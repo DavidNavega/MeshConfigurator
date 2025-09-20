@@ -13,7 +13,7 @@ import 'package:meshtastic_configurator/proto/meshtastic/admin.pb.dart' as admin
 import 'package:meshtastic_configurator/proto/meshtastic/channel.pb.dart' as ch;
 import 'package:meshtastic_configurator/proto/meshtastic/module_config.pb.dart' as mod;
 import 'package:meshtastic_configurator/proto/meshtastic/config.pb.dart' as cfg;
-import 'package:meshtastic_configurator/proto/meshtastic/user.pb.dart' as usr;
+import 'package:meshtastic_configurator/proto/meshtastic/mesh.pb.dart' as usr;
 
 class BluetoothService {
   final FlutterBluePlus _ble = FlutterBluePlus.instance;
@@ -21,6 +21,13 @@ class BluetoothService {
   BluetoothCharacteristic? _toRadio;
   BluetoothCharacteristic? _fromRadio;
   BluetoothCharacteristic? _fromNum;
+  StreamController<mesh.FromRadio>? _fromRadioController;
+  StreamSubscription<List<int>>? _fromRadioSubscription;
+  StreamQueue<mesh.FromRadio>? _fromRadioQueue;
+  Completer<void>? _pendingRequest;
+
+  static const Duration _defaultResponseTimeout = Duration(seconds: 5);
+  static const Duration _postResponseWindow = Duration(milliseconds: 200);
 
   Future<bool> _ensurePermissions() async {
     final statuses = await [
@@ -30,12 +37,150 @@ class BluetoothService {
     ].request();
     return statuses.values.every((s) => s.isGranted);
   }
+  Future<void> _disposeRadioStreams() async {
+    await _fromRadioSubscription?.cancel();
+    _fromRadioSubscription = null;
+    await _fromRadioQueue?.cancel();
+    _fromRadioQueue = null;
+    await _fromRadioController?.close();
+    _fromRadioController = null;
+  }
+
+  Future<void> _initializeFromRadioNotifications() async {
+    final characteristic = _fromRadio;
+    if (characteristic == null) return;
+
+    await _disposeRadioStreams();
+
+    _fromRadioController = StreamController<mesh.FromRadio>.broadcast();
+    _fromRadioQueue = StreamQueue(_fromRadioController!.stream);
+
+    if (characteristic.properties.notify) {
+      try {
+        await characteristic.setNotifyValue(true);
+      } catch (_) {}
+    }
+
+    _fromRadioSubscription = characteristic.onValueReceived.listen(
+          (data) {
+        if (data.isEmpty) return;
+        try {
+          final frame = mesh.FromRadio.fromBuffer(data);
+          _fromRadioController?.add(frame);
+        } catch (error, stackTrace) {
+          _fromRadioController?.addError(error, stackTrace);
+        }
+      },
+      onError: (error, stackTrace) {
+        _fromRadioController?.addError(error, stackTrace);
+      },
+    );
+  }
+
+  Future<T> _withRequestLock<T>(Future<T> Function() action) async {
+    while (_pendingRequest != null) {
+      try {
+        await _pendingRequest!.future;
+      } catch (_) {
+        break;
+      }
+    }
+
+    final completer = Completer<void>();
+    _pendingRequest = completer;
+    try {
+      return await action();
+    } finally {
+      _pendingRequest = null;
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
+    }
+  }
+
+  Future<List<mesh.FromRadio>> _collectResponses({
+    required bool Function(List<mesh.FromRadio>) isComplete,
+    Duration timeout = _defaultResponseTimeout,
+  }) async {
+    final queue = _fromRadioQueue;
+    if (queue == null) {
+      throw StateError('Radio stream not initialized');
+    }
+
+    final responses = <mesh.FromRadio>[];
+    final stopwatch = Stopwatch()..start();
+
+    while (true) {
+      final remaining = timeout - stopwatch.elapsed;
+      if (remaining <= Duration.zero) {
+        if (responses.isEmpty) {
+          throw TimeoutException('Timeout waiting for radio response');
+        }
+        return responses;
+      }
+
+      mesh.FromRadio frame;
+      try {
+        frame = await queue.next.timeout(remaining);
+      } on TimeoutException {
+        if (responses.isEmpty) {
+          throw TimeoutException('Timeout waiting for radio response');
+        }
+        return responses;
+      } on StateError {
+        if (responses.isEmpty) rethrow;
+        return responses;
+      }
+
+      responses.add(frame);
+
+      if (isComplete(responses)) {
+        final postStopwatch = Stopwatch()..start();
+        while (postStopwatch.elapsed < _postResponseWindow) {
+          final postRemaining = _postResponseWindow - postStopwatch.elapsed;
+          if (postRemaining <= Duration.zero) break;
+          try {
+            final extra = await queue.next.timeout(postRemaining);
+            responses.add(extra);
+          } on TimeoutException {
+            break;
+          } on StateError {
+            break;
+          }
+        }
+        return responses;
+      }
+    }
+  }
+
+  Future<List<mesh.FromRadio>> _sendAndReceive(
+      mesh.ToRadio message, {
+        bool Function(List<mesh.FromRadio>)? isComplete,
+        Duration timeout = _defaultResponseTimeout,
+      }) {
+    return _withRequestLock(() async {
+      final toCharacteristic = _toRadio;
+      if (toCharacteristic == null) {
+        throw StateError('Radio write characteristic not available');
+      }
+
+      await toCharacteristic.write(
+        message.writeToBuffer(),
+        withoutResponse: false,
+      );
+
+      return _collectResponses(
+        isComplete: isComplete ?? (responses) => responses.isNotEmpty,
+        timeout: timeout,
+      );
+    });
+  }
 
   Future<bool> connectAndInit() async {
     if (!await _ensurePermissions()) return false;
-    await _ble.startScan(timeout: const Duration(seconds: 8));
+    await FlutterBluePlus.startScan(timeout: const Duration(seconds: 8));
     BluetoothDevice? found;
-    await for (final results in _ble.scanResults) {
+    await for (final results in FlutterBluePlus.scanResults) {
       for (final r in results) {
         final name = (r.device.platformName ?? '').toUpperCase();
         if (name.contains('MESHTASTIC') || name.contains('TBEAM') ||
@@ -66,6 +211,7 @@ class BluetoothService {
       await _dev!.disconnect();
       return false;
     }
+    await _initializeFromRadioNotifications();
     if (_fromNum!.properties.notify) {
       await _fromNum!.setNotifyValue(true);
     }
@@ -73,71 +219,129 @@ class BluetoothService {
   }
 
   Future<void> disconnect() async {
+    try {
+      await _fromRadio?.setNotifyValue(false);
+    } catch (_) {}
+    try {
+      await _fromNum?.setNotifyValue(false);
+    } catch (_) {}
+
+    await _disposeRadioStreams();
+
     try { await _dev?.disconnect(); } catch (_) {}
+
+    _dev = null;
+    _toRadio = null;
+    _fromRadio = null;
+    _fromNum = null;
   }
 
   Future<NodeConfig?> readConfig() async {
-    if (_toRadio == null || _fromRadio == null) return null;
+    if (_toRadio == null || _fromRadioQueue == null) return null;
     final cfgOut = NodeConfig();
 
-    Future<void> send(mesh.ToRadio to) async {
-      await _toRadio!.write(to.writeToBuffer(), withoutResponse: false);
-      while (true) {
-        final data = await _fromRadio!.read();
-        if (data.isEmpty) break;
-        final fr = mesh.FromRadio.fromBuffer(data);
-
-        if (fr.hasUser()) {
-          final u = fr.user;
-          if (u.hasLongName()) cfgOut.longName = u.longName;
-          if (u.hasShortName()) cfgOut.shortName = u.shortName;
-        }
-        if (fr.hasChannel()) {
-          final c = fr.channel;
-          if (c.hasIndex()) cfgOut.channelIndex = c.index;
-          if (c.hasSettings() && c.settings.hasPsk()) {
-            cfgOut.key = Uint8List.fromList(c.settings.psk);
-          }
-        }
-        if (fr.hasModuleConfig() && fr.moduleConfig.hasSerial()) {
-          final s = fr.moduleConfig.serial;
-          cfgOut.serialOutputMode =
-              (s.mode == mod.ModuleConfig_SerialConfig_SerialMode.CALTOPO) ? 'WPL' : 'TLL';
-          if (s.hasBaud()) cfgOut.baudRate = s.baud;
-        }
-        if (fr.hasRadio()) {
-          final r = fr.radio;
-          if (r.hasLora()) {
-            final region = r.lora.region;
-            switch (region) {
-              case 2: cfgOut.frequencyRegion = '433'; break; // EU433
-              case 3: cfgOut.frequencyRegion = '868'; break; // EU868
-              case 1: cfgOut.frequencyRegion = '915'; break; // US915
-              default: break;
+    void _applyFrameToConfig(NodeConfig cfg, mesh.FromRadio fr) {
+      if (fr.hasUser()) {
+        final u = fr.user;
+        if (u.hasLongName()) cfg.longName = u.longName;
+        if (u.hasShortName()) cfg.shortName = u.shortName;
+      }
+      if (fr.hasChannel()) {
+        final c = fr.channel;
+        if (c.hasIndex()) cfg.channelIndex = c.index;
+        if (c.hasSettings() && c.settings.hasPsk()) cfg.key = c.settings.psk;
+      }
+      if (fr.hasModuleConfig() && fr.moduleConfig.hasSerial()) {
+        final s = fr.moduleConfig.serial;
+        cfg.serialOutputMode =
+        (s.mode == mod.ModuleConfig_SerialConfig_SerialMode.CALTOPO) ? 'WPL' : 'TLL';
+        if (s.hasBaud()) cfg.baudRate = s.baud;
+      }
+      if (fr.hasRadio()) {
+        final r = fr.radio;
+        if (r.hasLora()) {
+          final region = r.lora.region;
+          switch (region) {
+            case 2:
+              cfg.frequencyRegion = '433';
+              break; // EU433
+            case 3:
+              cfg.frequencyRegion = '868';
+              break; // EU868
+            case 1:
+              cfg.frequencyRegion = '915';
+              break; // US915
+            default:
+              break;
             }
           }
         }
       }
     }
 
-    await send(mesh.ToRadio()..admin = (admin.AdminMessage()
-      ..getConfigRequest = (admin.AdminMessage_ConfigType.USER)));
-    await send(mesh.ToRadio()..admin = (admin.AdminMessage()
-      ..getConfigRequest = (admin.AdminMessage_ConfigType.CHANNEL)));
-    await send(mesh.ToRadio()..admin = (admin.AdminMessage()
-      ..getModuleConfigRequest = (admin.ModuleConfigType.SERIAL)));
-    await send(mesh.ToRadio()..admin = (admin.AdminMessage()
-      ..getConfigRequest = (admin.AdminMessage_ConfigType.RADIO)));
-
-    return cfgOut;
+  Future<void> requestAndApply(
+      mesh.ToRadio message,
+      bool Function(mesh.FromRadio) matcher,
+      ) async {
+    try {
+      final frames = await _sendAndReceive(
+        message,
+        isComplete: (responses) => responses.any(matcher),
+        timeout: _defaultResponseTimeout,
+      );
+      for (final frame in frames) {
+        _applyFrameToConfig(cfgOut, frame);
+      }
+    } on TimeoutException {
+      // Ignore timeouts to allow partial configuration reads.
+    }
   }
 
-  Future<void> writeConfig(NodeConfig cfgIn) async {
-    if (_toRadio == null) return;
+  try {
+  await requestAndApply(
+  mesh.ToRadio()
+  ..admin = (admin.AdminMessage()
+  ..getConfigRequest = (admin.AdminMessage_ConfigType.USER)),
+  (frame) => frame.hasUser(),
+  );
+  await requestAndApply(
+  mesh.ToRadio()
+  ..admin = (admin.AdminMessage()
+  ..getConfigRequest = (admin.AdminMessage_ConfigType.CHANNEL)),
+  (frame) => frame.hasChannel(),
+  );
+  await requestAndApply(
+  mesh.ToRadio()
+  ..admin = (admin.AdminMessage()
+  ..getModuleConfigRequest = (admin.ModuleConfigType.SERIAL)),
+  (frame) => frame.hasModuleConfig() && frame.moduleConfig.hasSerial(),
+  );
+  await requestAndApply(
+  mesh.ToRadio()
+  ..admin = (admin.AdminMessage()
+  ..getConfigRequest = (admin.AdminMessage_ConfigType.RADIO)),
+  (frame) => frame.hasRadio(),
+  );
+  } catch (_) {
+  return null;
+  }
 
-    Future<void> send(mesh.ToRadio to) async {
-      await _toRadio!.write(to.writeToBuffer(), withoutResponse: false);
-    }
+  return cfgOut;
+}
+
+  Future<void> writeConfig(NodeConfig cfgIn) async {
+    if (_toRadio == null || _fromRadioQueue == null) return;
+
+    Future<void> send(mesh.ToRadio message) async {
+      try {
+        await _sendAndReceive(
+          message,
+          isComplete: (responses) => responses.isNotEmpty,
+          timeout: _defaultResponseTimeout,
+        );
+      } on TimeoutException {
+        throw TimeoutException('Timeout waiting for radio acknowledgement');
+      }
 
     final u = usr.User()
       ..shortName = cfgIn.shortName
