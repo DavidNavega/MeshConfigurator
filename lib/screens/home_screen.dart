@@ -17,6 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _syncControllers(ConfigProvider provider) {
     final cfg = provider.cfg;
+    final keyText = provider.keyDisplay;
 
     TextSelection sel(String text) => TextSelection.collapsed(offset: text.length);
 
@@ -26,8 +27,8 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_longC.text != cfg.longName) {
       _longC.value = TextEditingValue(text: cfg.longName, selection: sel(cfg.longName));
     }
-    if (_keyC.text != cfg.key) {
-      _keyC.value = TextEditingValue(text: cfg.key, selection: sel(cfg.key));
+    if (_keyC.text != keyText) {
+      _keyC.value = TextEditingValue(text: keyText, selection: sel(keyText));
     }
   }
 
@@ -139,7 +140,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               await p.readConfig();
                               _shortC.text = p.cfg.shortName;
                               _longC.text = p.cfg.longName;
-                              _keyC.text = p.cfg.key;
                               _keyC.text = p.keyDisplay;
                             },
                             style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
