@@ -1,0 +1,111 @@
+import 'package:flutter/foundation.dart';
+import '../models/node_config.dart';
+import '../services/bluetooth_service.dart';
+import '../services/tcp_service.dart';
+import '../services/usb_service.dart';
+
+enum ConnKind { bluetooth, tcpHttp, usb }
+
+class ConfigProvider with ChangeNotifier {
+  final bluetooth = BluetoothService();
+  TcpHttpService? tcp;
+  final usb = UsbService();
+
+  ConnKind? _kind;
+  NodeConfig _cfg = NodeConfig();
+  bool _busy = false;
+  String _status = 'Desconectado';
+
+  NodeConfig get cfg => _cfg;
+  bool get busy => _busy;
+  String get status => _status;
+  ConnKind? get kind => _kind;
+
+  void _setBusy(bool v) { _busy = v; notifyListeners(); }
+  void _setStatus(String s) { _status = s; notifyListeners(); }
+  void _setCfg(NodeConfig c) { _cfg = c; notifyListeners(); }
+
+  Future<void> connectBle() async {
+    _setBusy(true);
+    _kind = ConnKind.bluetooth;
+    _setStatus('Conectando BLE...');
+    final ok = await bluetooth.connectAndInit();
+    _setStatus(ok ? 'BLE conectado' : 'Error BLE');
+    _setBusy(false);
+  }
+
+  Future<void> connectTcp(String baseUrl) async {
+    _setBusy(true);
+    _kind = ConnKind.tcpHttp;
+    _setStatus('Conectando TCP/HTTP...');
+    tcp = TcpHttpService(baseUrl);
+    _setStatus('TCP listo');
+    _setBusy(false);
+  }
+
+  Future<void> connectUsb() async {
+    _setBusy(true);
+    _kind = ConnKind.usb;
+    _setStatus('Conectando USB...');
+    final ok = await usb.connect();
+    _setStatus(ok ? 'USB conectado' : 'Error USB');
+    _setBusy(false);
+  }
+
+  Future<void> readConfig() async {
+    _setBusy(true);
+    try {
+      NodeConfig? c;
+      switch (_kind) {
+        case ConnKind.bluetooth:
+          c = await bluetooth.readConfig();
+          break;
+        case ConnKind.tcpHttp:
+          c = await tcp?.readConfig();
+          break;
+        case ConnKind.usb:
+          c = await usb.readConfig();
+          break;
+        default:
+          _setStatus('Conecta primero');
+      }
+      if (c != null) _setCfg(c);
+    } finally {
+      _setBusy(false);
+    }
+  }
+
+  Future<void> writeConfig() async {
+    _setBusy(true);
+    try {
+      switch (_kind) {
+        case ConnKind.bluetooth:
+          await bluetooth.writeConfig(_cfg);
+          break;
+        case ConnKind.tcpHttp:
+          await tcp?.writeConfig(_cfg);
+          break;
+        case ConnKind.usb:
+          await usb.writeConfig(_cfg);
+          break;
+        default:
+          _setStatus('Conecta primero');
+      }
+    } finally {
+      _setBusy(false);
+    }
+  }
+
+  // Helpers de UI
+  void setNames({String? shortName, String? longName}) {
+    _cfg = NodeConfig.fromJson(_cfg.toJson());
+    if (shortName != null) _cfg.shortName = shortName;
+    if (longName != null) _cfg.longName = longName;
+    notifyListeners();
+  }
+  void setChannelIndex(int idx) { _cfg = NodeConfig.fromJson(_cfg.toJson()); _cfg.channelIndex = idx; notifyListeners(); }
+  void setKey(String k) { _cfg = NodeConfig.fromJson(_cfg.toJson()); _cfg.key = k; notifyListeners(); }
+  void setSerialMode(String m) { _cfg = NodeConfig.fromJson(_cfg.toJson()); _cfg.serialOutputMode = m; notifyListeners(); }
+  void setBaud(int b) { _cfg = NodeConfig.fromJson(_cfg.toJson()); _cfg.baudRate = b; notifyListeners(); }
+  void setFrequencyRegion(String r) { _cfg = NodeConfig.fromJson(_cfg.toJson()); _cfg.frequencyRegion = r; notifyListeners(); }
+}

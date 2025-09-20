@@ -1,0 +1,28 @@
+name: meshtastic_configurator
+description: App Flutter para configurar dispositivos Meshtastic (BLE / TCP / USB) con Protobuf.
+publish_to: 'none'
+version: 1.2.0+3
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.2
+  shared_preferences: ^2.2.3
+  flutter_blue_plus: ^1.31.16
+  usb_serial: ^0.3.0
+  http: ^1.2.2
+  permission_handler: ^11.3.1
+  protobuf: ^3.1.0
+
+dev_dependencies:
+  flutter_lints: ^3.0.2
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/logo.png

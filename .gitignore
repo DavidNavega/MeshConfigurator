@@ -1,0 +1,15 @@
+# Flutter/Dart/Pub related
+.dart_tool/
+.packages
+.pub-cache/
+build/
+ios/
+macos/
+windows/
+linux/
+web/
+# Android
+android/.gradle/
+android/build/
+*.iml
+.idea/
