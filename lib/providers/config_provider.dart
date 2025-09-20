@@ -16,6 +16,11 @@ class ConfigProvider with ChangeNotifier {
   bool _busy = false;
   String _status = 'Desconectado';
   String? _keyError;
+  String _keyText = '';
+
+  ConfigProvider() {
+    _keyText = NodeConfig.keyToDisplay(_cfg.key);
+  }
 
   NodeConfig get cfg => _cfg;
   bool get busy => _busy;
@@ -23,11 +28,17 @@ class ConfigProvider with ChangeNotifier {
   ConnKind? get kind => _kind;
   String? get keyError => _keyError;
 
-  String get keyDisplay => NodeConfig.keyToDisplay(_cfg.key);
+  String get keyDisplay => _keyText;
 
   void _setBusy(bool v) { _busy = v; notifyListeners(); }
   void _setStatus(String s) { _status = s; notifyListeners(); }
-  void _setCfg(NodeConfig c) { _cfg = c; _keyError = null; notifyListeners(); }
+  void _setCfg(NodeConfig c) {
+    _cfg = c;
+    _keyError = null;
+    _keyText = NodeConfig.keyToDisplay(c.key);
+    notifyListeners();
+  }
+
 
   Future<void> connectBle() async {
     _setBusy(true);
@@ -147,20 +158,19 @@ class ConfigProvider with ChangeNotifier {
   }
   void setChannelIndex(int idx) { _cfg = NodeConfig.fromJson(_cfg.toJson()); _cfg.channelIndex = idx; notifyListeners(); }
   void setKey(String k) {
+    _keyText = k;
+    String? error;
     final parsed = NodeConfig.parseKeyText(k);
     if (parsed == null) {
-      _keyError = 'Formato no válido. Usa hex o Base64.';
-      notifyListeners();
-      return;
+      error = 'Formato no válido. Usa hex o Base64.';
+    } else if (!NodeConfig.isValidKeyLength(parsed)) {
+      error = 'La clave debe tener 0, 16 o 32 bytes.';
+    } else {
+      _cfg = NodeConfig.fromJson(_cfg.toJson());
+      _cfg.key = parsed;
+      _keyText = NodeConfig.keyToDisplay(parsed);
     }
-    if (!NodeConfig.isValidKeyLength(parsed)) {
-      _keyError = 'La clave debe tener 0, 16 o 32 bytes.';
-      notifyListeners();
-      return;
-    }
-    _cfg = NodeConfig.fromJson(_cfg.toJson());
-    _cfg.key = parsed;
-    _keyError = null;
+    _keyError = error;
     notifyListeners();
   }
   void setSerialMode(String m) { _cfg = NodeConfig.fromJson(_cfg.toJson()); _cfg.serialOutputMode = m; notifyListeners(); }

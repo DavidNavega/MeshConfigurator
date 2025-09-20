@@ -138,9 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ElevatedButton(
                             onPressed: p.busy ? null : () async {
                               await p.readConfig();
-                              _shortC.text = p.cfg.shortName;
-                              _longC.text = p.cfg.longName;
-                              _keyC.text = p.keyDisplay;
+                              _syncControllers(p);
                             },
                             style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
                             child: const Text('Leer configuración'),
