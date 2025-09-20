@@ -13,9 +13,47 @@ class _HomeScreenState extends State<HomeScreen> {
   final _longC = TextEditingController();
   final _keyC = TextEditingController();
   final _tcpUrlC = TextEditingController(text: "http://meshtastic.local");
+  ConfigProvider? _provider;
+
+  void _syncControllers(ConfigProvider provider) {
+    final cfg = provider.cfg;
+
+    TextSelection sel(String text) => TextSelection.collapsed(offset: text.length);
+
+    if (_shortC.text != cfg.shortName) {
+      _shortC.value = TextEditingValue(text: cfg.shortName, selection: sel(cfg.shortName));
+    }
+    if (_longC.text != cfg.longName) {
+      _longC.value = TextEditingValue(text: cfg.longName, selection: sel(cfg.longName));
+    }
+    if (_keyC.text != cfg.key) {
+      _keyC.value = TextEditingValue(text: cfg.key, selection: sel(cfg.key));
+    }
+  }
+
+  void _onProviderUpdate() {
+    final provider = _provider;
+    if (provider == null) return;
+    if (!mounted) return;
+    _syncControllers(provider);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final provider = context.read<ConfigProvider>();
+    if (identical(provider, _provider)) {
+      return;
+    }
+    _provider?.removeListener(_onProviderUpdate);
+    _provider = provider;
+    _provider?.addListener(_onProviderUpdate);
+    _syncControllers(provider);
+  }
 
   @override
   void dispose() {
+    _provider?.removeListener(_onProviderUpdate);
     _shortC.dispose();
     _longC.dispose();
     _keyC.dispose();
@@ -26,11 +64,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final p = context.watch<ConfigProvider>();
-
-    InputDecoration deco(String label) => InputDecoration(
-      labelText: label,
-      border: const OutlineInputBorder(),
-    );
+    InputDecoration deco(String label, {String? errorText, String? helper}) =>
+        InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+          errorText: errorText,
+          helperText: helper,
+          helperStyle: const TextStyle(color: Colors.white60),
+        );
 
     return Scaffold(
       appBar: AppBar(
@@ -99,6 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               _shortC.text = p.cfg.shortName;
                               _longC.text = p.cfg.longName;
                               _keyC.text = p.cfg.key;
+                              _keyC.text = p.keyDisplay;
                             },
                             style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
                             child: const Text('Leer configuración'),
@@ -155,7 +197,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       TextField(
                         controller: _keyC,
                         style: const TextStyle(color: Colors.white),
-                        decoration: deco('Llave (PSK)'),
+                        decoration: deco(
+                          'Llave (PSK)',
+                          errorText: p.keyError,
+                          helper: 'Vacío, 16 o 32 bytes en hex o Base64.',
+                        ),
                         onChanged: (v) => context.read<ConfigProvider>().setKey(v),
                       ),
                       const SizedBox(height: 8),

@@ -189,60 +189,6 @@ class Config_DeviceConfig_RebroadcastMode extends $pb.ProtobufEnum {
 }
 
 ///
-///  Defines buzzer behavior for audio feedback
-class Config_DeviceConfig_BuzzerMode extends $pb.ProtobufEnum {
-  ///
-  ///  Default behavior.
-  ///  Buzzer is enabled for all audio feedback including button presses and alerts.
-  static const Config_DeviceConfig_BuzzerMode ALL_ENABLED =
-      Config_DeviceConfig_BuzzerMode._(0, _omitEnumNames ? '' : 'ALL_ENABLED');
-
-  ///
-  ///  Disabled.
-  ///  All buzzer audio feedback is disabled.
-  static const Config_DeviceConfig_BuzzerMode DISABLED =
-      Config_DeviceConfig_BuzzerMode._(1, _omitEnumNames ? '' : 'DISABLED');
-
-  ///
-  ///  Notifications Only.
-  ///  Buzzer is enabled only for notifications and alerts, but not for button presses.
-  ///  External notification config determines the specifics of the notification behavior.
-  static const Config_DeviceConfig_BuzzerMode NOTIFICATIONS_ONLY =
-      Config_DeviceConfig_BuzzerMode._(
-          2, _omitEnumNames ? '' : 'NOTIFICATIONS_ONLY');
-
-  ///
-  ///  Non-notification system buzzer tones only.
-  ///  Buzzer is enabled only for non-notification tones such as button presses, startup, shutdown, but not for alerts.
-  static const Config_DeviceConfig_BuzzerMode SYSTEM_ONLY =
-      Config_DeviceConfig_BuzzerMode._(3, _omitEnumNames ? '' : 'SYSTEM_ONLY');
-
-  ///
-  ///  Direct Message notifications only.
-  ///  Buzzer is enabled only for direct messages and alerts, but not for button presses.
-  ///  External notification config determines the specifics of the notification behavior.
-  static const Config_DeviceConfig_BuzzerMode DIRECT_MSG_ONLY =
-      Config_DeviceConfig_BuzzerMode._(
-          4, _omitEnumNames ? '' : 'DIRECT_MSG_ONLY');
-
-  static const $core.List<Config_DeviceConfig_BuzzerMode> values =
-      <Config_DeviceConfig_BuzzerMode>[
-    ALL_ENABLED,
-    DISABLED,
-    NOTIFICATIONS_ONLY,
-    SYSTEM_ONLY,
-    DIRECT_MSG_ONLY,
-  ];
-
-  static final $core.List<Config_DeviceConfig_BuzzerMode?> _byValue =
-      $pb.ProtobufEnum.$_initByValueList(values, 4);
-  static Config_DeviceConfig_BuzzerMode? valueOf($core.int value) =>
-      value < 0 || value >= _byValue.length ? null : _byValue[value];
-
-  const Config_DeviceConfig_BuzzerMode._(super.value, super.name);
-}
-
-///
 ///  Bit field of boolean configuration options, indicating which optional
 ///  fields to include when assembling POSITION messages.
 ///  Longitude, latitude, altitude, speed, heading, and DOP
@@ -518,30 +464,24 @@ class Config_DisplayConfig_DisplayUnits extends $pb.ProtobufEnum {
 ///  Override OLED outo detect with this if it fails.
 class Config_DisplayConfig_OledType extends $pb.ProtobufEnum {
   ///
-  ///  Default / Autodetect
+  ///  Default / Auto
   static const Config_DisplayConfig_OledType OLED_AUTO =
       Config_DisplayConfig_OledType._(0, _omitEnumNames ? '' : 'OLED_AUTO');
 
   ///
-  ///  Default / Autodetect
+  ///  Default / Auto
   static const Config_DisplayConfig_OledType OLED_SSD1306 =
       Config_DisplayConfig_OledType._(1, _omitEnumNames ? '' : 'OLED_SSD1306');
 
   ///
-  ///  Default / Autodetect
+  ///  Default / Auto
   static const Config_DisplayConfig_OledType OLED_SH1106 =
       Config_DisplayConfig_OledType._(2, _omitEnumNames ? '' : 'OLED_SH1106');
 
   ///
-  ///  Can not be auto detected but set by proto. Used for 128x64 screens
+  ///  Can not be auto detected but set by proto. Used for 128x128 screens
   static const Config_DisplayConfig_OledType OLED_SH1107 =
       Config_DisplayConfig_OledType._(3, _omitEnumNames ? '' : 'OLED_SH1107');
-
-  ///
-  ///  Can not be auto detected but set by proto. Used for 128x128 screens
-  static const Config_DisplayConfig_OledType OLED_SH1107_128_128 =
-      Config_DisplayConfig_OledType._(
-          4, _omitEnumNames ? '' : 'OLED_SH1107_128_128');
 
   static const $core.List<Config_DisplayConfig_OledType> values =
       <Config_DisplayConfig_OledType>[
@@ -549,11 +489,10 @@ class Config_DisplayConfig_OledType extends $pb.ProtobufEnum {
     OLED_SSD1306,
     OLED_SH1106,
     OLED_SH1107,
-    OLED_SH1107_128_128,
   ];
 
   static final $core.List<Config_DisplayConfig_OledType?> _byValue =
-      $pb.ProtobufEnum.$_initByValueList(values, 4);
+      $pb.ProtobufEnum.$_initByValueList(values, 3);
   static Config_DisplayConfig_OledType? valueOf($core.int value) =>
       value < 0 || value >= _byValue.length ? null : _byValue[value];
 
@@ -777,31 +716,6 @@ class Config_LoRaConfig_RegionCode extends $pb.ProtobufEnum {
   static const Config_LoRaConfig_RegionCode PH_915 =
       Config_LoRaConfig_RegionCode._(21, _omitEnumNames ? '' : 'PH_915');
 
-  ///
-  ///  Australia / New Zealand 433MHz
-  static const Config_LoRaConfig_RegionCode ANZ_433 =
-      Config_LoRaConfig_RegionCode._(22, _omitEnumNames ? '' : 'ANZ_433');
-
-  ///
-  ///  Kazakhstan 433MHz
-  static const Config_LoRaConfig_RegionCode KZ_433 =
-      Config_LoRaConfig_RegionCode._(23, _omitEnumNames ? '' : 'KZ_433');
-
-  ///
-  ///  Kazakhstan 863MHz
-  static const Config_LoRaConfig_RegionCode KZ_863 =
-      Config_LoRaConfig_RegionCode._(24, _omitEnumNames ? '' : 'KZ_863');
-
-  ///
-  ///  Nepal 865MHz
-  static const Config_LoRaConfig_RegionCode NP_865 =
-      Config_LoRaConfig_RegionCode._(25, _omitEnumNames ? '' : 'NP_865');
-
-  ///
-  ///  Brazil 902MHz
-  static const Config_LoRaConfig_RegionCode BR_902 =
-      Config_LoRaConfig_RegionCode._(26, _omitEnumNames ? '' : 'BR_902');
-
   static const $core.List<Config_LoRaConfig_RegionCode> values =
       <Config_LoRaConfig_RegionCode>[
     UNSET,
@@ -826,15 +740,10 @@ class Config_LoRaConfig_RegionCode extends $pb.ProtobufEnum {
     PH_433,
     PH_868,
     PH_915,
-    ANZ_433,
-    KZ_433,
-    KZ_863,
-    NP_865,
-    BR_902,
   ];
 
   static final $core.List<Config_LoRaConfig_RegionCode?> _byValue =
-      $pb.ProtobufEnum.$_initByValueList(values, 26);
+      $pb.ProtobufEnum.$_initByValueList(values, 21);
   static Config_LoRaConfig_RegionCode? valueOf($core.int value) =>
       value < 0 || value >= _byValue.length ? null : _byValue[value];
 

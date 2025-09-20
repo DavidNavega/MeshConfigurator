@@ -12,7 +12,6 @@
 
 import 'dart:core' as $core;
 
-import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'channel.pb.dart' as $3;
@@ -464,7 +463,6 @@ class User extends $pb.GeneratedMessage {
     $core.bool? isLicensed,
     $1.Config_DeviceConfig_Role? role,
     $core.List<$core.int>? publicKey,
-    $core.bool? isUnmessagable,
   }) {
     final result = create();
     if (id != null) result.id = id;
@@ -475,7 +473,6 @@ class User extends $pb.GeneratedMessage {
     if (isLicensed != null) result.isLicensed = isLicensed;
     if (role != null) result.role = role;
     if (publicKey != null) result.publicKey = publicKey;
-    if (isUnmessagable != null) result.isUnmessagable = isUnmessagable;
     return result;
   }
 
@@ -509,7 +506,6 @@ class User extends $pb.GeneratedMessage {
         enumValues: $1.Config_DeviceConfig_Role.values)
     ..a<$core.List<$core.int>>(
         8, _omitFieldNames ? '' : 'publicKey', $pb.PbFieldType.OY)
-    ..aOB(9, _omitFieldNames ? '' : 'isUnmessagable')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -634,17 +630,6 @@ class User extends $pb.GeneratedMessage {
   $core.bool hasPublicKey() => $_has(7);
   @$pb.TagNumber(8)
   void clearPublicKey() => $_clearField(8);
-
-  ///
-  ///  Whether or not the node can be messaged
-  @$pb.TagNumber(9)
-  $core.bool get isUnmessagable => $_getBF(8);
-  @$pb.TagNumber(9)
-  set isUnmessagable($core.bool value) => $_setBool(8, value);
-  @$pb.TagNumber(9)
-  $core.bool hasIsUnmessagable() => $_has(8);
-  @$pb.TagNumber(9)
-  void clearIsUnmessagable() => $_clearField(9);
 }
 
 ///
@@ -1021,98 +1006,6 @@ class Data extends $pb.GeneratedMessage {
 }
 
 ///
-///  The actual over-the-mesh message doing KeyVerification
-class KeyVerification extends $pb.GeneratedMessage {
-  factory KeyVerification({
-    $fixnum.Int64? nonce,
-    $core.List<$core.int>? hash1,
-    $core.List<$core.int>? hash2,
-  }) {
-    final result = create();
-    if (nonce != null) result.nonce = nonce;
-    if (hash1 != null) result.hash1 = hash1;
-    if (hash2 != null) result.hash2 = hash2;
-    return result;
-  }
-
-  KeyVerification._();
-
-  factory KeyVerification.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory KeyVerification.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'KeyVerification',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'meshtastic'),
-      createEmptyInstance: create)
-    ..a<$fixnum.Int64>(1, _omitFieldNames ? '' : 'nonce', $pb.PbFieldType.OU6,
-        defaultOrMaker: $fixnum.Int64.ZERO)
-    ..a<$core.List<$core.int>>(
-        2, _omitFieldNames ? '' : 'hash1', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(
-        3, _omitFieldNames ? '' : 'hash2', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  KeyVerification clone() => KeyVerification()..mergeFromMessage(this);
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  KeyVerification copyWith(void Function(KeyVerification) updates) =>
-      super.copyWith((message) => updates(message as KeyVerification))
-          as KeyVerification;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static KeyVerification create() => KeyVerification._();
-  @$core.override
-  KeyVerification createEmptyInstance() => create();
-  static $pb.PbList<KeyVerification> createRepeated() =>
-      $pb.PbList<KeyVerification>();
-  @$core.pragma('dart2js:noInline')
-  static KeyVerification getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<KeyVerification>(create);
-  static KeyVerification? _defaultInstance;
-
-  ///
-  ///  random value Selected by the requesting node
-  @$pb.TagNumber(1)
-  $fixnum.Int64 get nonce => $_getI64(0);
-  @$pb.TagNumber(1)
-  set nonce($fixnum.Int64 value) => $_setInt64(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasNonce() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearNonce() => $_clearField(1);
-
-  ///
-  ///  The final authoritative hash, only to be sent by NodeA at the end of the handshake
-  @$pb.TagNumber(2)
-  $core.List<$core.int> get hash1 => $_getN(1);
-  @$pb.TagNumber(2)
-  set hash1($core.List<$core.int> value) => $_setBytes(1, value);
-  @$pb.TagNumber(2)
-  $core.bool hasHash1() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearHash1() => $_clearField(2);
-
-  ///
-  ///  The intermediary hash (actually derived from hash1),
-  ///  sent from NodeB to NodeA in response to the initial message.
-  @$pb.TagNumber(3)
-  $core.List<$core.int> get hash2 => $_getN(2);
-  @$pb.TagNumber(3)
-  set hash2($core.List<$core.int> value) => $_setBytes(2, value);
-  @$pb.TagNumber(3)
-  $core.bool hasHash2() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearHash2() => $_clearField(3);
-}
-
-///
 ///  Waypoint message, used to share arbitrary locations across the mesh
 class Waypoint extends $pb.GeneratedMessage {
   factory Waypoint({
@@ -1415,7 +1308,6 @@ class MeshPacket extends $pb.GeneratedMessage {
     $core.int? nextHop,
     $core.int? relayNode,
     $core.int? txAfter,
-    MeshPacket_TransportMechanism? transportMechanism,
   }) {
     final result = create();
     if (from != null) result.from = from;
@@ -1438,8 +1330,6 @@ class MeshPacket extends $pb.GeneratedMessage {
     if (nextHop != null) result.nextHop = nextHop;
     if (relayNode != null) result.relayNode = relayNode;
     if (txAfter != null) result.txAfter = txAfter;
-    if (transportMechanism != null)
-      result.transportMechanism = transportMechanism;
     return result;
   }
 
@@ -1493,11 +1383,6 @@ class MeshPacket extends $pb.GeneratedMessage {
     ..a<$core.int>(18, _omitFieldNames ? '' : 'nextHop', $pb.PbFieldType.OU3)
     ..a<$core.int>(19, _omitFieldNames ? '' : 'relayNode', $pb.PbFieldType.OU3)
     ..a<$core.int>(20, _omitFieldNames ? '' : 'txAfter', $pb.PbFieldType.OU3)
-    ..e<MeshPacket_TransportMechanism>(
-        21, _omitFieldNames ? '' : 'transportMechanism', $pb.PbFieldType.OE,
-        defaultOrMaker: MeshPacket_TransportMechanism.TRANSPORT_INTERNAL,
-        valueOf: MeshPacket_TransportMechanism.valueOf,
-        enumValues: MeshPacket_TransportMechanism.values)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1785,18 +1670,6 @@ class MeshPacket extends $pb.GeneratedMessage {
   $core.bool hasTxAfter() => $_has(19);
   @$pb.TagNumber(20)
   void clearTxAfter() => $_clearField(20);
-
-  ///
-  ///  Indicates which transport mechanism this packet arrived over
-  @$pb.TagNumber(21)
-  MeshPacket_TransportMechanism get transportMechanism => $_getN(20);
-  @$pb.TagNumber(21)
-  set transportMechanism(MeshPacket_TransportMechanism value) =>
-      $_setField(21, value);
-  @$pb.TagNumber(21)
-  $core.bool hasTransportMechanism() => $_has(20);
-  @$pb.TagNumber(21)
-  void clearTransportMechanism() => $_clearField(21);
 }
 
 ///
@@ -1829,7 +1702,6 @@ class NodeInfo extends $pb.GeneratedMessage {
     $core.int? hopsAway,
     $core.bool? isFavorite,
     $core.bool? isIgnored,
-    $core.bool? isKeyManuallyVerified,
   }) {
     final result = create();
     if (num != null) result.num = num;
@@ -1843,8 +1715,6 @@ class NodeInfo extends $pb.GeneratedMessage {
     if (hopsAway != null) result.hopsAway = hopsAway;
     if (isFavorite != null) result.isFavorite = isFavorite;
     if (isIgnored != null) result.isIgnored = isIgnored;
-    if (isKeyManuallyVerified != null)
-      result.isKeyManuallyVerified = isKeyManuallyVerified;
     return result;
   }
 
@@ -1874,7 +1744,6 @@ class NodeInfo extends $pb.GeneratedMessage {
     ..a<$core.int>(9, _omitFieldNames ? '' : 'hopsAway', $pb.PbFieldType.OU3)
     ..aOB(10, _omitFieldNames ? '' : 'isFavorite')
     ..aOB(11, _omitFieldNames ? '' : 'isIgnored')
-    ..aOB(12, _omitFieldNames ? '' : 'isKeyManuallyVerified')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -2026,19 +1895,6 @@ class NodeInfo extends $pb.GeneratedMessage {
   $core.bool hasIsIgnored() => $_has(10);
   @$pb.TagNumber(11)
   void clearIsIgnored() => $_clearField(11);
-
-  ///
-  ///  True if node public key has been verified.
-  ///  Persists between NodeDB internal clean ups
-  ///  LSB 0 of the bitfield
-  @$pb.TagNumber(12)
-  $core.bool get isKeyManuallyVerified => $_getBF(11);
-  @$pb.TagNumber(12)
-  set isKeyManuallyVerified($core.bool value) => $_setBool(11, value);
-  @$pb.TagNumber(12)
-  $core.bool hasIsKeyManuallyVerified() => $_has(11);
-  @$pb.TagNumber(12)
-  void clearIsKeyManuallyVerified() => $_clearField(12);
 }
 
 ///
@@ -2052,8 +1908,6 @@ class MyNodeInfo extends $pb.GeneratedMessage {
     $core.int? minAppVersion,
     $core.List<$core.int>? deviceId,
     $core.String? pioEnv,
-    FirmwareEdition? firmwareEdition,
-    $core.int? nodedbCount,
   }) {
     final result = create();
     if (myNodeNum != null) result.myNodeNum = myNodeNum;
@@ -2061,8 +1915,6 @@ class MyNodeInfo extends $pb.GeneratedMessage {
     if (minAppVersion != null) result.minAppVersion = minAppVersion;
     if (deviceId != null) result.deviceId = deviceId;
     if (pioEnv != null) result.pioEnv = pioEnv;
-    if (firmwareEdition != null) result.firmwareEdition = firmwareEdition;
-    if (nodedbCount != null) result.nodedbCount = nodedbCount;
     return result;
   }
 
@@ -2086,13 +1938,6 @@ class MyNodeInfo extends $pb.GeneratedMessage {
     ..a<$core.List<$core.int>>(
         12, _omitFieldNames ? '' : 'deviceId', $pb.PbFieldType.OY)
     ..aOS(13, _omitFieldNames ? '' : 'pioEnv')
-    ..e<FirmwareEdition>(
-        14, _omitFieldNames ? '' : 'firmwareEdition', $pb.PbFieldType.OE,
-        defaultOrMaker: FirmwareEdition.VANILLA,
-        valueOf: FirmwareEdition.valueOf,
-        enumValues: FirmwareEdition.values)
-    ..a<$core.int>(
-        15, _omitFieldNames ? '' : 'nodedbCount', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -2171,29 +2016,6 @@ class MyNodeInfo extends $pb.GeneratedMessage {
   $core.bool hasPioEnv() => $_has(4);
   @$pb.TagNumber(13)
   void clearPioEnv() => $_clearField(13);
-
-  ///
-  ///  The indicator for whether this device is running event firmware and which
-  @$pb.TagNumber(14)
-  FirmwareEdition get firmwareEdition => $_getN(5);
-  @$pb.TagNumber(14)
-  set firmwareEdition(FirmwareEdition value) => $_setField(14, value);
-  @$pb.TagNumber(14)
-  $core.bool hasFirmwareEdition() => $_has(5);
-  @$pb.TagNumber(14)
-  void clearFirmwareEdition() => $_clearField(14);
-
-  ///
-  ///  The number of nodes in the nodedb.
-  ///  This is used by the phone to know how many NodeInfo packets to expect on want_config
-  @$pb.TagNumber(15)
-  $core.int get nodedbCount => $_getIZ(6);
-  @$pb.TagNumber(15)
-  set nodedbCount($core.int value) => $_setUnsignedInt32(6, value);
-  @$pb.TagNumber(15)
-  $core.bool hasNodedbCount() => $_has(6);
-  @$pb.TagNumber(15)
-  void clearNodedbCount() => $_clearField(15);
 }
 
 ///
@@ -2786,15 +2608,6 @@ class FromRadio extends $pb.GeneratedMessage {
   $5.DeviceUIConfig ensureDeviceuiConfig() => $_ensure(16);
 }
 
-enum ClientNotification_PayloadVariant {
-  keyVerificationNumberInform,
-  keyVerificationNumberRequest,
-  keyVerificationFinal,
-  duplicatedPublicKey,
-  lowEntropyKey,
-  notSet
-}
-
 ///
 ///  A notification message from the device to the client
 ///  To be used for important messages that should to be displayed to the user
@@ -2806,26 +2619,12 @@ class ClientNotification extends $pb.GeneratedMessage {
     $core.int? time,
     LogRecord_Level? level,
     $core.String? message,
-    KeyVerificationNumberInform? keyVerificationNumberInform,
-    KeyVerificationNumberRequest? keyVerificationNumberRequest,
-    KeyVerificationFinal? keyVerificationFinal,
-    DuplicatedPublicKey? duplicatedPublicKey,
-    LowEntropyKey? lowEntropyKey,
   }) {
     final result = create();
     if (replyId != null) result.replyId = replyId;
     if (time != null) result.time = time;
     if (level != null) result.level = level;
     if (message != null) result.message = message;
-    if (keyVerificationNumberInform != null)
-      result.keyVerificationNumberInform = keyVerificationNumberInform;
-    if (keyVerificationNumberRequest != null)
-      result.keyVerificationNumberRequest = keyVerificationNumberRequest;
-    if (keyVerificationFinal != null)
-      result.keyVerificationFinal = keyVerificationFinal;
-    if (duplicatedPublicKey != null)
-      result.duplicatedPublicKey = duplicatedPublicKey;
-    if (lowEntropyKey != null) result.lowEntropyKey = lowEntropyKey;
     return result;
   }
 
@@ -2838,20 +2637,10 @@ class ClientNotification extends $pb.GeneratedMessage {
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
-  static const $core.Map<$core.int, ClientNotification_PayloadVariant>
-      _ClientNotification_PayloadVariantByTag = {
-    11: ClientNotification_PayloadVariant.keyVerificationNumberInform,
-    12: ClientNotification_PayloadVariant.keyVerificationNumberRequest,
-    13: ClientNotification_PayloadVariant.keyVerificationFinal,
-    14: ClientNotification_PayloadVariant.duplicatedPublicKey,
-    15: ClientNotification_PayloadVariant.lowEntropyKey,
-    0: ClientNotification_PayloadVariant.notSet
-  };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ClientNotification',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'meshtastic'),
       createEmptyInstance: create)
-    ..oo(0, [11, 12, 13, 14, 15])
     ..a<$core.int>(1, _omitFieldNames ? '' : 'replyId', $pb.PbFieldType.OU3)
     ..a<$core.int>(2, _omitFieldNames ? '' : 'time', $pb.PbFieldType.OF3)
     ..e<LogRecord_Level>(3, _omitFieldNames ? '' : 'level', $pb.PbFieldType.OE,
@@ -2859,19 +2648,6 @@ class ClientNotification extends $pb.GeneratedMessage {
         valueOf: LogRecord_Level.valueOf,
         enumValues: LogRecord_Level.values)
     ..aOS(4, _omitFieldNames ? '' : 'message')
-    ..aOM<KeyVerificationNumberInform>(
-        11, _omitFieldNames ? '' : 'keyVerificationNumberInform',
-        subBuilder: KeyVerificationNumberInform.create)
-    ..aOM<KeyVerificationNumberRequest>(
-        12, _omitFieldNames ? '' : 'keyVerificationNumberRequest',
-        subBuilder: KeyVerificationNumberRequest.create)
-    ..aOM<KeyVerificationFinal>(
-        13, _omitFieldNames ? '' : 'keyVerificationFinal',
-        subBuilder: KeyVerificationFinal.create)
-    ..aOM<DuplicatedPublicKey>(14, _omitFieldNames ? '' : 'duplicatedPublicKey',
-        subBuilder: DuplicatedPublicKey.create)
-    ..aOM<LowEntropyKey>(15, _omitFieldNames ? '' : 'lowEntropyKey',
-        subBuilder: LowEntropyKey.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -2894,10 +2670,6 @@ class ClientNotification extends $pb.GeneratedMessage {
   static ClientNotification getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<ClientNotification>(create);
   static ClientNotification? _defaultInstance;
-
-  ClientNotification_PayloadVariant whichPayloadVariant() =>
-      _ClientNotification_PayloadVariantByTag[$_whichOneof(0)]!;
-  void clearPayloadVariant() => $_clearField($_whichOneof(0));
 
   ///
   ///  The id of the packet we're notifying in response to
@@ -2942,399 +2714,6 @@ class ClientNotification extends $pb.GeneratedMessage {
   $core.bool hasMessage() => $_has(3);
   @$pb.TagNumber(4)
   void clearMessage() => $_clearField(4);
-
-  @$pb.TagNumber(11)
-  KeyVerificationNumberInform get keyVerificationNumberInform => $_getN(4);
-  @$pb.TagNumber(11)
-  set keyVerificationNumberInform(KeyVerificationNumberInform value) =>
-      $_setField(11, value);
-  @$pb.TagNumber(11)
-  $core.bool hasKeyVerificationNumberInform() => $_has(4);
-  @$pb.TagNumber(11)
-  void clearKeyVerificationNumberInform() => $_clearField(11);
-  @$pb.TagNumber(11)
-  KeyVerificationNumberInform ensureKeyVerificationNumberInform() =>
-      $_ensure(4);
-
-  @$pb.TagNumber(12)
-  KeyVerificationNumberRequest get keyVerificationNumberRequest => $_getN(5);
-  @$pb.TagNumber(12)
-  set keyVerificationNumberRequest(KeyVerificationNumberRequest value) =>
-      $_setField(12, value);
-  @$pb.TagNumber(12)
-  $core.bool hasKeyVerificationNumberRequest() => $_has(5);
-  @$pb.TagNumber(12)
-  void clearKeyVerificationNumberRequest() => $_clearField(12);
-  @$pb.TagNumber(12)
-  KeyVerificationNumberRequest ensureKeyVerificationNumberRequest() =>
-      $_ensure(5);
-
-  @$pb.TagNumber(13)
-  KeyVerificationFinal get keyVerificationFinal => $_getN(6);
-  @$pb.TagNumber(13)
-  set keyVerificationFinal(KeyVerificationFinal value) => $_setField(13, value);
-  @$pb.TagNumber(13)
-  $core.bool hasKeyVerificationFinal() => $_has(6);
-  @$pb.TagNumber(13)
-  void clearKeyVerificationFinal() => $_clearField(13);
-  @$pb.TagNumber(13)
-  KeyVerificationFinal ensureKeyVerificationFinal() => $_ensure(6);
-
-  @$pb.TagNumber(14)
-  DuplicatedPublicKey get duplicatedPublicKey => $_getN(7);
-  @$pb.TagNumber(14)
-  set duplicatedPublicKey(DuplicatedPublicKey value) => $_setField(14, value);
-  @$pb.TagNumber(14)
-  $core.bool hasDuplicatedPublicKey() => $_has(7);
-  @$pb.TagNumber(14)
-  void clearDuplicatedPublicKey() => $_clearField(14);
-  @$pb.TagNumber(14)
-  DuplicatedPublicKey ensureDuplicatedPublicKey() => $_ensure(7);
-
-  @$pb.TagNumber(15)
-  LowEntropyKey get lowEntropyKey => $_getN(8);
-  @$pb.TagNumber(15)
-  set lowEntropyKey(LowEntropyKey value) => $_setField(15, value);
-  @$pb.TagNumber(15)
-  $core.bool hasLowEntropyKey() => $_has(8);
-  @$pb.TagNumber(15)
-  void clearLowEntropyKey() => $_clearField(15);
-  @$pb.TagNumber(15)
-  LowEntropyKey ensureLowEntropyKey() => $_ensure(8);
-}
-
-class KeyVerificationNumberInform extends $pb.GeneratedMessage {
-  factory KeyVerificationNumberInform({
-    $fixnum.Int64? nonce,
-    $core.String? remoteLongname,
-    $core.int? securityNumber,
-  }) {
-    final result = create();
-    if (nonce != null) result.nonce = nonce;
-    if (remoteLongname != null) result.remoteLongname = remoteLongname;
-    if (securityNumber != null) result.securityNumber = securityNumber;
-    return result;
-  }
-
-  KeyVerificationNumberInform._();
-
-  factory KeyVerificationNumberInform.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory KeyVerificationNumberInform.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'KeyVerificationNumberInform',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'meshtastic'),
-      createEmptyInstance: create)
-    ..a<$fixnum.Int64>(1, _omitFieldNames ? '' : 'nonce', $pb.PbFieldType.OU6,
-        defaultOrMaker: $fixnum.Int64.ZERO)
-    ..aOS(2, _omitFieldNames ? '' : 'remoteLongname')
-    ..a<$core.int>(
-        3, _omitFieldNames ? '' : 'securityNumber', $pb.PbFieldType.OU3)
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  KeyVerificationNumberInform clone() =>
-      KeyVerificationNumberInform()..mergeFromMessage(this);
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  KeyVerificationNumberInform copyWith(
-          void Function(KeyVerificationNumberInform) updates) =>
-      super.copyWith(
-              (message) => updates(message as KeyVerificationNumberInform))
-          as KeyVerificationNumberInform;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static KeyVerificationNumberInform create() =>
-      KeyVerificationNumberInform._();
-  @$core.override
-  KeyVerificationNumberInform createEmptyInstance() => create();
-  static $pb.PbList<KeyVerificationNumberInform> createRepeated() =>
-      $pb.PbList<KeyVerificationNumberInform>();
-  @$core.pragma('dart2js:noInline')
-  static KeyVerificationNumberInform getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<KeyVerificationNumberInform>(create);
-  static KeyVerificationNumberInform? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $fixnum.Int64 get nonce => $_getI64(0);
-  @$pb.TagNumber(1)
-  set nonce($fixnum.Int64 value) => $_setInt64(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasNonce() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearNonce() => $_clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.String get remoteLongname => $_getSZ(1);
-  @$pb.TagNumber(2)
-  set remoteLongname($core.String value) => $_setString(1, value);
-  @$pb.TagNumber(2)
-  $core.bool hasRemoteLongname() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearRemoteLongname() => $_clearField(2);
-
-  @$pb.TagNumber(3)
-  $core.int get securityNumber => $_getIZ(2);
-  @$pb.TagNumber(3)
-  set securityNumber($core.int value) => $_setUnsignedInt32(2, value);
-  @$pb.TagNumber(3)
-  $core.bool hasSecurityNumber() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearSecurityNumber() => $_clearField(3);
-}
-
-class KeyVerificationNumberRequest extends $pb.GeneratedMessage {
-  factory KeyVerificationNumberRequest({
-    $fixnum.Int64? nonce,
-    $core.String? remoteLongname,
-  }) {
-    final result = create();
-    if (nonce != null) result.nonce = nonce;
-    if (remoteLongname != null) result.remoteLongname = remoteLongname;
-    return result;
-  }
-
-  KeyVerificationNumberRequest._();
-
-  factory KeyVerificationNumberRequest.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory KeyVerificationNumberRequest.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'KeyVerificationNumberRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'meshtastic'),
-      createEmptyInstance: create)
-    ..a<$fixnum.Int64>(1, _omitFieldNames ? '' : 'nonce', $pb.PbFieldType.OU6,
-        defaultOrMaker: $fixnum.Int64.ZERO)
-    ..aOS(2, _omitFieldNames ? '' : 'remoteLongname')
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  KeyVerificationNumberRequest clone() =>
-      KeyVerificationNumberRequest()..mergeFromMessage(this);
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  KeyVerificationNumberRequest copyWith(
-          void Function(KeyVerificationNumberRequest) updates) =>
-      super.copyWith(
-              (message) => updates(message as KeyVerificationNumberRequest))
-          as KeyVerificationNumberRequest;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static KeyVerificationNumberRequest create() =>
-      KeyVerificationNumberRequest._();
-  @$core.override
-  KeyVerificationNumberRequest createEmptyInstance() => create();
-  static $pb.PbList<KeyVerificationNumberRequest> createRepeated() =>
-      $pb.PbList<KeyVerificationNumberRequest>();
-  @$core.pragma('dart2js:noInline')
-  static KeyVerificationNumberRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<KeyVerificationNumberRequest>(create);
-  static KeyVerificationNumberRequest? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $fixnum.Int64 get nonce => $_getI64(0);
-  @$pb.TagNumber(1)
-  set nonce($fixnum.Int64 value) => $_setInt64(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasNonce() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearNonce() => $_clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.String get remoteLongname => $_getSZ(1);
-  @$pb.TagNumber(2)
-  set remoteLongname($core.String value) => $_setString(1, value);
-  @$pb.TagNumber(2)
-  $core.bool hasRemoteLongname() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearRemoteLongname() => $_clearField(2);
-}
-
-class KeyVerificationFinal extends $pb.GeneratedMessage {
-  factory KeyVerificationFinal({
-    $fixnum.Int64? nonce,
-    $core.String? remoteLongname,
-    $core.bool? isSender,
-    $core.String? verificationCharacters,
-  }) {
-    final result = create();
-    if (nonce != null) result.nonce = nonce;
-    if (remoteLongname != null) result.remoteLongname = remoteLongname;
-    if (isSender != null) result.isSender = isSender;
-    if (verificationCharacters != null)
-      result.verificationCharacters = verificationCharacters;
-    return result;
-  }
-
-  KeyVerificationFinal._();
-
-  factory KeyVerificationFinal.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory KeyVerificationFinal.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'KeyVerificationFinal',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'meshtastic'),
-      createEmptyInstance: create)
-    ..a<$fixnum.Int64>(1, _omitFieldNames ? '' : 'nonce', $pb.PbFieldType.OU6,
-        defaultOrMaker: $fixnum.Int64.ZERO)
-    ..aOS(2, _omitFieldNames ? '' : 'remoteLongname')
-    ..aOB(3, _omitFieldNames ? '' : 'isSender', protoName: 'isSender')
-    ..aOS(4, _omitFieldNames ? '' : 'verificationCharacters')
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  KeyVerificationFinal clone() =>
-      KeyVerificationFinal()..mergeFromMessage(this);
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  KeyVerificationFinal copyWith(void Function(KeyVerificationFinal) updates) =>
-      super.copyWith((message) => updates(message as KeyVerificationFinal))
-          as KeyVerificationFinal;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static KeyVerificationFinal create() => KeyVerificationFinal._();
-  @$core.override
-  KeyVerificationFinal createEmptyInstance() => create();
-  static $pb.PbList<KeyVerificationFinal> createRepeated() =>
-      $pb.PbList<KeyVerificationFinal>();
-  @$core.pragma('dart2js:noInline')
-  static KeyVerificationFinal getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<KeyVerificationFinal>(create);
-  static KeyVerificationFinal? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $fixnum.Int64 get nonce => $_getI64(0);
-  @$pb.TagNumber(1)
-  set nonce($fixnum.Int64 value) => $_setInt64(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasNonce() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearNonce() => $_clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.String get remoteLongname => $_getSZ(1);
-  @$pb.TagNumber(2)
-  set remoteLongname($core.String value) => $_setString(1, value);
-  @$pb.TagNumber(2)
-  $core.bool hasRemoteLongname() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearRemoteLongname() => $_clearField(2);
-
-  @$pb.TagNumber(3)
-  $core.bool get isSender => $_getBF(2);
-  @$pb.TagNumber(3)
-  set isSender($core.bool value) => $_setBool(2, value);
-  @$pb.TagNumber(3)
-  $core.bool hasIsSender() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearIsSender() => $_clearField(3);
-
-  @$pb.TagNumber(4)
-  $core.String get verificationCharacters => $_getSZ(3);
-  @$pb.TagNumber(4)
-  set verificationCharacters($core.String value) => $_setString(3, value);
-  @$pb.TagNumber(4)
-  $core.bool hasVerificationCharacters() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearVerificationCharacters() => $_clearField(4);
-}
-
-class DuplicatedPublicKey extends $pb.GeneratedMessage {
-  factory DuplicatedPublicKey() => create();
-
-  DuplicatedPublicKey._();
-
-  factory DuplicatedPublicKey.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory DuplicatedPublicKey.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'DuplicatedPublicKey',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'meshtastic'),
-      createEmptyInstance: create)
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  DuplicatedPublicKey clone() => DuplicatedPublicKey()..mergeFromMessage(this);
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  DuplicatedPublicKey copyWith(void Function(DuplicatedPublicKey) updates) =>
-      super.copyWith((message) => updates(message as DuplicatedPublicKey))
-          as DuplicatedPublicKey;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static DuplicatedPublicKey create() => DuplicatedPublicKey._();
-  @$core.override
-  DuplicatedPublicKey createEmptyInstance() => create();
-  static $pb.PbList<DuplicatedPublicKey> createRepeated() =>
-      $pb.PbList<DuplicatedPublicKey>();
-  @$core.pragma('dart2js:noInline')
-  static DuplicatedPublicKey getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<DuplicatedPublicKey>(create);
-  static DuplicatedPublicKey? _defaultInstance;
-}
-
-class LowEntropyKey extends $pb.GeneratedMessage {
-  factory LowEntropyKey() => create();
-
-  LowEntropyKey._();
-
-  factory LowEntropyKey.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory LowEntropyKey.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'LowEntropyKey',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'meshtastic'),
-      createEmptyInstance: create)
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  LowEntropyKey clone() => LowEntropyKey()..mergeFromMessage(this);
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  LowEntropyKey copyWith(void Function(LowEntropyKey) updates) =>
-      super.copyWith((message) => updates(message as LowEntropyKey))
-          as LowEntropyKey;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static LowEntropyKey create() => LowEntropyKey._();
-  @$core.override
-  LowEntropyKey createEmptyInstance() => create();
-  static $pb.PbList<LowEntropyKey> createRepeated() =>
-      $pb.PbList<LowEntropyKey>();
-  @$core.pragma('dart2js:noInline')
-  static LowEntropyKey getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<LowEntropyKey>(create);
-  static LowEntropyKey? _defaultInstance;
 }
 
 ///
@@ -4100,13 +3479,7 @@ class DeviceMetadata extends $pb.GeneratedMessage {
 ///  A heartbeat message is sent to the node from the client to keep the connection alive.
 ///  This is currently only needed to keep serial connections alive, but can be used by any PhoneAPI.
 class Heartbeat extends $pb.GeneratedMessage {
-  factory Heartbeat({
-    $core.int? nonce,
-  }) {
-    final result = create();
-    if (nonce != null) result.nonce = nonce;
-    return result;
-  }
+  factory Heartbeat() => create();
 
   Heartbeat._();
 
@@ -4121,7 +3494,6 @@ class Heartbeat extends $pb.GeneratedMessage {
       _omitMessageNames ? '' : 'Heartbeat',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'meshtastic'),
       createEmptyInstance: create)
-    ..a<$core.int>(1, _omitFieldNames ? '' : 'nonce', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -4142,17 +3514,6 @@ class Heartbeat extends $pb.GeneratedMessage {
   static Heartbeat getDefault() =>
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Heartbeat>(create);
   static Heartbeat? _defaultInstance;
-
-  ///
-  ///  The nonce of the heartbeat message
-  @$pb.TagNumber(1)
-  $core.int get nonce => $_getIZ(0);
-  @$pb.TagNumber(1)
-  set nonce($core.int value) => $_setUnsignedInt32(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasNonce() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearNonce() => $_clearField(1);
 }
 
 ///

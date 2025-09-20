@@ -56,9 +56,6 @@ class AdminMessage_ConfigType extends $pb.ProtobufEnum {
   ///  TODO: REPLACE
   static const AdminMessage_ConfigType SECURITY_CONFIG =
       AdminMessage_ConfigType._(7, _omitEnumNames ? '' : 'SECURITY_CONFIG');
-
-  ///
-  ///  Session key config
   static const AdminMessage_ConfigType SESSIONKEY_CONFIG =
       AdminMessage_ConfigType._(8, _omitEnumNames ? '' : 'SESSIONKEY_CONFIG');
 
@@ -215,49 +212,6 @@ class AdminMessage_BackupLocation extends $pb.ProtobufEnum {
       value < 0 || value >= _byValue.length ? null : _byValue[value];
 
   const AdminMessage_BackupLocation._(super.value, super.name);
-}
-
-///
-///  Three stages of this request.
-class KeyVerificationAdmin_MessageType extends $pb.ProtobufEnum {
-  ///
-  ///  This is the first stage, where a client initiates
-  static const KeyVerificationAdmin_MessageType INITIATE_VERIFICATION =
-      KeyVerificationAdmin_MessageType._(
-          0, _omitEnumNames ? '' : 'INITIATE_VERIFICATION');
-
-  ///
-  ///  After the nonce has been returned over the mesh, the client prompts for the security number
-  ///  And uses this message to provide it to the node.
-  static const KeyVerificationAdmin_MessageType PROVIDE_SECURITY_NUMBER =
-      KeyVerificationAdmin_MessageType._(
-          1, _omitEnumNames ? '' : 'PROVIDE_SECURITY_NUMBER');
-
-  ///
-  ///  Once the user has compared the verification message, this message notifies the node.
-  static const KeyVerificationAdmin_MessageType DO_VERIFY =
-      KeyVerificationAdmin_MessageType._(2, _omitEnumNames ? '' : 'DO_VERIFY');
-
-  ///
-  ///  This is the cancel path, can be taken at any point
-  static const KeyVerificationAdmin_MessageType DO_NOT_VERIFY =
-      KeyVerificationAdmin_MessageType._(
-          3, _omitEnumNames ? '' : 'DO_NOT_VERIFY');
-
-  static const $core.List<KeyVerificationAdmin_MessageType> values =
-      <KeyVerificationAdmin_MessageType>[
-    INITIATE_VERIFICATION,
-    PROVIDE_SECURITY_NUMBER,
-    DO_VERIFY,
-    DO_NOT_VERIFY,
-  ];
-
-  static final $core.List<KeyVerificationAdmin_MessageType?> _byValue =
-      $pb.ProtobufEnum.$_initByValueList(values, 3);
-  static KeyVerificationAdmin_MessageType? valueOf($core.int value) =>
-      value < 0 || value >= _byValue.length ? null : _byValue[value];
-
-  const KeyVerificationAdmin_MessageType._(super.value, super.name);
 }
 
 const $core.bool _omitEnumNames =

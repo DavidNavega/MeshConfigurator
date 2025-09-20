@@ -12,7 +12,6 @@
 
 import 'dart:core' as $core;
 
-import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'admin.pbenum.dart';
@@ -26,110 +25,6 @@ import 'module_config.pb.dart' as $3;
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
 export 'admin.pbenum.dart';
-
-///
-///  Input event message to be sent to the node.
-class AdminMessage_InputEvent extends $pb.GeneratedMessage {
-  factory AdminMessage_InputEvent({
-    $core.int? eventCode,
-    $core.int? kbChar,
-    $core.int? touchX,
-    $core.int? touchY,
-  }) {
-    final result = create();
-    if (eventCode != null) result.eventCode = eventCode;
-    if (kbChar != null) result.kbChar = kbChar;
-    if (touchX != null) result.touchX = touchX;
-    if (touchY != null) result.touchY = touchY;
-    return result;
-  }
-
-  AdminMessage_InputEvent._();
-
-  factory AdminMessage_InputEvent.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory AdminMessage_InputEvent.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'AdminMessage.InputEvent',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'meshtastic'),
-      createEmptyInstance: create)
-    ..a<$core.int>(1, _omitFieldNames ? '' : 'eventCode', $pb.PbFieldType.OU3)
-    ..a<$core.int>(2, _omitFieldNames ? '' : 'kbChar', $pb.PbFieldType.OU3)
-    ..a<$core.int>(3, _omitFieldNames ? '' : 'touchX', $pb.PbFieldType.OU3)
-    ..a<$core.int>(4, _omitFieldNames ? '' : 'touchY', $pb.PbFieldType.OU3)
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  AdminMessage_InputEvent clone() =>
-      AdminMessage_InputEvent()..mergeFromMessage(this);
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  AdminMessage_InputEvent copyWith(
-          void Function(AdminMessage_InputEvent) updates) =>
-      super.copyWith((message) => updates(message as AdminMessage_InputEvent))
-          as AdminMessage_InputEvent;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static AdminMessage_InputEvent create() => AdminMessage_InputEvent._();
-  @$core.override
-  AdminMessage_InputEvent createEmptyInstance() => create();
-  static $pb.PbList<AdminMessage_InputEvent> createRepeated() =>
-      $pb.PbList<AdminMessage_InputEvent>();
-  @$core.pragma('dart2js:noInline')
-  static AdminMessage_InputEvent getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<AdminMessage_InputEvent>(create);
-  static AdminMessage_InputEvent? _defaultInstance;
-
-  ///
-  ///  The input event code
-  @$pb.TagNumber(1)
-  $core.int get eventCode => $_getIZ(0);
-  @$pb.TagNumber(1)
-  set eventCode($core.int value) => $_setUnsignedInt32(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasEventCode() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearEventCode() => $_clearField(1);
-
-  ///
-  ///  Keyboard character code
-  @$pb.TagNumber(2)
-  $core.int get kbChar => $_getIZ(1);
-  @$pb.TagNumber(2)
-  set kbChar($core.int value) => $_setUnsignedInt32(1, value);
-  @$pb.TagNumber(2)
-  $core.bool hasKbChar() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearKbChar() => $_clearField(2);
-
-  ///
-  ///  The touch X coordinate
-  @$pb.TagNumber(3)
-  $core.int get touchX => $_getIZ(2);
-  @$pb.TagNumber(3)
-  set touchX($core.int value) => $_setUnsignedInt32(2, value);
-  @$pb.TagNumber(3)
-  $core.bool hasTouchX() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearTouchX() => $_clearField(3);
-
-  ///
-  ///  The touch Y coordinate
-  @$pb.TagNumber(4)
-  $core.int get touchY => $_getIZ(3);
-  @$pb.TagNumber(4)
-  set touchY($core.int value) => $_setUnsignedInt32(3, value);
-  @$pb.TagNumber(4)
-  $core.bool hasTouchY() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearTouchY() => $_clearField(4);
-}
 
 enum AdminMessage_PayloadVariant {
   getChannelRequest,
@@ -157,7 +52,6 @@ enum AdminMessage_PayloadVariant {
   backupPreferences,
   restorePreferences,
   removeBackupPreferences,
-  sendInputEvent,
   setOwner,
   setChannel,
   setConfig,
@@ -177,8 +71,6 @@ enum AdminMessage_PayloadVariant {
   removeIgnoredNode,
   beginEditSettings,
   commitEditSettings,
-  addContact,
-  keyVerification,
   factoryResetDevice,
   rebootOtaSeconds,
   exitSimulator,
@@ -220,7 +112,6 @@ class AdminMessage extends $pb.GeneratedMessage {
     AdminMessage_BackupLocation? backupPreferences,
     AdminMessage_BackupLocation? restorePreferences,
     AdminMessage_BackupLocation? removeBackupPreferences,
-    AdminMessage_InputEvent? sendInputEvent,
     $1.User? setOwner,
     $0.Channel? setChannel,
     $2.Config? setConfig,
@@ -240,8 +131,6 @@ class AdminMessage extends $pb.GeneratedMessage {
     $core.int? removeIgnoredNode,
     $core.bool? beginEditSettings,
     $core.bool? commitEditSettings,
-    SharedContact? addContact,
-    KeyVerificationAdmin? keyVerification,
     $core.int? factoryResetDevice,
     $core.int? rebootOtaSeconds,
     $core.bool? exitSimulator,
@@ -299,7 +188,6 @@ class AdminMessage extends $pb.GeneratedMessage {
       result.restorePreferences = restorePreferences;
     if (removeBackupPreferences != null)
       result.removeBackupPreferences = removeBackupPreferences;
-    if (sendInputEvent != null) result.sendInputEvent = sendInputEvent;
     if (setOwner != null) result.setOwner = setOwner;
     if (setChannel != null) result.setChannel = setChannel;
     if (setConfig != null) result.setConfig = setConfig;
@@ -326,8 +214,6 @@ class AdminMessage extends $pb.GeneratedMessage {
     if (beginEditSettings != null) result.beginEditSettings = beginEditSettings;
     if (commitEditSettings != null)
       result.commitEditSettings = commitEditSettings;
-    if (addContact != null) result.addContact = addContact;
-    if (keyVerification != null) result.keyVerification = keyVerification;
     if (factoryResetDevice != null)
       result.factoryResetDevice = factoryResetDevice;
     if (rebootOtaSeconds != null) result.rebootOtaSeconds = rebootOtaSeconds;
@@ -377,7 +263,6 @@ class AdminMessage extends $pb.GeneratedMessage {
     24: AdminMessage_PayloadVariant.backupPreferences,
     25: AdminMessage_PayloadVariant.restorePreferences,
     26: AdminMessage_PayloadVariant.removeBackupPreferences,
-    27: AdminMessage_PayloadVariant.sendInputEvent,
     32: AdminMessage_PayloadVariant.setOwner,
     33: AdminMessage_PayloadVariant.setChannel,
     34: AdminMessage_PayloadVariant.setConfig,
@@ -397,8 +282,6 @@ class AdminMessage extends $pb.GeneratedMessage {
     48: AdminMessage_PayloadVariant.removeIgnoredNode,
     64: AdminMessage_PayloadVariant.beginEditSettings,
     65: AdminMessage_PayloadVariant.commitEditSettings,
-    66: AdminMessage_PayloadVariant.addContact,
-    67: AdminMessage_PayloadVariant.keyVerification,
     94: AdminMessage_PayloadVariant.factoryResetDevice,
     95: AdminMessage_PayloadVariant.rebootOtaSeconds,
     96: AdminMessage_PayloadVariant.exitSimulator,
@@ -438,7 +321,6 @@ class AdminMessage extends $pb.GeneratedMessage {
       24,
       25,
       26,
-      27,
       32,
       33,
       34,
@@ -458,8 +340,6 @@ class AdminMessage extends $pb.GeneratedMessage {
       48,
       64,
       65,
-      66,
-      67,
       94,
       95,
       96,
@@ -525,8 +405,6 @@ class AdminMessage extends $pb.GeneratedMessage {
         defaultOrMaker: AdminMessage_BackupLocation.FLASH,
         valueOf: AdminMessage_BackupLocation.valueOf,
         enumValues: AdminMessage_BackupLocation.values)
-    ..aOM<AdminMessage_InputEvent>(27, _omitFieldNames ? '' : 'sendInputEvent',
-        subBuilder: AdminMessage_InputEvent.create)
     ..aOM<$1.User>(32, _omitFieldNames ? '' : 'setOwner',
         subBuilder: $1.User.create)
     ..aOM<$0.Channel>(33, _omitFieldNames ? '' : 'setChannel',
@@ -559,10 +437,6 @@ class AdminMessage extends $pb.GeneratedMessage {
         48, _omitFieldNames ? '' : 'removeIgnoredNode', $pb.PbFieldType.OU3)
     ..aOB(64, _omitFieldNames ? '' : 'beginEditSettings')
     ..aOB(65, _omitFieldNames ? '' : 'commitEditSettings')
-    ..aOM<SharedContact>(66, _omitFieldNames ? '' : 'addContact',
-        subBuilder: SharedContact.create)
-    ..aOM<KeyVerificationAdmin>(67, _omitFieldNames ? '' : 'keyVerification',
-        subBuilder: KeyVerificationAdmin.create)
     ..a<$core.int>(
         94, _omitFieldNames ? '' : 'factoryResetDevice', $pb.PbFieldType.O3)
     ..a<$core.int>(
@@ -913,31 +787,17 @@ class AdminMessage extends $pb.GeneratedMessage {
   void clearRemoveBackupPreferences() => $_clearField(26);
 
   ///
-  ///  Send an input event to the node.
-  ///  This is used to trigger physical input events like button presses, touch events, etc.
-  @$pb.TagNumber(27)
-  AdminMessage_InputEvent get sendInputEvent => $_getN(25);
-  @$pb.TagNumber(27)
-  set sendInputEvent(AdminMessage_InputEvent value) => $_setField(27, value);
-  @$pb.TagNumber(27)
-  $core.bool hasSendInputEvent() => $_has(25);
-  @$pb.TagNumber(27)
-  void clearSendInputEvent() => $_clearField(27);
-  @$pb.TagNumber(27)
-  AdminMessage_InputEvent ensureSendInputEvent() => $_ensure(25);
-
-  ///
   ///  Set the owner for this node
   @$pb.TagNumber(32)
-  $1.User get setOwner => $_getN(26);
+  $1.User get setOwner => $_getN(25);
   @$pb.TagNumber(32)
   set setOwner($1.User value) => $_setField(32, value);
   @$pb.TagNumber(32)
-  $core.bool hasSetOwner() => $_has(26);
+  $core.bool hasSetOwner() => $_has(25);
   @$pb.TagNumber(32)
   void clearSetOwner() => $_clearField(32);
   @$pb.TagNumber(32)
-  $1.User ensureSetOwner() => $_ensure(26);
+  $1.User ensureSetOwner() => $_ensure(25);
 
   ///
   ///  Set channels (using the new API).
@@ -946,119 +806,119 @@ class AdminMessage extends $pb.GeneratedMessage {
   ///  Note: only one channel can be marked as primary.
   ///  If the client sets a particular channel to be primary, the previous channel will be set to SECONDARY automatically.
   @$pb.TagNumber(33)
-  $0.Channel get setChannel => $_getN(27);
+  $0.Channel get setChannel => $_getN(26);
   @$pb.TagNumber(33)
   set setChannel($0.Channel value) => $_setField(33, value);
   @$pb.TagNumber(33)
-  $core.bool hasSetChannel() => $_has(27);
+  $core.bool hasSetChannel() => $_has(26);
   @$pb.TagNumber(33)
   void clearSetChannel() => $_clearField(33);
   @$pb.TagNumber(33)
-  $0.Channel ensureSetChannel() => $_ensure(27);
+  $0.Channel ensureSetChannel() => $_ensure(26);
 
   ///
   ///  Set the current Config
   @$pb.TagNumber(34)
-  $2.Config get setConfig => $_getN(28);
+  $2.Config get setConfig => $_getN(27);
   @$pb.TagNumber(34)
   set setConfig($2.Config value) => $_setField(34, value);
   @$pb.TagNumber(34)
-  $core.bool hasSetConfig() => $_has(28);
+  $core.bool hasSetConfig() => $_has(27);
   @$pb.TagNumber(34)
   void clearSetConfig() => $_clearField(34);
   @$pb.TagNumber(34)
-  $2.Config ensureSetConfig() => $_ensure(28);
+  $2.Config ensureSetConfig() => $_ensure(27);
 
   ///
   ///  Set the current Config
   @$pb.TagNumber(35)
-  $3.ModuleConfig get setModuleConfig => $_getN(29);
+  $3.ModuleConfig get setModuleConfig => $_getN(28);
   @$pb.TagNumber(35)
   set setModuleConfig($3.ModuleConfig value) => $_setField(35, value);
   @$pb.TagNumber(35)
-  $core.bool hasSetModuleConfig() => $_has(29);
+  $core.bool hasSetModuleConfig() => $_has(28);
   @$pb.TagNumber(35)
   void clearSetModuleConfig() => $_clearField(35);
   @$pb.TagNumber(35)
-  $3.ModuleConfig ensureSetModuleConfig() => $_ensure(29);
+  $3.ModuleConfig ensureSetModuleConfig() => $_ensure(28);
 
   ///
   ///  Set the Canned Message Module messages text.
   @$pb.TagNumber(36)
-  $core.String get setCannedMessageModuleMessages => $_getSZ(30);
+  $core.String get setCannedMessageModuleMessages => $_getSZ(29);
   @$pb.TagNumber(36)
   set setCannedMessageModuleMessages($core.String value) =>
-      $_setString(30, value);
+      $_setString(29, value);
   @$pb.TagNumber(36)
-  $core.bool hasSetCannedMessageModuleMessages() => $_has(30);
+  $core.bool hasSetCannedMessageModuleMessages() => $_has(29);
   @$pb.TagNumber(36)
   void clearSetCannedMessageModuleMessages() => $_clearField(36);
 
   ///
   ///  Set the ringtone for ExternalNotification.
   @$pb.TagNumber(37)
-  $core.String get setRingtoneMessage => $_getSZ(31);
+  $core.String get setRingtoneMessage => $_getSZ(30);
   @$pb.TagNumber(37)
-  set setRingtoneMessage($core.String value) => $_setString(31, value);
+  set setRingtoneMessage($core.String value) => $_setString(30, value);
   @$pb.TagNumber(37)
-  $core.bool hasSetRingtoneMessage() => $_has(31);
+  $core.bool hasSetRingtoneMessage() => $_has(30);
   @$pb.TagNumber(37)
   void clearSetRingtoneMessage() => $_clearField(37);
 
   ///
   ///  Remove the node by the specified node-num from the NodeDB on the device
   @$pb.TagNumber(38)
-  $core.int get removeByNodenum => $_getIZ(32);
+  $core.int get removeByNodenum => $_getIZ(31);
   @$pb.TagNumber(38)
-  set removeByNodenum($core.int value) => $_setUnsignedInt32(32, value);
+  set removeByNodenum($core.int value) => $_setUnsignedInt32(31, value);
   @$pb.TagNumber(38)
-  $core.bool hasRemoveByNodenum() => $_has(32);
+  $core.bool hasRemoveByNodenum() => $_has(31);
   @$pb.TagNumber(38)
   void clearRemoveByNodenum() => $_clearField(38);
 
   ///
   ///  Set specified node-num to be favorited on the NodeDB on the device
   @$pb.TagNumber(39)
-  $core.int get setFavoriteNode => $_getIZ(33);
+  $core.int get setFavoriteNode => $_getIZ(32);
   @$pb.TagNumber(39)
-  set setFavoriteNode($core.int value) => $_setUnsignedInt32(33, value);
+  set setFavoriteNode($core.int value) => $_setUnsignedInt32(32, value);
   @$pb.TagNumber(39)
-  $core.bool hasSetFavoriteNode() => $_has(33);
+  $core.bool hasSetFavoriteNode() => $_has(32);
   @$pb.TagNumber(39)
   void clearSetFavoriteNode() => $_clearField(39);
 
   ///
   ///  Set specified node-num to be un-favorited on the NodeDB on the device
   @$pb.TagNumber(40)
-  $core.int get removeFavoriteNode => $_getIZ(34);
+  $core.int get removeFavoriteNode => $_getIZ(33);
   @$pb.TagNumber(40)
-  set removeFavoriteNode($core.int value) => $_setUnsignedInt32(34, value);
+  set removeFavoriteNode($core.int value) => $_setUnsignedInt32(33, value);
   @$pb.TagNumber(40)
-  $core.bool hasRemoveFavoriteNode() => $_has(34);
+  $core.bool hasRemoveFavoriteNode() => $_has(33);
   @$pb.TagNumber(40)
   void clearRemoveFavoriteNode() => $_clearField(40);
 
   ///
   ///  Set fixed position data on the node and then set the position.fixed_position = true
   @$pb.TagNumber(41)
-  $1.Position get setFixedPosition => $_getN(35);
+  $1.Position get setFixedPosition => $_getN(34);
   @$pb.TagNumber(41)
   set setFixedPosition($1.Position value) => $_setField(41, value);
   @$pb.TagNumber(41)
-  $core.bool hasSetFixedPosition() => $_has(35);
+  $core.bool hasSetFixedPosition() => $_has(34);
   @$pb.TagNumber(41)
   void clearSetFixedPosition() => $_clearField(41);
   @$pb.TagNumber(41)
-  $1.Position ensureSetFixedPosition() => $_ensure(35);
+  $1.Position ensureSetFixedPosition() => $_ensure(34);
 
   ///
   ///  Clear fixed position coordinates and then set position.fixed_position = false
   @$pb.TagNumber(42)
-  $core.bool get removeFixedPosition => $_getBF(36);
+  $core.bool get removeFixedPosition => $_getBF(35);
   @$pb.TagNumber(42)
-  set removeFixedPosition($core.bool value) => $_setBool(36, value);
+  set removeFixedPosition($core.bool value) => $_setBool(35, value);
   @$pb.TagNumber(42)
-  $core.bool hasRemoveFixedPosition() => $_has(36);
+  $core.bool hasRemoveFixedPosition() => $_has(35);
   @$pb.TagNumber(42)
   void clearRemoveFixedPosition() => $_clearField(42);
 
@@ -1066,70 +926,70 @@ class AdminMessage extends $pb.GeneratedMessage {
   ///  Set time only on the node
   ///  Convenience method to set the time on the node (as Net quality) without any other position data
   @$pb.TagNumber(43)
-  $core.int get setTimeOnly => $_getIZ(37);
+  $core.int get setTimeOnly => $_getIZ(36);
   @$pb.TagNumber(43)
-  set setTimeOnly($core.int value) => $_setUnsignedInt32(37, value);
+  set setTimeOnly($core.int value) => $_setUnsignedInt32(36, value);
   @$pb.TagNumber(43)
-  $core.bool hasSetTimeOnly() => $_has(37);
+  $core.bool hasSetTimeOnly() => $_has(36);
   @$pb.TagNumber(43)
   void clearSetTimeOnly() => $_clearField(43);
 
   ///
   ///  Tell the node to send the stored ui data.
   @$pb.TagNumber(44)
-  $core.bool get getUiConfigRequest => $_getBF(38);
+  $core.bool get getUiConfigRequest => $_getBF(37);
   @$pb.TagNumber(44)
-  set getUiConfigRequest($core.bool value) => $_setBool(38, value);
+  set getUiConfigRequest($core.bool value) => $_setBool(37, value);
   @$pb.TagNumber(44)
-  $core.bool hasGetUiConfigRequest() => $_has(38);
+  $core.bool hasGetUiConfigRequest() => $_has(37);
   @$pb.TagNumber(44)
   void clearGetUiConfigRequest() => $_clearField(44);
 
   ///
   ///  Reply stored device ui data.
   @$pb.TagNumber(45)
-  $5.DeviceUIConfig get getUiConfigResponse => $_getN(39);
+  $5.DeviceUIConfig get getUiConfigResponse => $_getN(38);
   @$pb.TagNumber(45)
   set getUiConfigResponse($5.DeviceUIConfig value) => $_setField(45, value);
   @$pb.TagNumber(45)
-  $core.bool hasGetUiConfigResponse() => $_has(39);
+  $core.bool hasGetUiConfigResponse() => $_has(38);
   @$pb.TagNumber(45)
   void clearGetUiConfigResponse() => $_clearField(45);
   @$pb.TagNumber(45)
-  $5.DeviceUIConfig ensureGetUiConfigResponse() => $_ensure(39);
+  $5.DeviceUIConfig ensureGetUiConfigResponse() => $_ensure(38);
 
   ///
   ///  Tell the node to store UI data persistently.
   @$pb.TagNumber(46)
-  $5.DeviceUIConfig get storeUiConfig => $_getN(40);
+  $5.DeviceUIConfig get storeUiConfig => $_getN(39);
   @$pb.TagNumber(46)
   set storeUiConfig($5.DeviceUIConfig value) => $_setField(46, value);
   @$pb.TagNumber(46)
-  $core.bool hasStoreUiConfig() => $_has(40);
+  $core.bool hasStoreUiConfig() => $_has(39);
   @$pb.TagNumber(46)
   void clearStoreUiConfig() => $_clearField(46);
   @$pb.TagNumber(46)
-  $5.DeviceUIConfig ensureStoreUiConfig() => $_ensure(40);
+  $5.DeviceUIConfig ensureStoreUiConfig() => $_ensure(39);
 
   ///
   ///  Set specified node-num to be ignored on the NodeDB on the device
   @$pb.TagNumber(47)
-  $core.int get setIgnoredNode => $_getIZ(41);
+  $core.int get setIgnoredNode => $_getIZ(40);
   @$pb.TagNumber(47)
-  set setIgnoredNode($core.int value) => $_setUnsignedInt32(41, value);
+  set setIgnoredNode($core.int value) => $_setUnsignedInt32(40, value);
   @$pb.TagNumber(47)
-  $core.bool hasSetIgnoredNode() => $_has(41);
+  $core.bool hasSetIgnoredNode() => $_has(40);
   @$pb.TagNumber(47)
   void clearSetIgnoredNode() => $_clearField(47);
 
   ///
   ///  Set specified node-num to be un-ignored on the NodeDB on the device
   @$pb.TagNumber(48)
-  $core.int get removeIgnoredNode => $_getIZ(42);
+  $core.int get removeIgnoredNode => $_getIZ(41);
   @$pb.TagNumber(48)
-  set removeIgnoredNode($core.int value) => $_setUnsignedInt32(42, value);
+  set removeIgnoredNode($core.int value) => $_setUnsignedInt32(41, value);
   @$pb.TagNumber(48)
-  $core.bool hasRemoveIgnoredNode() => $_has(42);
+  $core.bool hasRemoveIgnoredNode() => $_has(41);
   @$pb.TagNumber(48)
   void clearRemoveIgnoredNode() => $_clearField(48);
 
@@ -1137,59 +997,33 @@ class AdminMessage extends $pb.GeneratedMessage {
   ///  Begins an edit transaction for config, module config, owner, and channel settings changes
   ///  This will delay the standard *implicit* save to the file system and subsequent reboot behavior until committed (commit_edit_settings)
   @$pb.TagNumber(64)
-  $core.bool get beginEditSettings => $_getBF(43);
+  $core.bool get beginEditSettings => $_getBF(42);
   @$pb.TagNumber(64)
-  set beginEditSettings($core.bool value) => $_setBool(43, value);
+  set beginEditSettings($core.bool value) => $_setBool(42, value);
   @$pb.TagNumber(64)
-  $core.bool hasBeginEditSettings() => $_has(43);
+  $core.bool hasBeginEditSettings() => $_has(42);
   @$pb.TagNumber(64)
   void clearBeginEditSettings() => $_clearField(64);
 
   ///
   ///  Commits an open transaction for any edits made to config, module config, owner, and channel settings
   @$pb.TagNumber(65)
-  $core.bool get commitEditSettings => $_getBF(44);
+  $core.bool get commitEditSettings => $_getBF(43);
   @$pb.TagNumber(65)
-  set commitEditSettings($core.bool value) => $_setBool(44, value);
+  set commitEditSettings($core.bool value) => $_setBool(43, value);
   @$pb.TagNumber(65)
-  $core.bool hasCommitEditSettings() => $_has(44);
+  $core.bool hasCommitEditSettings() => $_has(43);
   @$pb.TagNumber(65)
   void clearCommitEditSettings() => $_clearField(65);
 
   ///
-  ///  Add a contact (User) to the nodedb
-  @$pb.TagNumber(66)
-  SharedContact get addContact => $_getN(45);
-  @$pb.TagNumber(66)
-  set addContact(SharedContact value) => $_setField(66, value);
-  @$pb.TagNumber(66)
-  $core.bool hasAddContact() => $_has(45);
-  @$pb.TagNumber(66)
-  void clearAddContact() => $_clearField(66);
-  @$pb.TagNumber(66)
-  SharedContact ensureAddContact() => $_ensure(45);
-
-  ///
-  ///  Initiate or respond to a key verification request
-  @$pb.TagNumber(67)
-  KeyVerificationAdmin get keyVerification => $_getN(46);
-  @$pb.TagNumber(67)
-  set keyVerification(KeyVerificationAdmin value) => $_setField(67, value);
-  @$pb.TagNumber(67)
-  $core.bool hasKeyVerification() => $_has(46);
-  @$pb.TagNumber(67)
-  void clearKeyVerification() => $_clearField(67);
-  @$pb.TagNumber(67)
-  KeyVerificationAdmin ensureKeyVerification() => $_ensure(46);
-
-  ///
   ///  Tell the node to factory reset config everything; all device state and configuration will be returned to factory defaults and BLE bonds will be cleared.
   @$pb.TagNumber(94)
-  $core.int get factoryResetDevice => $_getIZ(47);
+  $core.int get factoryResetDevice => $_getIZ(44);
   @$pb.TagNumber(94)
-  set factoryResetDevice($core.int value) => $_setSignedInt32(47, value);
+  set factoryResetDevice($core.int value) => $_setSignedInt32(44, value);
   @$pb.TagNumber(94)
-  $core.bool hasFactoryResetDevice() => $_has(47);
+  $core.bool hasFactoryResetDevice() => $_has(44);
   @$pb.TagNumber(94)
   void clearFactoryResetDevice() => $_clearField(94);
 
@@ -1197,11 +1031,11 @@ class AdminMessage extends $pb.GeneratedMessage {
   ///  Tell the node to reboot into the OTA Firmware in this many seconds (or <0 to cancel reboot)
   ///  Only Implemented for ESP32 Devices. This needs to be issued to send a new main firmware via bluetooth.
   @$pb.TagNumber(95)
-  $core.int get rebootOtaSeconds => $_getIZ(48);
+  $core.int get rebootOtaSeconds => $_getIZ(45);
   @$pb.TagNumber(95)
-  set rebootOtaSeconds($core.int value) => $_setSignedInt32(48, value);
+  set rebootOtaSeconds($core.int value) => $_setSignedInt32(45, value);
   @$pb.TagNumber(95)
-  $core.bool hasRebootOtaSeconds() => $_has(48);
+  $core.bool hasRebootOtaSeconds() => $_has(45);
   @$pb.TagNumber(95)
   void clearRebootOtaSeconds() => $_clearField(95);
 
@@ -1209,55 +1043,55 @@ class AdminMessage extends $pb.GeneratedMessage {
   ///  This message is only supported for the simulator Portduino build.
   ///  If received the simulator will exit successfully.
   @$pb.TagNumber(96)
-  $core.bool get exitSimulator => $_getBF(49);
+  $core.bool get exitSimulator => $_getBF(46);
   @$pb.TagNumber(96)
-  set exitSimulator($core.bool value) => $_setBool(49, value);
+  set exitSimulator($core.bool value) => $_setBool(46, value);
   @$pb.TagNumber(96)
-  $core.bool hasExitSimulator() => $_has(49);
+  $core.bool hasExitSimulator() => $_has(46);
   @$pb.TagNumber(96)
   void clearExitSimulator() => $_clearField(96);
 
   ///
   ///  Tell the node to reboot in this many seconds (or <0 to cancel reboot)
   @$pb.TagNumber(97)
-  $core.int get rebootSeconds => $_getIZ(50);
+  $core.int get rebootSeconds => $_getIZ(47);
   @$pb.TagNumber(97)
-  set rebootSeconds($core.int value) => $_setSignedInt32(50, value);
+  set rebootSeconds($core.int value) => $_setSignedInt32(47, value);
   @$pb.TagNumber(97)
-  $core.bool hasRebootSeconds() => $_has(50);
+  $core.bool hasRebootSeconds() => $_has(47);
   @$pb.TagNumber(97)
   void clearRebootSeconds() => $_clearField(97);
 
   ///
   ///  Tell the node to shutdown in this many seconds (or <0 to cancel shutdown)
   @$pb.TagNumber(98)
-  $core.int get shutdownSeconds => $_getIZ(51);
+  $core.int get shutdownSeconds => $_getIZ(48);
   @$pb.TagNumber(98)
-  set shutdownSeconds($core.int value) => $_setSignedInt32(51, value);
+  set shutdownSeconds($core.int value) => $_setSignedInt32(48, value);
   @$pb.TagNumber(98)
-  $core.bool hasShutdownSeconds() => $_has(51);
+  $core.bool hasShutdownSeconds() => $_has(48);
   @$pb.TagNumber(98)
   void clearShutdownSeconds() => $_clearField(98);
 
   ///
   ///  Tell the node to factory reset config; all device state and configuration will be returned to factory defaults; BLE bonds will be preserved.
   @$pb.TagNumber(99)
-  $core.int get factoryResetConfig => $_getIZ(52);
+  $core.int get factoryResetConfig => $_getIZ(49);
   @$pb.TagNumber(99)
-  set factoryResetConfig($core.int value) => $_setSignedInt32(52, value);
+  set factoryResetConfig($core.int value) => $_setSignedInt32(49, value);
   @$pb.TagNumber(99)
-  $core.bool hasFactoryResetConfig() => $_has(52);
+  $core.bool hasFactoryResetConfig() => $_has(49);
   @$pb.TagNumber(99)
   void clearFactoryResetConfig() => $_clearField(99);
 
   ///
   ///  Tell the node to reset the nodedb.
   @$pb.TagNumber(100)
-  $core.int get nodedbReset => $_getIZ(53);
+  $core.int get nodedbReset => $_getIZ(50);
   @$pb.TagNumber(100)
-  set nodedbReset($core.int value) => $_setSignedInt32(53, value);
+  set nodedbReset($core.int value) => $_setSignedInt32(50, value);
   @$pb.TagNumber(100)
-  $core.bool hasNodedbReset() => $_has(53);
+  $core.bool hasNodedbReset() => $_has(50);
   @$pb.TagNumber(100)
   void clearNodedbReset() => $_clearField(100);
 
@@ -1266,11 +1100,11 @@ class AdminMessage extends $pb.GeneratedMessage {
   ///  The client MUST include the same key with any set_x commands. Key expires after 300 seconds.
   ///  Prevents replay attacks for admin messages.
   @$pb.TagNumber(101)
-  $core.List<$core.int> get sessionPasskey => $_getN(54);
+  $core.List<$core.int> get sessionPasskey => $_getN(51);
   @$pb.TagNumber(101)
-  set sessionPasskey($core.List<$core.int> value) => $_setBytes(54, value);
+  set sessionPasskey($core.List<$core.int> value) => $_setBytes(51, value);
   @$pb.TagNumber(101)
-  $core.bool hasSessionPasskey() => $_has(54);
+  $core.bool hasSessionPasskey() => $_has(51);
   @$pb.TagNumber(101)
   void clearSessionPasskey() => $_clearField(101);
 }
@@ -1439,203 +1273,6 @@ class NodeRemoteHardwarePinsResponse extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $pb.PbList<$1.NodeRemoteHardwarePin> get nodeRemoteHardwarePins =>
       $_getList(0);
-}
-
-class SharedContact extends $pb.GeneratedMessage {
-  factory SharedContact({
-    $core.int? nodeNum,
-    $1.User? user,
-    $core.bool? shouldIgnore,
-  }) {
-    final result = create();
-    if (nodeNum != null) result.nodeNum = nodeNum;
-    if (user != null) result.user = user;
-    if (shouldIgnore != null) result.shouldIgnore = shouldIgnore;
-    return result;
-  }
-
-  SharedContact._();
-
-  factory SharedContact.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory SharedContact.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'SharedContact',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'meshtastic'),
-      createEmptyInstance: create)
-    ..a<$core.int>(1, _omitFieldNames ? '' : 'nodeNum', $pb.PbFieldType.OU3)
-    ..aOM<$1.User>(2, _omitFieldNames ? '' : 'user', subBuilder: $1.User.create)
-    ..aOB(3, _omitFieldNames ? '' : 'shouldIgnore')
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SharedContact clone() => SharedContact()..mergeFromMessage(this);
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SharedContact copyWith(void Function(SharedContact) updates) =>
-      super.copyWith((message) => updates(message as SharedContact))
-          as SharedContact;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static SharedContact create() => SharedContact._();
-  @$core.override
-  SharedContact createEmptyInstance() => create();
-  static $pb.PbList<SharedContact> createRepeated() =>
-      $pb.PbList<SharedContact>();
-  @$core.pragma('dart2js:noInline')
-  static SharedContact getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<SharedContact>(create);
-  static SharedContact? _defaultInstance;
-
-  ///
-  ///  The node number of the contact
-  @$pb.TagNumber(1)
-  $core.int get nodeNum => $_getIZ(0);
-  @$pb.TagNumber(1)
-  set nodeNum($core.int value) => $_setUnsignedInt32(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasNodeNum() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearNodeNum() => $_clearField(1);
-
-  ///
-  ///  The User of the contact
-  @$pb.TagNumber(2)
-  $1.User get user => $_getN(1);
-  @$pb.TagNumber(2)
-  set user($1.User value) => $_setField(2, value);
-  @$pb.TagNumber(2)
-  $core.bool hasUser() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearUser() => $_clearField(2);
-  @$pb.TagNumber(2)
-  $1.User ensureUser() => $_ensure(1);
-
-  ///
-  ///  Add this contact to the blocked / ignored list
-  @$pb.TagNumber(3)
-  $core.bool get shouldIgnore => $_getBF(2);
-  @$pb.TagNumber(3)
-  set shouldIgnore($core.bool value) => $_setBool(2, value);
-  @$pb.TagNumber(3)
-  $core.bool hasShouldIgnore() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearShouldIgnore() => $_clearField(3);
-}
-
-///
-///  This message is used by a client to initiate or complete a key verification
-class KeyVerificationAdmin extends $pb.GeneratedMessage {
-  factory KeyVerificationAdmin({
-    KeyVerificationAdmin_MessageType? messageType,
-    $core.int? remoteNodenum,
-    $fixnum.Int64? nonce,
-    $core.int? securityNumber,
-  }) {
-    final result = create();
-    if (messageType != null) result.messageType = messageType;
-    if (remoteNodenum != null) result.remoteNodenum = remoteNodenum;
-    if (nonce != null) result.nonce = nonce;
-    if (securityNumber != null) result.securityNumber = securityNumber;
-    return result;
-  }
-
-  KeyVerificationAdmin._();
-
-  factory KeyVerificationAdmin.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory KeyVerificationAdmin.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'KeyVerificationAdmin',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'meshtastic'),
-      createEmptyInstance: create)
-    ..e<KeyVerificationAdmin_MessageType>(
-        1, _omitFieldNames ? '' : 'messageType', $pb.PbFieldType.OE,
-        defaultOrMaker: KeyVerificationAdmin_MessageType.INITIATE_VERIFICATION,
-        valueOf: KeyVerificationAdmin_MessageType.valueOf,
-        enumValues: KeyVerificationAdmin_MessageType.values)
-    ..a<$core.int>(
-        2, _omitFieldNames ? '' : 'remoteNodenum', $pb.PbFieldType.OU3)
-    ..a<$fixnum.Int64>(3, _omitFieldNames ? '' : 'nonce', $pb.PbFieldType.OU6,
-        defaultOrMaker: $fixnum.Int64.ZERO)
-    ..a<$core.int>(
-        4, _omitFieldNames ? '' : 'securityNumber', $pb.PbFieldType.OU3)
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  KeyVerificationAdmin clone() =>
-      KeyVerificationAdmin()..mergeFromMessage(this);
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  KeyVerificationAdmin copyWith(void Function(KeyVerificationAdmin) updates) =>
-      super.copyWith((message) => updates(message as KeyVerificationAdmin))
-          as KeyVerificationAdmin;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static KeyVerificationAdmin create() => KeyVerificationAdmin._();
-  @$core.override
-  KeyVerificationAdmin createEmptyInstance() => create();
-  static $pb.PbList<KeyVerificationAdmin> createRepeated() =>
-      $pb.PbList<KeyVerificationAdmin>();
-  @$core.pragma('dart2js:noInline')
-  static KeyVerificationAdmin getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<KeyVerificationAdmin>(create);
-  static KeyVerificationAdmin? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  KeyVerificationAdmin_MessageType get messageType => $_getN(0);
-  @$pb.TagNumber(1)
-  set messageType(KeyVerificationAdmin_MessageType value) =>
-      $_setField(1, value);
-  @$pb.TagNumber(1)
-  $core.bool hasMessageType() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearMessageType() => $_clearField(1);
-
-  ///
-  ///  The nodenum we're requesting
-  @$pb.TagNumber(2)
-  $core.int get remoteNodenum => $_getIZ(1);
-  @$pb.TagNumber(2)
-  set remoteNodenum($core.int value) => $_setUnsignedInt32(1, value);
-  @$pb.TagNumber(2)
-  $core.bool hasRemoteNodenum() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearRemoteNodenum() => $_clearField(2);
-
-  ///
-  ///  The nonce is used to track the connection
-  @$pb.TagNumber(3)
-  $fixnum.Int64 get nonce => $_getI64(2);
-  @$pb.TagNumber(3)
-  set nonce($fixnum.Int64 value) => $_setInt64(2, value);
-  @$pb.TagNumber(3)
-  $core.bool hasNonce() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearNonce() => $_clearField(3);
-
-  ///
-  ///  The 4 digit code generated by the remote node, and communicated outside the mesh
-  @$pb.TagNumber(4)
-  $core.int get securityNumber => $_getIZ(3);
-  @$pb.TagNumber(4)
-  set securityNumber($core.int value) => $_setUnsignedInt32(3, value);
-  @$pb.TagNumber(4)
-  $core.bool hasSecurityNumber() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearSecurityNumber() => $_clearField(4);
 }
 
 const $core.bool _omitFieldNames =

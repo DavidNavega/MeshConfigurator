@@ -15,45 +15,80 @@ class ConfigProvider with ChangeNotifier {
   NodeConfig _cfg = NodeConfig();
   bool _busy = false;
   String _status = 'Desconectado';
+  String? _keyError;
 
   NodeConfig get cfg => _cfg;
   bool get busy => _busy;
   String get status => _status;
   ConnKind? get kind => _kind;
+  String? get keyError => _keyError;
+
+  String get keyDisplay => NodeConfig.keyToDisplay(_cfg.key);
 
   void _setBusy(bool v) { _busy = v; notifyListeners(); }
   void _setStatus(String s) { _status = s; notifyListeners(); }
-  void _setCfg(NodeConfig c) { _cfg = c; notifyListeners(); }
+  void _setCfg(NodeConfig c) { _cfg = c; _keyError = null; notifyListeners(); }
 
   Future<void> connectBle() async {
     _setBusy(true);
     _kind = ConnKind.bluetooth;
     _setStatus('Conectando BLE...');
-    final ok = await bluetooth.connectAndInit();
-    _setStatus(ok ? 'BLE conectado' : 'Error BLE');
-    _setBusy(false);
+    try {
+      final ok = await bluetooth.connectAndInit();
+      if (!ok) {
+        _setStatus('Error BLE');
+        return;
+      }
+      _setStatus('BLE conectado, leyendo configuración...');
+      await readConfig();
+    } catch (e) {
+      _setStatus('Error BLE: $e');
+    } finally {
+      _setBusy(false);
+    }
   }
 
   Future<void> connectTcp(String baseUrl) async {
     _setBusy(true);
     _kind = ConnKind.tcpHttp;
     _setStatus('Conectando TCP/HTTP...');
-    tcp = TcpHttpService(baseUrl);
-    _setStatus('TCP listo');
-    _setBusy(false);
+    try {
+      tcp = TcpHttpService(baseUrl);
+      _setStatus('TCP listo, leyendo configuración...');
+      await readConfig();
+    } catch (e) {
+      _setStatus('Error TCP/HTTP: $e');
+    } finally {
+      _setBusy(false);
+    }
   }
 
   Future<void> connectUsb() async {
     _setBusy(true);
     _kind = ConnKind.usb;
     _setStatus('Conectando USB...');
-    final ok = await usb.connect();
-    _setStatus(ok ? 'USB conectado' : 'Error USB');
-    _setBusy(false);
+    try {
+      final ok = await usb.connect();
+      if (!ok) {
+        _setStatus('Error USB');
+        return;
+      }
+      _setStatus('USB conectado, leyendo configuración...');
+      await readConfig();
+    } catch (e) {
+      _setStatus('Error USB: $e');
+    } finally {
+      _setBusy(false);
+    }
   }
 
   Future<void> readConfig() async {
+    if (_kind == null) {
+      _setStatus('Conecta primero');
+      return;
+    }
     _setBusy(true);
+    _setStatus('Leyendo configuración...');
     try {
       NodeConfig? c;
       switch (_kind) {
@@ -67,9 +102,16 @@ class ConfigProvider with ChangeNotifier {
           c = await usb.readConfig();
           break;
         default:
-          _setStatus('Conecta primero');
+          break;
       }
-      if (c != null) _setCfg(c);
+      if (c != null) {
+        _setCfg(c);
+        _setStatus('Configuración recibida');
+      } else {
+        _setStatus('No se pudo obtener la configuración');
+      }
+    } catch (e) {
+      _setStatus('Error al leer configuración: $e');
     } finally {
       _setBusy(false);
     }
@@ -104,7 +146,23 @@ class ConfigProvider with ChangeNotifier {
     notifyListeners();
   }
   void setChannelIndex(int idx) { _cfg = NodeConfig.fromJson(_cfg.toJson()); _cfg.channelIndex = idx; notifyListeners(); }
-  void setKey(String k) { _cfg = NodeConfig.fromJson(_cfg.toJson()); _cfg.key = k; notifyListeners(); }
+  void setKey(String k) {
+    final parsed = NodeConfig.parseKeyText(k);
+    if (parsed == null) {
+      _keyError = 'Formato no válido. Usa hex o Base64.';
+      notifyListeners();
+      return;
+    }
+    if (!NodeConfig.isValidKeyLength(parsed)) {
+      _keyError = 'La clave debe tener 0, 16 o 32 bytes.';
+      notifyListeners();
+      return;
+    }
+    _cfg = NodeConfig.fromJson(_cfg.toJson());
+    _cfg.key = parsed;
+    _keyError = null;
+    notifyListeners();
+  }
   void setSerialMode(String m) { _cfg = NodeConfig.fromJson(_cfg.toJson()); _cfg.serialOutputMode = m; notifyListeners(); }
   void setBaud(int b) { _cfg = NodeConfig.fromJson(_cfg.toJson()); _cfg.baudRate = b; notifyListeners(); }
   void setFrequencyRegion(String r) { _cfg = NodeConfig.fromJson(_cfg.toJson()); _cfg.frequencyRegion = r; notifyListeners(); }

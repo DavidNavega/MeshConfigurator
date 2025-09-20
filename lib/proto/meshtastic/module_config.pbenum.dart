@@ -257,18 +257,6 @@ class ModuleConfig_SerialConfig_Serial_Mode extends $pb.ProtobufEnum {
   static const ModuleConfig_SerialConfig_Serial_Mode WS85 =
       ModuleConfig_SerialConfig_Serial_Mode._(6, _omitEnumNames ? '' : 'WS85');
 
-  /// VE.Direct is a serial protocol used by Victron Energy products
-  /// https://beta.ivc.no/wiki/index.php/Victron_VE_Direct_DIY_Cable
-  static const ModuleConfig_SerialConfig_Serial_Mode VE_DIRECT =
-      ModuleConfig_SerialConfig_Serial_Mode._(
-          7, _omitEnumNames ? '' : 'VE_DIRECT');
-
-  /// Used to configure and view some parameters of MeshSolar.
-  /// https://heltec.org/project/meshsolar/
-  static const ModuleConfig_SerialConfig_Serial_Mode MS_CONFIG =
-      ModuleConfig_SerialConfig_Serial_Mode._(
-          8, _omitEnumNames ? '' : 'MS_CONFIG');
-
   static const $core.List<ModuleConfig_SerialConfig_Serial_Mode> values =
       <ModuleConfig_SerialConfig_Serial_Mode>[
     DEFAULT,
@@ -278,12 +266,10 @@ class ModuleConfig_SerialConfig_Serial_Mode extends $pb.ProtobufEnum {
     NMEA,
     CALTOPO,
     WS85,
-    VE_DIRECT,
-    MS_CONFIG,
   ];
 
   static final $core.List<ModuleConfig_SerialConfig_Serial_Mode?> _byValue =
-      $pb.ProtobufEnum.$_initByValueList(values, 8);
+      $pb.ProtobufEnum.$_initByValueList(values, 6);
   static ModuleConfig_SerialConfig_Serial_Mode? valueOf($core.int value) =>
       value < 0 || value >= _byValue.length ? null : _byValue[value];
 

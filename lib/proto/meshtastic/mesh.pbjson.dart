@@ -107,27 +107,6 @@ const HardwareModel$json = {
     {'1': 'MESH_TAB', '2': 86},
     {'1': 'MESHLINK', '2': 87},
     {'1': 'XIAO_NRF52_KIT', '2': 88},
-    {'1': 'THINKNODE_M1', '2': 89},
-    {'1': 'THINKNODE_M2', '2': 90},
-    {'1': 'T_ETH_ELITE', '2': 91},
-    {'1': 'HELTEC_SENSOR_HUB', '2': 92},
-    {'1': 'RESERVED_FRIED_CHICKEN', '2': 93},
-    {'1': 'HELTEC_MESH_POCKET', '2': 94},
-    {'1': 'SEEED_SOLAR_NODE', '2': 95},
-    {'1': 'NOMADSTAR_METEOR_PRO', '2': 96},
-    {'1': 'CROWPANEL', '2': 97},
-    {'1': 'LINK_32', '2': 98},
-    {'1': 'SEEED_WIO_TRACKER_L1', '2': 99},
-    {'1': 'SEEED_WIO_TRACKER_L1_EINK', '2': 100},
-    {'1': 'QWANTZ_TINY_ARMS', '2': 101},
-    {'1': 'T_DECK_PRO', '2': 102},
-    {'1': 'T_LORA_PAGER', '2': 103},
-    {'1': 'GAT562_MESH_TRIAL_TRACKER', '2': 104},
-    {'1': 'WISMESH_TAG', '2': 105},
-    {'1': 'RAK3312', '2': 106},
-    {'1': 'THINKNODE_M5', '2': 107},
-    {'1': 'HELTEC_MESH_SOLAR', '2': 108},
-    {'1': 'T_ECHO_LITE', '2': 109},
     {'1': 'PRIVATE_HW', '2': 255},
   ],
 };
@@ -164,15 +143,7 @@ final $typed_data.Uint8List hardwareModelDescriptor = $convert.base64Decode(
     '01U1RBQ0tfQ09SRTIQThINCglSUElfUElDTzIQTxISCg5NNVNUQUNLX0NPUkVTMxBQEhEKDVNF'
     'RUVEX1hJQU9fUzMQURILCgdNUzI0U0YxEFISDAoIVExPUkFfQzYQUxIPCgtXSVNNRVNIX1RBUB'
     'BUEg0KCVJPVVRBU1RJQxBVEgwKCE1FU0hfVEFCEFYSDAoITUVTSExJTksQVxISCg5YSUFPX05S'
-    'RjUyX0tJVBBYEhAKDFRISU5LTk9ERV9NMRBZEhAKDFRISU5LTk9ERV9NMhBaEg8KC1RfRVRIX0'
-    'VMSVRFEFsSFQoRSEVMVEVDX1NFTlNPUl9IVUIQXBIaChZSRVNFUlZFRF9GUklFRF9DSElDS0VO'
-    'EF0SFgoSSEVMVEVDX01FU0hfUE9DS0VUEF4SFAoQU0VFRURfU09MQVJfTk9ERRBfEhgKFE5PTU'
-    'FEU1RBUl9NRVRFT1JfUFJPEGASDQoJQ1JPV1BBTkVMEGESCwoHTElOS18zMhBiEhgKFFNFRUVE'
-    'X1dJT19UUkFDS0VSX0wxEGMSHQoZU0VFRURfV0lPX1RSQUNLRVJfTDFfRUlOSxBkEhQKEFFXQU'
-    '5UWl9USU5ZX0FSTVMQZRIOCgpUX0RFQ0tfUFJPEGYSEAoMVF9MT1JBX1BBR0VSEGcSHQoZR0FU'
-    'NTYyX01FU0hfVFJJQUxfVFJBQ0tFUhBoEg8KC1dJU01FU0hfVEFHEGkSCwoHUkFLMzMxMhBqEh'
-    'AKDFRISU5LTk9ERV9NNRBrEhUKEUhFTFRFQ19NRVNIX1NPTEFSEGwSDwoLVF9FQ0hPX0xJVEUQ'
-    'bRIPCgpQUklWQVRFX0hXEP8B');
+    'RjUyX0tJVBBYEg8KClBSSVZBVEVfSFcQ/wE=');
 
 @$core.Deprecated('Use constantsDescriptor instead')
 const Constants$json = {
@@ -217,26 +188,6 @@ final $typed_data.Uint8List criticalErrorCodeDescriptor = $convert.base64Decode(
     'DVJBRElPX1NQSV9CVUcQCxIgChxGTEFTSF9DT1JSVVBUSU9OX1JFQ09WRVJBQkxFEAwSIgoeRk'
     'xBU0hfQ09SUlVQVElPTl9VTlJFQ09WRVJBQkxFEA0=');
 
-@$core.Deprecated('Use firmwareEditionDescriptor instead')
-const FirmwareEdition$json = {
-  '1': 'FirmwareEdition',
-  '2': [
-    {'1': 'VANILLA', '2': 0},
-    {'1': 'SMART_CITIZEN', '2': 1},
-    {'1': 'OPEN_SAUCE', '2': 16},
-    {'1': 'DEFCON', '2': 17},
-    {'1': 'BURNING_MAN', '2': 18},
-    {'1': 'HAMVENTION', '2': 19},
-    {'1': 'DIY_EDITION', '2': 127},
-  ],
-};
-
-/// Descriptor for `FirmwareEdition`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List firmwareEditionDescriptor = $convert.base64Decode(
-    'Cg9GaXJtd2FyZUVkaXRpb24SCwoHVkFOSUxMQRAAEhEKDVNNQVJUX0NJVElaRU4QARIOCgpPUE'
-    'VOX1NBVUNFEBASCgoGREVGQ09OEBESDwoLQlVSTklOR19NQU4QEhIOCgpIQU1WRU5USU9OEBMS'
-    'DwoLRElZX0VESVRJT04Qfw==');
-
 @$core.Deprecated('Use excludedModulesDescriptor instead')
 const ExcludedModules$json = {
   '1': 'ExcludedModules',
@@ -255,8 +206,6 @@ const ExcludedModules$json = {
     {'1': 'AMBIENTLIGHTING_CONFIG', '2': 1024},
     {'1': 'DETECTIONSENSOR_CONFIG', '2': 2048},
     {'1': 'PAXCOUNTER_CONFIG', '2': 4096},
-    {'1': 'BLUETOOTH_CONFIG', '2': 8192},
-    {'1': 'NETWORK_CONFIG', '2': 16384},
   ],
 };
 
@@ -268,7 +217,7 @@ final $typed_data.Uint8List excludedModulesDescriptor = $convert.base64Decode(
     'NBTk5FRE1TR19DT05GSUcQQBIRCgxBVURJT19DT05GSUcQgAESGgoVUkVNT1RFSEFSRFdBUkVf'
     'Q09ORklHEIACEhgKE05FSUdIQk9SSU5GT19DT05GSUcQgAQSGwoWQU1CSUVOVExJR0hUSU5HX0'
     'NPTkZJRxCACBIbChZERVRFQ1RJT05TRU5TT1JfQ09ORklHEIAQEhYKEVBBWENPVU5URVJfQ09O'
-    'RklHEIAgEhUKEEJMVUVUT09USF9DT05GSUcQgEASFAoOTkVUV09SS19DT05GSUcQgIAB');
+    'RklHEIAg');
 
 @$core.Deprecated('Use positionDescriptor instead')
 const Position$json = {
@@ -467,18 +416,6 @@ const User$json = {
       '10': 'role'
     },
     {'1': 'public_key', '3': 8, '4': 1, '5': 12, '10': 'publicKey'},
-    {
-      '1': 'is_unmessagable',
-      '3': 9,
-      '4': 1,
-      '5': 8,
-      '9': 0,
-      '10': 'isUnmessagable',
-      '17': true
-    },
-  ],
-  '8': [
-    {'1': '_is_unmessagable'},
   ],
 };
 
@@ -489,8 +426,7 @@ final $typed_data.Uint8List userDescriptor = $convert.base64Decode(
     'chI0Cghod19tb2RlbBgFIAEoDjIZLm1lc2h0YXN0aWMuSGFyZHdhcmVNb2RlbFIHaHdNb2RlbB'
     'IfCgtpc19saWNlbnNlZBgGIAEoCFIKaXNMaWNlbnNlZBI4CgRyb2xlGAcgASgOMiQubWVzaHRh'
     'c3RpYy5Db25maWcuRGV2aWNlQ29uZmlnLlJvbGVSBHJvbGUSHQoKcHVibGljX2tleRgIIAEoDF'
-    'IJcHVibGljS2V5EiwKD2lzX3VubWVzc2FnYWJsZRgJIAEoCEgAUg5pc1VubWVzc2FnYWJsZYgB'
-    'AUISChBfaXNfdW5tZXNzYWdhYmxl');
+    'IJcHVibGljS2V5');
 
 @$core.Deprecated('Use routeDiscoveryDescriptor instead')
 const RouteDiscovery$json = {
@@ -567,7 +503,6 @@ const Routing_Error$json = {
     {'1': 'PKI_UNKNOWN_PUBKEY', '2': 35},
     {'1': 'ADMIN_BAD_SESSION_KEY', '2': 36},
     {'1': 'ADMIN_PUBLIC_KEY_UNAUTHORIZED', '2': 37},
-    {'1': 'RATE_LIMIT_EXCEEDED', '2': 38},
   ],
 };
 
@@ -576,13 +511,13 @@ final $typed_data.Uint8List routingDescriptor = $convert.base64Decode(
     'CgdSb3V0aW5nEkEKDXJvdXRlX3JlcXVlc3QYASABKAsyGi5tZXNodGFzdGljLlJvdXRlRGlzY2'
     '92ZXJ5SABSDHJvdXRlUmVxdWVzdBI9Cgtyb3V0ZV9yZXBseRgCIAEoCzIaLm1lc2h0YXN0aWMu'
     'Um91dGVEaXNjb3ZlcnlIAFIKcm91dGVSZXBseRI+CgxlcnJvcl9yZWFzb24YAyABKA4yGS5tZX'
-    'NodGFzdGljLlJvdXRpbmcuRXJyb3JIAFILZXJyb3JSZWFzb24iyQIKBUVycm9yEggKBE5PTkUQ'
+    'NodGFzdGljLlJvdXRpbmcuRXJyb3JIAFILZXJyb3JSZWFzb24isAIKBUVycm9yEggKBE5PTkUQ'
     'ABIMCghOT19ST1VURRABEgsKB0dPVF9OQUsQAhILCgdUSU1FT1VUEAMSEAoMTk9fSU5URVJGQU'
     'NFEAQSEgoOTUFYX1JFVFJBTlNNSVQQBRIOCgpOT19DSEFOTkVMEAYSDQoJVE9PX0xBUkdFEAcS'
     'DwoLTk9fUkVTUE9OU0UQCBIUChBEVVRZX0NZQ0xFX0xJTUlUEAkSDwoLQkFEX1JFUVVFU1QQIB'
     'ISCg5OT1RfQVVUSE9SSVpFRBAhEg4KClBLSV9GQUlMRUQQIhIWChJQS0lfVU5LTk9XTl9QVUJL'
     'RVkQIxIZChVBRE1JTl9CQURfU0VTU0lPTl9LRVkQJBIhCh1BRE1JTl9QVUJMSUNfS0VZX1VOQV'
-    'VUSE9SSVpFRBAlEhcKE1JBVEVfTElNSVRfRVhDRUVERUQQJkIJCgd2YXJpYW50');
+    'VUSE9SSVpFRBAlQgkKB3ZhcmlhbnQ=');
 
 @$core.Deprecated('Use dataDescriptor instead')
 const Data$json = {
@@ -626,21 +561,6 @@ final $typed_data.Uint8List dataDescriptor = $convert.base64Decode(
     'F1ZXN0X2lkGAYgASgHUglyZXF1ZXN0SWQSGQoIcmVwbHlfaWQYByABKAdSB3JlcGx5SWQSFAoF'
     'ZW1vamkYCCABKAdSBWVtb2ppEh8KCGJpdGZpZWxkGAkgASgNSABSCGJpdGZpZWxkiAEBQgsKCV'
     '9iaXRmaWVsZA==');
-
-@$core.Deprecated('Use keyVerificationDescriptor instead')
-const KeyVerification$json = {
-  '1': 'KeyVerification',
-  '2': [
-    {'1': 'nonce', '3': 1, '4': 1, '5': 4, '10': 'nonce'},
-    {'1': 'hash1', '3': 2, '4': 1, '5': 12, '10': 'hash1'},
-    {'1': 'hash2', '3': 3, '4': 1, '5': 12, '10': 'hash2'},
-  ],
-};
-
-/// Descriptor for `KeyVerification`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List keyVerificationDescriptor = $convert.base64Decode(
-    'Cg9LZXlWZXJpZmljYXRpb24SFAoFbm9uY2UYASABKARSBW5vbmNlEhQKBWhhc2gxGAIgASgMUg'
-    'VoYXNoMRIUCgVoYXNoMhgDIAEoDFIFaGFzaDI=');
 
 @$core.Deprecated('Use waypointDescriptor instead')
 const Waypoint$json = {
@@ -752,20 +672,8 @@ const MeshPacket$json = {
     {'1': 'next_hop', '3': 18, '4': 1, '5': 13, '10': 'nextHop'},
     {'1': 'relay_node', '3': 19, '4': 1, '5': 13, '10': 'relayNode'},
     {'1': 'tx_after', '3': 20, '4': 1, '5': 13, '10': 'txAfter'},
-    {
-      '1': 'transport_mechanism',
-      '3': 21,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.MeshPacket.TransportMechanism',
-      '10': 'transportMechanism'
-    },
   ],
-  '4': [
-    MeshPacket_Priority$json,
-    MeshPacket_Delayed$json,
-    MeshPacket_TransportMechanism$json
-  ],
+  '4': [MeshPacket_Priority$json, MeshPacket_Delayed$json],
   '8': [
     {'1': 'payload_variant'},
   ],
@@ -798,21 +706,6 @@ const MeshPacket_Delayed$json = {
   ],
 };
 
-@$core.Deprecated('Use meshPacketDescriptor instead')
-const MeshPacket_TransportMechanism$json = {
-  '1': 'TransportMechanism',
-  '2': [
-    {'1': 'TRANSPORT_INTERNAL', '2': 0},
-    {'1': 'TRANSPORT_LORA', '2': 1},
-    {'1': 'TRANSPORT_LORA_ALT1', '2': 2},
-    {'1': 'TRANSPORT_LORA_ALT2', '2': 3},
-    {'1': 'TRANSPORT_LORA_ALT3', '2': 4},
-    {'1': 'TRANSPORT_MQTT', '2': 5},
-    {'1': 'TRANSPORT_MULTICAST_UDP', '2': 6},
-    {'1': 'TRANSPORT_API', '2': 7},
-  ],
-};
-
 /// Descriptor for `MeshPacket`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List meshPacketDescriptor = $convert.base64Decode(
     'CgpNZXNoUGFja2V0EhIKBGZyb20YASABKAdSBGZyb20SDgoCdG8YAiABKAdSAnRvEhgKB2NoYW'
@@ -826,16 +719,11 @@ final $typed_data.Uint8List meshPacketDescriptor = $convert.base64Decode(
     'cXR0EhsKCWhvcF9zdGFydBgPIAEoDVIIaG9wU3RhcnQSHQoKcHVibGljX2tleRgQIAEoDFIJcH'
     'VibGljS2V5EiMKDXBraV9lbmNyeXB0ZWQYESABKAhSDHBraUVuY3J5cHRlZBIZCghuZXh0X2hv'
     'cBgSIAEoDVIHbmV4dEhvcBIdCgpyZWxheV9ub2RlGBMgASgNUglyZWxheU5vZGUSGQoIdHhfYW'
-    'Z0ZXIYFCABKA1SB3R4QWZ0ZXISWgoTdHJhbnNwb3J0X21lY2hhbmlzbRgVIAEoDjIpLm1lc2h0'
-    'YXN0aWMuTWVzaFBhY2tldC5UcmFuc3BvcnRNZWNoYW5pc21SEnRyYW5zcG9ydE1lY2hhbmlzbS'
-    'J+CghQcmlvcml0eRIJCgVVTlNFVBAAEgcKA01JThABEg4KCkJBQ0tHUk9VTkQQChILCgdERUZB'
-    'VUxUEEASDAoIUkVMSUFCTEUQRhIMCghSRVNQT05TRRBQEggKBEhJR0gQZBIJCgVBTEVSVBBuEg'
-    'cKA0FDSxB4EgcKA01BWBB/IkIKB0RlbGF5ZWQSDAoITk9fREVMQVkQABIVChFERUxBWUVEX0JS'
-    'T0FEQ0FTVBABEhIKDkRFTEFZRURfRElSRUNUEAIizwEKElRyYW5zcG9ydE1lY2hhbmlzbRIWCh'
-    'JUUkFOU1BPUlRfSU5URVJOQUwQABISCg5UUkFOU1BPUlRfTE9SQRABEhcKE1RSQU5TUE9SVF9M'
-    'T1JBX0FMVDEQAhIXChNUUkFOU1BPUlRfTE9SQV9BTFQyEAMSFwoTVFJBTlNQT1JUX0xPUkFfQU'
-    'xUMxAEEhIKDlRSQU5TUE9SVF9NUVRUEAUSGwoXVFJBTlNQT1JUX01VTFRJQ0FTVF9VRFAQBhIR'
-    'Cg1UUkFOU1BPUlRfQVBJEAdCEQoPcGF5bG9hZF92YXJpYW50');
+    'Z0ZXIYFCABKA1SB3R4QWZ0ZXIifgoIUHJpb3JpdHkSCQoFVU5TRVQQABIHCgNNSU4QARIOCgpC'
+    'QUNLR1JPVU5EEAoSCwoHREVGQVVMVBBAEgwKCFJFTElBQkxFEEYSDAoIUkVTUE9OU0UQUBIICg'
+    'RISUdIEGQSCQoFQUxFUlQQbhIHCgNBQ0sQeBIHCgNNQVgQfyJCCgdEZWxheWVkEgwKCE5PX0RF'
+    'TEFZEAASFQoRREVMQVlFRF9CUk9BRENBU1QQARISCg5ERUxBWUVEX0RJUkVDVBACQhEKD3BheW'
+    'xvYWRfdmFyaWFudA==');
 
 @$core.Deprecated('Use nodeInfoDescriptor instead')
 const NodeInfo$json = {
@@ -881,13 +769,6 @@ const NodeInfo$json = {
     },
     {'1': 'is_favorite', '3': 10, '4': 1, '5': 8, '10': 'isFavorite'},
     {'1': 'is_ignored', '3': 11, '4': 1, '5': 8, '10': 'isIgnored'},
-    {
-      '1': 'is_key_manually_verified',
-      '3': 12,
-      '4': 1,
-      '5': 8,
-      '10': 'isKeyManuallyVerified'
-    },
   ],
   '8': [
     {'1': '_hops_away'},
@@ -902,9 +783,8 @@ final $typed_data.Uint8List nodeInfoDescriptor = $convert.base64Decode(
     'AKDmRldmljZV9tZXRyaWNzGAYgASgLMhkubWVzaHRhc3RpYy5EZXZpY2VNZXRyaWNzUg1kZXZp'
     'Y2VNZXRyaWNzEhgKB2NoYW5uZWwYByABKA1SB2NoYW5uZWwSGQoIdmlhX21xdHQYCCABKAhSB3'
     'ZpYU1xdHQSIAoJaG9wc19hd2F5GAkgASgNSABSCGhvcHNBd2F5iAEBEh8KC2lzX2Zhdm9yaXRl'
-    'GAogASgIUgppc0Zhdm9yaXRlEh0KCmlzX2lnbm9yZWQYCyABKAhSCWlzSWdub3JlZBI3Chhpc1'
-    '9rZXlfbWFudWFsbHlfdmVyaWZpZWQYDCABKAhSFWlzS2V5TWFudWFsbHlWZXJpZmllZEIMCgpf'
-    'aG9wc19hd2F5');
+    'GAogASgIUgppc0Zhdm9yaXRlEh0KCmlzX2lnbm9yZWQYCyABKAhSCWlzSWdub3JlZEIMCgpfaG'
+    '9wc19hd2F5');
 
 @$core.Deprecated('Use myNodeInfoDescriptor instead')
 const MyNodeInfo$json = {
@@ -915,15 +795,6 @@ const MyNodeInfo$json = {
     {'1': 'min_app_version', '3': 11, '4': 1, '5': 13, '10': 'minAppVersion'},
     {'1': 'device_id', '3': 12, '4': 1, '5': 12, '10': 'deviceId'},
     {'1': 'pio_env', '3': 13, '4': 1, '5': 9, '10': 'pioEnv'},
-    {
-      '1': 'firmware_edition',
-      '3': 14,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.FirmwareEdition',
-      '10': 'firmwareEdition'
-    },
-    {'1': 'nodedb_count', '3': 15, '4': 1, '5': 13, '10': 'nodedbCount'},
   ],
 };
 
@@ -932,9 +803,7 @@ final $typed_data.Uint8List myNodeInfoDescriptor = $convert.base64Decode(
     'CgpNeU5vZGVJbmZvEh4KC215X25vZGVfbnVtGAEgASgNUglteU5vZGVOdW0SIQoMcmVib290X2'
     'NvdW50GAggASgNUgtyZWJvb3RDb3VudBImCg9taW5fYXBwX3ZlcnNpb24YCyABKA1SDW1pbkFw'
     'cFZlcnNpb24SGwoJZGV2aWNlX2lkGAwgASgMUghkZXZpY2VJZBIXCgdwaW9fZW52GA0gASgJUg'
-    'ZwaW9FbnYSRgoQZmlybXdhcmVfZWRpdGlvbhgOIAEoDjIbLm1lc2h0YXN0aWMuRmlybXdhcmVF'
-    'ZGl0aW9uUg9maXJtd2FyZUVkaXRpb24SIQoMbm9kZWRiX2NvdW50GA8gASgNUgtub2RlZGJDb3'
-    'VudA==');
+    'ZwaW9FbnY=');
 
 @$core.Deprecated('Use logRecordDescriptor instead')
 const LogRecord$json = {
@@ -1169,7 +1038,7 @@ const ClientNotification$json = {
       '3': 1,
       '4': 1,
       '5': 13,
-      '9': 1,
+      '9': 0,
       '10': 'replyId',
       '17': true
     },
@@ -1183,146 +1052,17 @@ const ClientNotification$json = {
       '10': 'level'
     },
     {'1': 'message', '3': 4, '4': 1, '5': 9, '10': 'message'},
-    {
-      '1': 'key_verification_number_inform',
-      '3': 11,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.KeyVerificationNumberInform',
-      '9': 0,
-      '10': 'keyVerificationNumberInform'
-    },
-    {
-      '1': 'key_verification_number_request',
-      '3': 12,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.KeyVerificationNumberRequest',
-      '9': 0,
-      '10': 'keyVerificationNumberRequest'
-    },
-    {
-      '1': 'key_verification_final',
-      '3': 13,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.KeyVerificationFinal',
-      '9': 0,
-      '10': 'keyVerificationFinal'
-    },
-    {
-      '1': 'duplicated_public_key',
-      '3': 14,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.DuplicatedPublicKey',
-      '9': 0,
-      '10': 'duplicatedPublicKey'
-    },
-    {
-      '1': 'low_entropy_key',
-      '3': 15,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.LowEntropyKey',
-      '9': 0,
-      '10': 'lowEntropyKey'
-    },
   ],
   '8': [
-    {'1': 'payload_variant'},
     {'1': '_reply_id'},
   ],
 };
 
 /// Descriptor for `ClientNotification`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List clientNotificationDescriptor = $convert.base64Decode(
-    'ChJDbGllbnROb3RpZmljYXRpb24SHgoIcmVwbHlfaWQYASABKA1IAVIHcmVwbHlJZIgBARISCg'
+    'ChJDbGllbnROb3RpZmljYXRpb24SHgoIcmVwbHlfaWQYASABKA1IAFIHcmVwbHlJZIgBARISCg'
     'R0aW1lGAIgASgHUgR0aW1lEjEKBWxldmVsGAMgASgOMhsubWVzaHRhc3RpYy5Mb2dSZWNvcmQu'
-    'TGV2ZWxSBWxldmVsEhgKB21lc3NhZ2UYBCABKAlSB21lc3NhZ2USbgoea2V5X3ZlcmlmaWNhdG'
-    'lvbl9udW1iZXJfaW5mb3JtGAsgASgLMicubWVzaHRhc3RpYy5LZXlWZXJpZmljYXRpb25OdW1i'
-    'ZXJJbmZvcm1IAFIba2V5VmVyaWZpY2F0aW9uTnVtYmVySW5mb3JtEnEKH2tleV92ZXJpZmljYX'
-    'Rpb25fbnVtYmVyX3JlcXVlc3QYDCABKAsyKC5tZXNodGFzdGljLktleVZlcmlmaWNhdGlvbk51'
-    'bWJlclJlcXVlc3RIAFIca2V5VmVyaWZpY2F0aW9uTnVtYmVyUmVxdWVzdBJYChZrZXlfdmVyaW'
-    'ZpY2F0aW9uX2ZpbmFsGA0gASgLMiAubWVzaHRhc3RpYy5LZXlWZXJpZmljYXRpb25GaW5hbEgA'
-    'UhRrZXlWZXJpZmljYXRpb25GaW5hbBJVChVkdXBsaWNhdGVkX3B1YmxpY19rZXkYDiABKAsyHy'
-    '5tZXNodGFzdGljLkR1cGxpY2F0ZWRQdWJsaWNLZXlIAFITZHVwbGljYXRlZFB1YmxpY0tleRJD'
-    'Cg9sb3dfZW50cm9weV9rZXkYDyABKAsyGS5tZXNodGFzdGljLkxvd0VudHJvcHlLZXlIAFINbG'
-    '93RW50cm9weUtleUIRCg9wYXlsb2FkX3ZhcmlhbnRCCwoJX3JlcGx5X2lk');
-
-@$core.Deprecated('Use keyVerificationNumberInformDescriptor instead')
-const KeyVerificationNumberInform$json = {
-  '1': 'KeyVerificationNumberInform',
-  '2': [
-    {'1': 'nonce', '3': 1, '4': 1, '5': 4, '10': 'nonce'},
-    {'1': 'remote_longname', '3': 2, '4': 1, '5': 9, '10': 'remoteLongname'},
-    {'1': 'security_number', '3': 3, '4': 1, '5': 13, '10': 'securityNumber'},
-  ],
-};
-
-/// Descriptor for `KeyVerificationNumberInform`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List keyVerificationNumberInformDescriptor =
-    $convert.base64Decode(
-        'ChtLZXlWZXJpZmljYXRpb25OdW1iZXJJbmZvcm0SFAoFbm9uY2UYASABKARSBW5vbmNlEicKD3'
-        'JlbW90ZV9sb25nbmFtZRgCIAEoCVIOcmVtb3RlTG9uZ25hbWUSJwoPc2VjdXJpdHlfbnVtYmVy'
-        'GAMgASgNUg5zZWN1cml0eU51bWJlcg==');
-
-@$core.Deprecated('Use keyVerificationNumberRequestDescriptor instead')
-const KeyVerificationNumberRequest$json = {
-  '1': 'KeyVerificationNumberRequest',
-  '2': [
-    {'1': 'nonce', '3': 1, '4': 1, '5': 4, '10': 'nonce'},
-    {'1': 'remote_longname', '3': 2, '4': 1, '5': 9, '10': 'remoteLongname'},
-  ],
-};
-
-/// Descriptor for `KeyVerificationNumberRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List keyVerificationNumberRequestDescriptor =
-    $convert.base64Decode(
-        'ChxLZXlWZXJpZmljYXRpb25OdW1iZXJSZXF1ZXN0EhQKBW5vbmNlGAEgASgEUgVub25jZRInCg'
-        '9yZW1vdGVfbG9uZ25hbWUYAiABKAlSDnJlbW90ZUxvbmduYW1l');
-
-@$core.Deprecated('Use keyVerificationFinalDescriptor instead')
-const KeyVerificationFinal$json = {
-  '1': 'KeyVerificationFinal',
-  '2': [
-    {'1': 'nonce', '3': 1, '4': 1, '5': 4, '10': 'nonce'},
-    {'1': 'remote_longname', '3': 2, '4': 1, '5': 9, '10': 'remoteLongname'},
-    {'1': 'isSender', '3': 3, '4': 1, '5': 8, '10': 'isSender'},
-    {
-      '1': 'verification_characters',
-      '3': 4,
-      '4': 1,
-      '5': 9,
-      '10': 'verificationCharacters'
-    },
-  ],
-};
-
-/// Descriptor for `KeyVerificationFinal`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List keyVerificationFinalDescriptor = $convert.base64Decode(
-    'ChRLZXlWZXJpZmljYXRpb25GaW5hbBIUCgVub25jZRgBIAEoBFIFbm9uY2USJwoPcmVtb3RlX2'
-    'xvbmduYW1lGAIgASgJUg5yZW1vdGVMb25nbmFtZRIaCghpc1NlbmRlchgDIAEoCFIIaXNTZW5k'
-    'ZXISNwoXdmVyaWZpY2F0aW9uX2NoYXJhY3RlcnMYBCABKAlSFnZlcmlmaWNhdGlvbkNoYXJhY3'
-    'RlcnM=');
-
-@$core.Deprecated('Use duplicatedPublicKeyDescriptor instead')
-const DuplicatedPublicKey$json = {
-  '1': 'DuplicatedPublicKey',
-};
-
-/// Descriptor for `DuplicatedPublicKey`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List duplicatedPublicKeyDescriptor =
-    $convert.base64Decode('ChNEdXBsaWNhdGVkUHVibGljS2V5');
-
-@$core.Deprecated('Use lowEntropyKeyDescriptor instead')
-const LowEntropyKey$json = {
-  '1': 'LowEntropyKey',
-};
-
-/// Descriptor for `LowEntropyKey`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List lowEntropyKeyDescriptor =
-    $convert.base64Decode('Cg1Mb3dFbnRyb3B5S2V5');
+    'TGV2ZWxSBWxldmVsEhgKB21lc3NhZ2UYBCABKAlSB21lc3NhZ2VCCwoJX3JlcGx5X2lk');
 
 @$core.Deprecated('Use fileInfoDescriptor instead')
 const FileInfo$json = {
@@ -1545,14 +1285,11 @@ final $typed_data.Uint8List deviceMetadataDescriptor = $convert.base64Decode(
 @$core.Deprecated('Use heartbeatDescriptor instead')
 const Heartbeat$json = {
   '1': 'Heartbeat',
-  '2': [
-    {'1': 'nonce', '3': 1, '4': 1, '5': 13, '10': 'nonce'},
-  ],
 };
 
 /// Descriptor for `Heartbeat`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List heartbeatDescriptor =
-    $convert.base64Decode('CglIZWFydGJlYXQSFAoFbm9uY2UYASABKA1SBW5vbmNl');
+    $convert.base64Decode('CglIZWFydGJlYXQ=');
 
 @$core.Deprecated('Use nodeRemoteHardwarePinDescriptor instead')
 const NodeRemoteHardwarePin$json = {

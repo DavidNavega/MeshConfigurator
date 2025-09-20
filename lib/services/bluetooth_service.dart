@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -93,7 +95,9 @@ class BluetoothService {
         if (fr.hasChannel()) {
           final c = fr.channel;
           if (c.hasIndex()) cfgOut.channelIndex = c.index;
-          if (c.hasSettings() && c.settings.hasPsk()) cfgOut.key = c.settings.psk;
+          if (c.hasSettings() && c.settings.hasPsk()) {
+            cfgOut.key = Uint8List.fromList(c.settings.psk);
+          }
         }
         if (fr.hasModuleConfig() && fr.moduleConfig.hasSerial()) {
           final s = fr.moduleConfig.serial;

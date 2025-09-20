@@ -37,7 +37,6 @@ class Config_DeviceConfig extends $pb.GeneratedMessage {
     $core.bool? disableTripleClick,
     $core.String? tzdef,
     $core.bool? ledHeartbeatDisabled,
-    Config_DeviceConfig_BuzzerMode? buzzerMode,
   }) {
     final result = create();
     if (role != null) result.role = role;
@@ -55,7 +54,6 @@ class Config_DeviceConfig extends $pb.GeneratedMessage {
     if (tzdef != null) result.tzdef = tzdef;
     if (ledHeartbeatDisabled != null)
       result.ledHeartbeatDisabled = ledHeartbeatDisabled;
-    if (buzzerMode != null) result.buzzerMode = buzzerMode;
     return result;
   }
 
@@ -92,11 +90,6 @@ class Config_DeviceConfig extends $pb.GeneratedMessage {
     ..aOB(10, _omitFieldNames ? '' : 'disableTripleClick')
     ..aOS(11, _omitFieldNames ? '' : 'tzdef')
     ..aOB(12, _omitFieldNames ? '' : 'ledHeartbeatDisabled')
-    ..e<Config_DeviceConfig_BuzzerMode>(
-        13, _omitFieldNames ? '' : 'buzzerMode', $pb.PbFieldType.OE,
-        defaultOrMaker: Config_DeviceConfig_BuzzerMode.ALL_ENABLED,
-        valueOf: Config_DeviceConfig_BuzzerMode.valueOf,
-        enumValues: Config_DeviceConfig_BuzzerMode.values)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -255,18 +248,6 @@ class Config_DeviceConfig extends $pb.GeneratedMessage {
   $core.bool hasLedHeartbeatDisabled() => $_has(10);
   @$pb.TagNumber(12)
   void clearLedHeartbeatDisabled() => $_clearField(12);
-
-  ///
-  ///  Controls buzzer behavior for audio feedback
-  ///  Defaults to ENABLED
-  @$pb.TagNumber(13)
-  Config_DeviceConfig_BuzzerMode get buzzerMode => $_getN(11);
-  @$pb.TagNumber(13)
-  set buzzerMode(Config_DeviceConfig_BuzzerMode value) => $_setField(13, value);
-  @$pb.TagNumber(13)
-  $core.bool hasBuzzerMode() => $_has(11);
-  @$pb.TagNumber(13)
-  void clearBuzzerMode() => $_clearField(13);
 }
 
 ///
@@ -845,7 +826,6 @@ class Config_NetworkConfig extends $pb.GeneratedMessage {
     Config_NetworkConfig_IpV4Config? ipv4Config,
     $core.String? rsyslogServer,
     $core.int? enabledProtocols,
-    $core.bool? ipv6Enabled,
   }) {
     final result = create();
     if (wifiEnabled != null) result.wifiEnabled = wifiEnabled;
@@ -857,7 +837,6 @@ class Config_NetworkConfig extends $pb.GeneratedMessage {
     if (ipv4Config != null) result.ipv4Config = ipv4Config;
     if (rsyslogServer != null) result.rsyslogServer = rsyslogServer;
     if (enabledProtocols != null) result.enabledProtocols = enabledProtocols;
-    if (ipv6Enabled != null) result.ipv6Enabled = ipv6Enabled;
     return result;
   }
 
@@ -890,7 +869,6 @@ class Config_NetworkConfig extends $pb.GeneratedMessage {
     ..aOS(9, _omitFieldNames ? '' : 'rsyslogServer')
     ..a<$core.int>(
         10, _omitFieldNames ? '' : 'enabledProtocols', $pb.PbFieldType.OU3)
-    ..aOB(11, _omitFieldNames ? '' : 'ipv6Enabled')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -950,7 +928,7 @@ class Config_NetworkConfig extends $pb.GeneratedMessage {
   void clearWifiPsk() => $_clearField(4);
 
   ///
-  ///  NTP server to use if WiFi is conneced, defaults to `meshtastic.pool.ntp.org`
+  ///  NTP server to use if WiFi is conneced, defaults to `0.pool.ntp.org`
   @$pb.TagNumber(5)
   $core.String get ntpServer => $_getSZ(3);
   @$pb.TagNumber(5)
@@ -1017,17 +995,6 @@ class Config_NetworkConfig extends $pb.GeneratedMessage {
   $core.bool hasEnabledProtocols() => $_has(8);
   @$pb.TagNumber(10)
   void clearEnabledProtocols() => $_clearField(10);
-
-  ///
-  ///  Enable/Disable ipv6 support
-  @$pb.TagNumber(11)
-  $core.bool get ipv6Enabled => $_getBF(9);
-  @$pb.TagNumber(11)
-  set ipv6Enabled($core.bool value) => $_setBool(9, value);
-  @$pb.TagNumber(11)
-  $core.bool hasIpv6Enabled() => $_has(9);
-  @$pb.TagNumber(11)
-  void clearIpv6Enabled() => $_clearField(11);
 }
 
 ///
@@ -1035,10 +1002,9 @@ class Config_NetworkConfig extends $pb.GeneratedMessage {
 class Config_DisplayConfig extends $pb.GeneratedMessage {
   factory Config_DisplayConfig({
     $core.int? screenOnSecs,
-    @$core.Deprecated('This field is deprecated.')
     Config_DisplayConfig_GpsCoordinateFormat? gpsFormat,
     $core.int? autoScreenCarouselSecs,
-    @$core.Deprecated('This field is deprecated.') $core.bool? compassNorthTop,
+    $core.bool? compassNorthTop,
     $core.bool? flipScreen,
     Config_DisplayConfig_DisplayUnits? units,
     Config_DisplayConfig_OledType? oled,
@@ -1150,19 +1116,14 @@ class Config_DisplayConfig extends $pb.GeneratedMessage {
   void clearScreenOnSecs() => $_clearField(1);
 
   ///
-  ///  Deprecated in 2.7.4: Unused
   ///  How the GPS coordinates are formatted on the OLED screen.
-  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(2)
   Config_DisplayConfig_GpsCoordinateFormat get gpsFormat => $_getN(1);
-  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(2)
   set gpsFormat(Config_DisplayConfig_GpsCoordinateFormat value) =>
       $_setField(2, value);
-  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(2)
   $core.bool hasGpsFormat() => $_has(1);
-  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(2)
   void clearGpsFormat() => $_clearField(2);
 
@@ -1181,16 +1142,12 @@ class Config_DisplayConfig extends $pb.GeneratedMessage {
   ///
   ///  If this is set, the displayed compass will always point north. if unset, the old behaviour
   ///  (top of display is heading direction) is used.
-  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(4)
   $core.bool get compassNorthTop => $_getBF(3);
-  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(4)
   set compassNorthTop($core.bool value) => $_setBool(3, value);
-  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(4)
   $core.bool hasCompassNorthTop() => $_has(3);
-  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(4)
   void clearCompassNorthTop() => $_clearField(4);
 

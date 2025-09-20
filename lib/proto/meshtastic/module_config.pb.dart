@@ -245,14 +245,11 @@ class ModuleConfig_MapReportSettings extends $pb.GeneratedMessage {
   factory ModuleConfig_MapReportSettings({
     $core.int? publishIntervalSecs,
     $core.int? positionPrecision,
-    $core.bool? shouldReportLocation,
   }) {
     final result = create();
     if (publishIntervalSecs != null)
       result.publishIntervalSecs = publishIntervalSecs;
     if (positionPrecision != null) result.positionPrecision = positionPrecision;
-    if (shouldReportLocation != null)
-      result.shouldReportLocation = shouldReportLocation;
     return result;
   }
 
@@ -273,7 +270,6 @@ class ModuleConfig_MapReportSettings extends $pb.GeneratedMessage {
         1, _omitFieldNames ? '' : 'publishIntervalSecs', $pb.PbFieldType.OU3)
     ..a<$core.int>(
         2, _omitFieldNames ? '' : 'positionPrecision', $pb.PbFieldType.OU3)
-    ..aOB(3, _omitFieldNames ? '' : 'shouldReportLocation')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -322,17 +318,6 @@ class ModuleConfig_MapReportSettings extends $pb.GeneratedMessage {
   $core.bool hasPositionPrecision() => $_has(1);
   @$pb.TagNumber(2)
   void clearPositionPrecision() => $_clearField(2);
-
-  ///
-  ///  Whether we have opted-in to report our location to the map
-  @$pb.TagNumber(3)
-  $core.bool get shouldReportLocation => $_getBF(2);
-  @$pb.TagNumber(3)
-  set shouldReportLocation($core.bool value) => $_setBool(2, value);
-  @$pb.TagNumber(3)
-  $core.bool hasShouldReportLocation() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearShouldReportLocation() => $_clearField(3);
 }
 
 ///
@@ -1909,8 +1894,7 @@ class ModuleConfig_CannedMessageConfig extends $pb.GeneratedMessage {
     ModuleConfig_CannedMessageConfig_InputEventChar? inputbrokerEventCcw,
     ModuleConfig_CannedMessageConfig_InputEventChar? inputbrokerEventPress,
     $core.bool? updown1Enabled,
-    @$core.Deprecated('This field is deprecated.') $core.bool? enabled,
-    @$core.Deprecated('This field is deprecated.')
+    $core.bool? enabled,
     $core.String? allowInputSource,
     $core.bool? sendBell,
   }) {
@@ -2100,32 +2084,24 @@ class ModuleConfig_CannedMessageConfig extends $pb.GeneratedMessage {
 
   ///
   ///  Enable/disable CannedMessageModule.
-  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(9)
   $core.bool get enabled => $_getBF(8);
-  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(9)
   set enabled($core.bool value) => $_setBool(8, value);
-  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(9)
   $core.bool hasEnabled() => $_has(8);
-  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(9)
   void clearEnabled() => $_clearField(9);
 
   ///
   ///  Input event origin accepted by the canned message module.
   ///  Can be e.g. "rotEnc1", "upDownEnc1", "scanAndSelect", "cardkb", "serialkb", or keyword "_any"
-  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(10)
   $core.String get allowInputSource => $_getSZ(9);
-  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(10)
   set allowInputSource($core.String value) => $_setString(9, value);
-  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(10)
   $core.bool hasAllowInputSource() => $_has(9);
-  @$core.Deprecated('This field is deprecated.')
   @$pb.TagNumber(10)
   void clearAllowInputSource() => $_clearField(10);
 

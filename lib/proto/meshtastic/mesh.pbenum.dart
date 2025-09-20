@@ -488,111 +488,6 @@ class HardwareModel extends $pb.ProtobufEnum {
       HardwareModel._(88, _omitEnumNames ? '' : 'XIAO_NRF52_KIT');
 
   ///
-  ///  Elecrow ThinkNode M1 & M2
-  ///  https://www.elecrow.com/wiki/ThinkNode-M1_Transceiver_Device(Meshtastic)_Power_By_nRF52840.html
-  ///  https://www.elecrow.com/wiki/ThinkNode-M2_Transceiver_Device(Meshtastic)_Power_By_NRF52840.html (this actually uses ESP32-S3)
-  static const HardwareModel THINKNODE_M1 =
-      HardwareModel._(89, _omitEnumNames ? '' : 'THINKNODE_M1');
-  static const HardwareModel THINKNODE_M2 =
-      HardwareModel._(90, _omitEnumNames ? '' : 'THINKNODE_M2');
-
-  ///
-  ///  Lilygo T-ETH-Elite
-  static const HardwareModel T_ETH_ELITE =
-      HardwareModel._(91, _omitEnumNames ? '' : 'T_ETH_ELITE');
-
-  ///
-  ///  Heltec HRI-3621 industrial probe
-  static const HardwareModel HELTEC_SENSOR_HUB =
-      HardwareModel._(92, _omitEnumNames ? '' : 'HELTEC_SENSOR_HUB');
-
-  ///
-  ///  Reserved Fried Chicken ID for future use
-  static const HardwareModel RESERVED_FRIED_CHICKEN =
-      HardwareModel._(93, _omitEnumNames ? '' : 'RESERVED_FRIED_CHICKEN');
-
-  ///
-  ///  Heltec Magnetic Power Bank with Meshtastic compatible
-  static const HardwareModel HELTEC_MESH_POCKET =
-      HardwareModel._(94, _omitEnumNames ? '' : 'HELTEC_MESH_POCKET');
-
-  ///
-  ///  Seeed Solar Node
-  static const HardwareModel SEEED_SOLAR_NODE =
-      HardwareModel._(95, _omitEnumNames ? '' : 'SEEED_SOLAR_NODE');
-
-  ///
-  ///  NomadStar Meteor Pro https://nomadstar.ch/
-  static const HardwareModel NOMADSTAR_METEOR_PRO =
-      HardwareModel._(96, _omitEnumNames ? '' : 'NOMADSTAR_METEOR_PRO');
-
-  ///
-  ///  Elecrow CrowPanel Advance models, ESP32-S3 and TFT with SX1262 radio plugin
-  static const HardwareModel CROWPANEL =
-      HardwareModel._(97, _omitEnumNames ? '' : 'CROWPANEL');
-
-  ///
-  ///  Lilygo LINK32 board with sensors
-  static const HardwareModel LINK_32 =
-      HardwareModel._(98, _omitEnumNames ? '' : 'LINK_32');
-
-  ///
-  ///  Seeed Tracker L1
-  static const HardwareModel SEEED_WIO_TRACKER_L1 =
-      HardwareModel._(99, _omitEnumNames ? '' : 'SEEED_WIO_TRACKER_L1');
-
-  ///
-  ///  Seeed Tracker L1 EINK driver
-  static const HardwareModel SEEED_WIO_TRACKER_L1_EINK =
-      HardwareModel._(100, _omitEnumNames ? '' : 'SEEED_WIO_TRACKER_L1_EINK');
-
-  ///
-  ///  Reserved ID for future and past use
-  static const HardwareModel QWANTZ_TINY_ARMS =
-      HardwareModel._(101, _omitEnumNames ? '' : 'QWANTZ_TINY_ARMS');
-
-  ///
-  ///  Lilygo T-Deck Pro
-  static const HardwareModel T_DECK_PRO =
-      HardwareModel._(102, _omitEnumNames ? '' : 'T_DECK_PRO');
-
-  ///
-  ///  Lilygo TLora Pager
-  static const HardwareModel T_LORA_PAGER =
-      HardwareModel._(103, _omitEnumNames ? '' : 'T_LORA_PAGER');
-
-  ///
-  ///  GAT562 Mesh Trial Tracker
-  static const HardwareModel GAT562_MESH_TRIAL_TRACKER =
-      HardwareModel._(104, _omitEnumNames ? '' : 'GAT562_MESH_TRIAL_TRACKER');
-
-  ///
-  ///  RAKwireless WisMesh Tag
-  static const HardwareModel WISMESH_TAG =
-      HardwareModel._(105, _omitEnumNames ? '' : 'WISMESH_TAG');
-
-  ///
-  ///  RAKwireless WisBlock Core RAK3312 https://docs.rakwireless.com/product-categories/wisduo/rak3112-module/overview/
-  static const HardwareModel RAK3312 =
-      HardwareModel._(106, _omitEnumNames ? '' : 'RAK3312');
-
-  ///
-  ///  Elecrow ThinkNode M5 https://www.elecrow.com/wiki/ThinkNode_M5_Meshtastic_LoRa_Signal_Transceiver_ESP32-S3.html
-  static const HardwareModel THINKNODE_M5 =
-      HardwareModel._(107, _omitEnumNames ? '' : 'THINKNODE_M5');
-
-  ///
-  ///  MeshSolar is an integrated power management and communication solution designed for outdoor low-power devices.
-  ///  https://heltec.org/project/meshsolar/
-  static const HardwareModel HELTEC_MESH_SOLAR =
-      HardwareModel._(108, _omitEnumNames ? '' : 'HELTEC_MESH_SOLAR');
-
-  ///
-  ///  Lilygo T-Echo Lite
-  static const HardwareModel T_ECHO_LITE =
-      HardwareModel._(109, _omitEnumNames ? '' : 'T_ECHO_LITE');
-
-  ///
   ///  ------------------------------------------------------------------------------------------------------------------------------------------
   ///  Reserved ID For developing private Ports. These will show up in live traffic sparsely, so we can use a high number. Keep it within 8 bits.
   ///  ------------------------------------------------------------------------------------------------------------------------------------------
@@ -689,27 +584,6 @@ class HardwareModel extends $pb.ProtobufEnum {
     MESH_TAB,
     MESHLINK,
     XIAO_NRF52_KIT,
-    THINKNODE_M1,
-    THINKNODE_M2,
-    T_ETH_ELITE,
-    HELTEC_SENSOR_HUB,
-    RESERVED_FRIED_CHICKEN,
-    HELTEC_MESH_POCKET,
-    SEEED_SOLAR_NODE,
-    NOMADSTAR_METEOR_PRO,
-    CROWPANEL,
-    LINK_32,
-    SEEED_WIO_TRACKER_L1,
-    SEEED_WIO_TRACKER_L1_EINK,
-    QWANTZ_TINY_ARMS,
-    T_DECK_PRO,
-    T_LORA_PAGER,
-    GAT562_MESH_TRIAL_TRACKER,
-    WISMESH_TAG,
-    RAK3312,
-    THINKNODE_M5,
-    HELTEC_MESH_SOLAR,
-    T_ECHO_LITE,
     PRIVATE_HW,
   ];
 
@@ -856,62 +730,6 @@ class CriticalErrorCode extends $pb.ProtobufEnum {
 }
 
 ///
-///  Enum to indicate to clients whether this firmware is a special firmware build, like an event.
-///  The first 16 values are reserved for non-event special firmwares, like the Smart Citizen use case.
-class FirmwareEdition extends $pb.ProtobufEnum {
-  ///
-  ///  Vanilla firmware
-  static const FirmwareEdition VANILLA =
-      FirmwareEdition._(0, _omitEnumNames ? '' : 'VANILLA');
-
-  ///
-  ///  Firmware for use in the Smart Citizen environmental monitoring network
-  static const FirmwareEdition SMART_CITIZEN =
-      FirmwareEdition._(1, _omitEnumNames ? '' : 'SMART_CITIZEN');
-
-  ///
-  ///  Open Sauce, the maker conference held yearly in CA
-  static const FirmwareEdition OPEN_SAUCE =
-      FirmwareEdition._(16, _omitEnumNames ? '' : 'OPEN_SAUCE');
-
-  ///
-  ///  DEFCON, the yearly hacker conference
-  static const FirmwareEdition DEFCON =
-      FirmwareEdition._(17, _omitEnumNames ? '' : 'DEFCON');
-
-  ///
-  ///  Burning Man, the yearly hippie gathering in the desert
-  static const FirmwareEdition BURNING_MAN =
-      FirmwareEdition._(18, _omitEnumNames ? '' : 'BURNING_MAN');
-
-  ///
-  ///  Hamvention, the Dayton amateur radio convention
-  static const FirmwareEdition HAMVENTION =
-      FirmwareEdition._(19, _omitEnumNames ? '' : 'HAMVENTION');
-
-  ///
-  ///  Placeholder for DIY and unofficial events
-  static const FirmwareEdition DIY_EDITION =
-      FirmwareEdition._(127, _omitEnumNames ? '' : 'DIY_EDITION');
-
-  static const $core.List<FirmwareEdition> values = <FirmwareEdition>[
-    VANILLA,
-    SMART_CITIZEN,
-    OPEN_SAUCE,
-    DEFCON,
-    BURNING_MAN,
-    HAMVENTION,
-    DIY_EDITION,
-  ];
-
-  static final $core.Map<$core.int, FirmwareEdition> _byValue =
-      $pb.ProtobufEnum.initByValue(values);
-  static FirmwareEdition? valueOf($core.int value) => _byValue[value];
-
-  const FirmwareEdition._(super.value, super.name);
-}
-
-///
 ///  Enum for modules excluded from a device's configuration.
 ///  Each value represents a ModuleConfigType that can be toggled as excluded
 ///  by setting its corresponding bit in the `excluded_modules` bitmask field.
@@ -986,16 +804,6 @@ class ExcludedModules extends $pb.ProtobufEnum {
   static const ExcludedModules PAXCOUNTER_CONFIG =
       ExcludedModules._(4096, _omitEnumNames ? '' : 'PAXCOUNTER_CONFIG');
 
-  ///
-  ///  Bluetooth config (not technically a module, but used to indicate bluetooth capabilities)
-  static const ExcludedModules BLUETOOTH_CONFIG =
-      ExcludedModules._(8192, _omitEnumNames ? '' : 'BLUETOOTH_CONFIG');
-
-  ///
-  ///  Network config (not technically a module, but used to indicate network capabilities)
-  static const ExcludedModules NETWORK_CONFIG =
-      ExcludedModules._(16384, _omitEnumNames ? '' : 'NETWORK_CONFIG');
-
   static const $core.List<ExcludedModules> values = <ExcludedModules>[
     EXCLUDED_NONE,
     MQTT_CONFIG,
@@ -1011,8 +819,6 @@ class ExcludedModules extends $pb.ProtobufEnum {
     AMBIENTLIGHTING_CONFIG,
     DETECTIONSENSOR_CONFIG,
     PAXCOUNTER_CONFIG,
-    BLUETOOTH_CONFIG,
-    NETWORK_CONFIG,
   ];
 
   static final $core.Map<$core.int, ExcludedModules> _byValue =
@@ -1191,12 +997,6 @@ class Routing_Error extends $pb.ProtobufEnum {
   static const Routing_Error ADMIN_PUBLIC_KEY_UNAUTHORIZED = Routing_Error._(
       37, _omitEnumNames ? '' : 'ADMIN_PUBLIC_KEY_UNAUTHORIZED');
 
-  ///
-  ///  Airtime fairness rate limit exceeded for a packet
-  ///  This typically enforced per portnum and is used to prevent a single node from monopolizing airtime
-  static const Routing_Error RATE_LIMIT_EXCEEDED =
-      Routing_Error._(38, _omitEnumNames ? '' : 'RATE_LIMIT_EXCEEDED');
-
   static const $core.List<Routing_Error> values = <Routing_Error>[
     NONE,
     NO_ROUTE,
@@ -1214,7 +1014,6 @@ class Routing_Error extends $pb.ProtobufEnum {
     PKI_UNKNOWN_PUBKEY,
     ADMIN_BAD_SESSION_KEY,
     ADMIN_PUBLIC_KEY_UNAUTHORIZED,
-    RATE_LIMIT_EXCEEDED,
   ];
 
   static final $core.Map<$core.int, Routing_Error> _byValue =
@@ -1348,76 +1147,6 @@ class MeshPacket_Delayed extends $pb.ProtobufEnum {
       value < 0 || value >= _byValue.length ? null : _byValue[value];
 
   const MeshPacket_Delayed._(super.value, super.name);
-}
-
-///
-///  Enum to identify which transport mechanism this packet arrived over
-class MeshPacket_TransportMechanism extends $pb.ProtobufEnum {
-  ///
-  ///  The default case is that the node generated a packet itself
-  static const MeshPacket_TransportMechanism TRANSPORT_INTERNAL =
-      MeshPacket_TransportMechanism._(
-          0, _omitEnumNames ? '' : 'TRANSPORT_INTERNAL');
-
-  ///
-  ///  Arrived via the primary LoRa radio
-  static const MeshPacket_TransportMechanism TRANSPORT_LORA =
-      MeshPacket_TransportMechanism._(
-          1, _omitEnumNames ? '' : 'TRANSPORT_LORA');
-
-  ///
-  ///  Arrived via a secondary LoRa radio
-  static const MeshPacket_TransportMechanism TRANSPORT_LORA_ALT1 =
-      MeshPacket_TransportMechanism._(
-          2, _omitEnumNames ? '' : 'TRANSPORT_LORA_ALT1');
-
-  ///
-  ///  Arrived via a tertiary LoRa radio
-  static const MeshPacket_TransportMechanism TRANSPORT_LORA_ALT2 =
-      MeshPacket_TransportMechanism._(
-          3, _omitEnumNames ? '' : 'TRANSPORT_LORA_ALT2');
-
-  ///
-  ///  Arrived via a quaternary LoRa radio
-  static const MeshPacket_TransportMechanism TRANSPORT_LORA_ALT3 =
-      MeshPacket_TransportMechanism._(
-          4, _omitEnumNames ? '' : 'TRANSPORT_LORA_ALT3');
-
-  ///
-  ///  Arrived via an MQTT connection
-  static const MeshPacket_TransportMechanism TRANSPORT_MQTT =
-      MeshPacket_TransportMechanism._(
-          5, _omitEnumNames ? '' : 'TRANSPORT_MQTT');
-
-  ///
-  ///  Arrived via Multicast UDP
-  static const MeshPacket_TransportMechanism TRANSPORT_MULTICAST_UDP =
-      MeshPacket_TransportMechanism._(
-          6, _omitEnumNames ? '' : 'TRANSPORT_MULTICAST_UDP');
-
-  ///
-  ///  Arrived via API connection
-  static const MeshPacket_TransportMechanism TRANSPORT_API =
-      MeshPacket_TransportMechanism._(7, _omitEnumNames ? '' : 'TRANSPORT_API');
-
-  static const $core.List<MeshPacket_TransportMechanism> values =
-      <MeshPacket_TransportMechanism>[
-    TRANSPORT_INTERNAL,
-    TRANSPORT_LORA,
-    TRANSPORT_LORA_ALT1,
-    TRANSPORT_LORA_ALT2,
-    TRANSPORT_LORA_ALT3,
-    TRANSPORT_MQTT,
-    TRANSPORT_MULTICAST_UDP,
-    TRANSPORT_API,
-  ];
-
-  static final $core.List<MeshPacket_TransportMechanism?> _byValue =
-      $pb.ProtobufEnum.$_initByValueList(values, 7);
-  static MeshPacket_TransportMechanism? valueOf($core.int value) =>
-      value < 0 || value >= _byValue.length ? null : _byValue[value];
-
-  const MeshPacket_TransportMechanism._(super.value, super.name);
 }
 
 ///

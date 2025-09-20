@@ -226,15 +226,6 @@ const AdminMessage$json = {
       '10': 'removeBackupPreferences'
     },
     {
-      '1': 'send_input_event',
-      '3': 27,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.AdminMessage.InputEvent',
-      '9': 0,
-      '10': 'sendInputEvent'
-    },
-    {
       '1': 'set_owner',
       '3': 32,
       '4': 1,
@@ -394,24 +385,6 @@ const AdminMessage$json = {
       '10': 'commitEditSettings'
     },
     {
-      '1': 'add_contact',
-      '3': 66,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.SharedContact',
-      '9': 0,
-      '10': 'addContact'
-    },
-    {
-      '1': 'key_verification',
-      '3': 67,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.KeyVerificationAdmin',
-      '9': 0,
-      '10': 'keyVerification'
-    },
-    {
       '1': 'factory_reset_device',
       '3': 94,
       '4': 1,
@@ -468,7 +441,6 @@ const AdminMessage$json = {
       '10': 'nodedbReset'
     },
   ],
-  '3': [AdminMessage_InputEvent$json],
   '4': [
     AdminMessage_ConfigType$json,
     AdminMessage_ModuleConfigType$json,
@@ -476,17 +448,6 @@ const AdminMessage$json = {
   ],
   '8': [
     {'1': 'payload_variant'},
-  ],
-};
-
-@$core.Deprecated('Use adminMessageDescriptor instead')
-const AdminMessage_InputEvent$json = {
-  '1': 'InputEvent',
-  '2': [
-    {'1': 'event_code', '3': 1, '4': 1, '5': 13, '10': 'eventCode'},
-    {'1': 'kb_char', '3': 2, '4': 1, '5': 13, '10': 'kbChar'},
-    {'1': 'touch_x', '3': 3, '4': 1, '5': 13, '10': 'touchX'},
-    {'1': 'touch_y', '3': 4, '4': 1, '5': 13, '10': 'touchY'},
   ],
 };
 
@@ -573,49 +534,43 @@ final $typed_data.Uint8List adminMessageDescriptor = $convert.base64Decode(
     'UhFiYWNrdXBQcmVmZXJlbmNlcxJaChNyZXN0b3JlX3ByZWZlcmVuY2VzGBkgASgOMicubWVzaH'
     'Rhc3RpYy5BZG1pbk1lc3NhZ2UuQmFja3VwTG9jYXRpb25IAFIScmVzdG9yZVByZWZlcmVuY2Vz'
     'EmUKGXJlbW92ZV9iYWNrdXBfcHJlZmVyZW5jZXMYGiABKA4yJy5tZXNodGFzdGljLkFkbWluTW'
-    'Vzc2FnZS5CYWNrdXBMb2NhdGlvbkgAUhdyZW1vdmVCYWNrdXBQcmVmZXJlbmNlcxJPChBzZW5k'
-    'X2lucHV0X2V2ZW50GBsgASgLMiMubWVzaHRhc3RpYy5BZG1pbk1lc3NhZ2UuSW5wdXRFdmVudE'
-    'gAUg5zZW5kSW5wdXRFdmVudBIvCglzZXRfb3duZXIYICABKAsyEC5tZXNodGFzdGljLlVzZXJI'
-    'AFIIc2V0T3duZXISNgoLc2V0X2NoYW5uZWwYISABKAsyEy5tZXNodGFzdGljLkNoYW5uZWxIAF'
-    'IKc2V0Q2hhbm5lbBIzCgpzZXRfY29uZmlnGCIgASgLMhIubWVzaHRhc3RpYy5Db25maWdIAFIJ'
-    'c2V0Q29uZmlnEkYKEXNldF9tb2R1bGVfY29uZmlnGCMgASgLMhgubWVzaHRhc3RpYy5Nb2R1bG'
-    'VDb25maWdIAFIPc2V0TW9kdWxlQ29uZmlnEkwKInNldF9jYW5uZWRfbWVzc2FnZV9tb2R1bGVf'
-    'bWVzc2FnZXMYJCABKAlIAFIec2V0Q2FubmVkTWVzc2FnZU1vZHVsZU1lc3NhZ2VzEjIKFHNldF'
-    '9yaW5ndG9uZV9tZXNzYWdlGCUgASgJSABSEnNldFJpbmd0b25lTWVzc2FnZRIsChFyZW1vdmVf'
-    'Ynlfbm9kZW51bRgmIAEoDUgAUg9yZW1vdmVCeU5vZGVudW0SLAoRc2V0X2Zhdm9yaXRlX25vZG'
-    'UYJyABKA1IAFIPc2V0RmF2b3JpdGVOb2RlEjIKFHJlbW92ZV9mYXZvcml0ZV9ub2RlGCggASgN'
-    'SABSEnJlbW92ZUZhdm9yaXRlTm9kZRJEChJzZXRfZml4ZWRfcG9zaXRpb24YKSABKAsyFC5tZX'
-    'NodGFzdGljLlBvc2l0aW9uSABSEHNldEZpeGVkUG9zaXRpb24SNAoVcmVtb3ZlX2ZpeGVkX3Bv'
-    'c2l0aW9uGCogASgISABSE3JlbW92ZUZpeGVkUG9zaXRpb24SJAoNc2V0X3RpbWVfb25seRgrIA'
-    'EoB0gAUgtzZXRUaW1lT25seRIzChVnZXRfdWlfY29uZmlnX3JlcXVlc3QYLCABKAhIAFISZ2V0'
-    'VWlDb25maWdSZXF1ZXN0ElEKFmdldF91aV9jb25maWdfcmVzcG9uc2UYLSABKAsyGi5tZXNodG'
-    'FzdGljLkRldmljZVVJQ29uZmlnSABSE2dldFVpQ29uZmlnUmVzcG9uc2USRAoPc3RvcmVfdWlf'
-    'Y29uZmlnGC4gASgLMhoubWVzaHRhc3RpYy5EZXZpY2VVSUNvbmZpZ0gAUg1zdG9yZVVpQ29uZm'
-    'lnEioKEHNldF9pZ25vcmVkX25vZGUYLyABKA1IAFIOc2V0SWdub3JlZE5vZGUSMAoTcmVtb3Zl'
-    'X2lnbm9yZWRfbm9kZRgwIAEoDUgAUhFyZW1vdmVJZ25vcmVkTm9kZRIwChNiZWdpbl9lZGl0X3'
-    'NldHRpbmdzGEAgASgISABSEWJlZ2luRWRpdFNldHRpbmdzEjIKFGNvbW1pdF9lZGl0X3NldHRp'
-    'bmdzGEEgASgISABSEmNvbW1pdEVkaXRTZXR0aW5ncxI8CgthZGRfY29udGFjdBhCIAEoCzIZLm'
-    '1lc2h0YXN0aWMuU2hhcmVkQ29udGFjdEgAUgphZGRDb250YWN0Ek0KEGtleV92ZXJpZmljYXRp'
-    'b24YQyABKAsyIC5tZXNodGFzdGljLktleVZlcmlmaWNhdGlvbkFkbWluSABSD2tleVZlcmlmaW'
-    'NhdGlvbhIyChRmYWN0b3J5X3Jlc2V0X2RldmljZRheIAEoBUgAUhJmYWN0b3J5UmVzZXREZXZp'
+    'Vzc2FnZS5CYWNrdXBMb2NhdGlvbkgAUhdyZW1vdmVCYWNrdXBQcmVmZXJlbmNlcxIvCglzZXRf'
+    'b3duZXIYICABKAsyEC5tZXNodGFzdGljLlVzZXJIAFIIc2V0T3duZXISNgoLc2V0X2NoYW5uZW'
+    'wYISABKAsyEy5tZXNodGFzdGljLkNoYW5uZWxIAFIKc2V0Q2hhbm5lbBIzCgpzZXRfY29uZmln'
+    'GCIgASgLMhIubWVzaHRhc3RpYy5Db25maWdIAFIJc2V0Q29uZmlnEkYKEXNldF9tb2R1bGVfY2'
+    '9uZmlnGCMgASgLMhgubWVzaHRhc3RpYy5Nb2R1bGVDb25maWdIAFIPc2V0TW9kdWxlQ29uZmln'
+    'EkwKInNldF9jYW5uZWRfbWVzc2FnZV9tb2R1bGVfbWVzc2FnZXMYJCABKAlIAFIec2V0Q2Fubm'
+    'VkTWVzc2FnZU1vZHVsZU1lc3NhZ2VzEjIKFHNldF9yaW5ndG9uZV9tZXNzYWdlGCUgASgJSABS'
+    'EnNldFJpbmd0b25lTWVzc2FnZRIsChFyZW1vdmVfYnlfbm9kZW51bRgmIAEoDUgAUg9yZW1vdm'
+    'VCeU5vZGVudW0SLAoRc2V0X2Zhdm9yaXRlX25vZGUYJyABKA1IAFIPc2V0RmF2b3JpdGVOb2Rl'
+    'EjIKFHJlbW92ZV9mYXZvcml0ZV9ub2RlGCggASgNSABSEnJlbW92ZUZhdm9yaXRlTm9kZRJECh'
+    'JzZXRfZml4ZWRfcG9zaXRpb24YKSABKAsyFC5tZXNodGFzdGljLlBvc2l0aW9uSABSEHNldEZp'
+    'eGVkUG9zaXRpb24SNAoVcmVtb3ZlX2ZpeGVkX3Bvc2l0aW9uGCogASgISABSE3JlbW92ZUZpeG'
+    'VkUG9zaXRpb24SJAoNc2V0X3RpbWVfb25seRgrIAEoB0gAUgtzZXRUaW1lT25seRIzChVnZXRf'
+    'dWlfY29uZmlnX3JlcXVlc3QYLCABKAhIAFISZ2V0VWlDb25maWdSZXF1ZXN0ElEKFmdldF91aV'
+    '9jb25maWdfcmVzcG9uc2UYLSABKAsyGi5tZXNodGFzdGljLkRldmljZVVJQ29uZmlnSABSE2dl'
+    'dFVpQ29uZmlnUmVzcG9uc2USRAoPc3RvcmVfdWlfY29uZmlnGC4gASgLMhoubWVzaHRhc3RpYy'
+    '5EZXZpY2VVSUNvbmZpZ0gAUg1zdG9yZVVpQ29uZmlnEioKEHNldF9pZ25vcmVkX25vZGUYLyAB'
+    'KA1IAFIOc2V0SWdub3JlZE5vZGUSMAoTcmVtb3ZlX2lnbm9yZWRfbm9kZRgwIAEoDUgAUhFyZW'
+    '1vdmVJZ25vcmVkTm9kZRIwChNiZWdpbl9lZGl0X3NldHRpbmdzGEAgASgISABSEWJlZ2luRWRp'
+    'dFNldHRpbmdzEjIKFGNvbW1pdF9lZGl0X3NldHRpbmdzGEEgASgISABSEmNvbW1pdEVkaXRTZX'
+    'R0aW5ncxIyChRmYWN0b3J5X3Jlc2V0X2RldmljZRheIAEoBUgAUhJmYWN0b3J5UmVzZXREZXZp'
     'Y2USLgoScmVib290X290YV9zZWNvbmRzGF8gASgFSABSEHJlYm9vdE90YVNlY29uZHMSJwoOZX'
     'hpdF9zaW11bGF0b3IYYCABKAhIAFINZXhpdFNpbXVsYXRvchInCg5yZWJvb3Rfc2Vjb25kcxhh'
     'IAEoBUgAUg1yZWJvb3RTZWNvbmRzEisKEHNodXRkb3duX3NlY29uZHMYYiABKAVIAFIPc2h1dG'
     'Rvd25TZWNvbmRzEjIKFGZhY3RvcnlfcmVzZXRfY29uZmlnGGMgASgFSABSEmZhY3RvcnlSZXNl'
-    'dENvbmZpZxIjCgxub2RlZGJfcmVzZXQYZCABKAVIAFILbm9kZWRiUmVzZXQadgoKSW5wdXRFdm'
-    'VudBIdCgpldmVudF9jb2RlGAEgASgNUglldmVudENvZGUSFwoHa2JfY2hhchgCIAEoDVIGa2JD'
-    'aGFyEhcKB3RvdWNoX3gYAyABKA1SBnRvdWNoWBIXCgd0b3VjaF95GAQgASgNUgZ0b3VjaFki1g'
-    'EKCkNvbmZpZ1R5cGUSEQoNREVWSUNFX0NPTkZJRxAAEhMKD1BPU0lUSU9OX0NPTkZJRxABEhAK'
-    'DFBPV0VSX0NPTkZJRxACEhIKDk5FVFdPUktfQ09ORklHEAMSEgoORElTUExBWV9DT05GSUcQBB'
-    'IPCgtMT1JBX0NPTkZJRxAFEhQKEEJMVUVUT09USF9DT05GSUcQBhITCg9TRUNVUklUWV9DT05G'
-    'SUcQBxIVChFTRVNTSU9OS0VZX0NPTkZJRxAIEhMKD0RFVklDRVVJX0NPTkZJRxAJIrsCChBNb2'
-    'R1bGVDb25maWdUeXBlEg8KC01RVFRfQ09ORklHEAASEQoNU0VSSUFMX0NPTkZJRxABEhMKD0VY'
-    'VE5PVElGX0NPTkZJRxACEhcKE1NUT1JFRk9SV0FSRF9DT05GSUcQAxIUChBSQU5HRVRFU1RfQ0'
-    '9ORklHEAQSFAoQVEVMRU1FVFJZX0NPTkZJRxAFEhQKEENBTk5FRE1TR19DT05GSUcQBhIQCgxB'
-    'VURJT19DT05GSUcQBxIZChVSRU1PVEVIQVJEV0FSRV9DT05GSUcQCBIXChNORUlHSEJPUklORk'
-    '9fQ09ORklHEAkSGgoWQU1CSUVOVExJR0hUSU5HX0NPTkZJRxAKEhoKFkRFVEVDVElPTlNFTlNP'
-    'Ul9DT05GSUcQCxIVChFQQVhDT1VOVEVSX0NPTkZJRxAMIiMKDkJhY2t1cExvY2F0aW9uEgkKBU'
-    'ZMQVNIEAASBgoCU0QQAUIRCg9wYXlsb2FkX3ZhcmlhbnQ=');
+    'dENvbmZpZxIjCgxub2RlZGJfcmVzZXQYZCABKAVIAFILbm9kZWRiUmVzZXQi1gEKCkNvbmZpZ1'
+    'R5cGUSEQoNREVWSUNFX0NPTkZJRxAAEhMKD1BPU0lUSU9OX0NPTkZJRxABEhAKDFBPV0VSX0NP'
+    'TkZJRxACEhIKDk5FVFdPUktfQ09ORklHEAMSEgoORElTUExBWV9DT05GSUcQBBIPCgtMT1JBX0'
+    'NPTkZJRxAFEhQKEEJMVUVUT09USF9DT05GSUcQBhITCg9TRUNVUklUWV9DT05GSUcQBxIVChFT'
+    'RVNTSU9OS0VZX0NPTkZJRxAIEhMKD0RFVklDRVVJX0NPTkZJRxAJIrsCChBNb2R1bGVDb25maW'
+    'dUeXBlEg8KC01RVFRfQ09ORklHEAASEQoNU0VSSUFMX0NPTkZJRxABEhMKD0VYVE5PVElGX0NP'
+    'TkZJRxACEhcKE1NUT1JFRk9SV0FSRF9DT05GSUcQAxIUChBSQU5HRVRFU1RfQ09ORklHEAQSFA'
+    'oQVEVMRU1FVFJZX0NPTkZJRxAFEhQKEENBTk5FRE1TR19DT05GSUcQBhIQCgxBVURJT19DT05G'
+    'SUcQBxIZChVSRU1PVEVIQVJEV0FSRV9DT05GSUcQCBIXChNORUlHSEJPUklORk9fQ09ORklHEA'
+    'kSGgoWQU1CSUVOVExJR0hUSU5HX0NPTkZJRxAKEhoKFkRFVEVDVElPTlNFTlNPUl9DT05GSUcQ'
+    'CxIVChFQQVhDT1VOVEVSX0NPTkZJRxAMIiMKDkJhY2t1cExvY2F0aW9uEgkKBUZMQVNIEAASBg'
+    'oCU0QQAUIRCg9wYXlsb2FkX3ZhcmlhbnQ=');
 
 @$core.Deprecated('Use hamParametersDescriptor instead')
 const HamParameters$json = {
@@ -655,77 +610,3 @@ final $typed_data.Uint8List nodeRemoteHardwarePinsResponseDescriptor =
         'Ch5Ob2RlUmVtb3RlSGFyZHdhcmVQaW5zUmVzcG9uc2USXAoZbm9kZV9yZW1vdGVfaGFyZHdhcm'
         'VfcGlucxgBIAMoCzIhLm1lc2h0YXN0aWMuTm9kZVJlbW90ZUhhcmR3YXJlUGluUhZub2RlUmVt'
         'b3RlSGFyZHdhcmVQaW5z');
-
-@$core.Deprecated('Use sharedContactDescriptor instead')
-const SharedContact$json = {
-  '1': 'SharedContact',
-  '2': [
-    {'1': 'node_num', '3': 1, '4': 1, '5': 13, '10': 'nodeNum'},
-    {
-      '1': 'user',
-      '3': 2,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.User',
-      '10': 'user'
-    },
-    {'1': 'should_ignore', '3': 3, '4': 1, '5': 8, '10': 'shouldIgnore'},
-  ],
-};
-
-/// Descriptor for `SharedContact`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List sharedContactDescriptor = $convert.base64Decode(
-    'Cg1TaGFyZWRDb250YWN0EhkKCG5vZGVfbnVtGAEgASgNUgdub2RlTnVtEiQKBHVzZXIYAiABKA'
-    'syEC5tZXNodGFzdGljLlVzZXJSBHVzZXISIwoNc2hvdWxkX2lnbm9yZRgDIAEoCFIMc2hvdWxk'
-    'SWdub3Jl');
-
-@$core.Deprecated('Use keyVerificationAdminDescriptor instead')
-const KeyVerificationAdmin$json = {
-  '1': 'KeyVerificationAdmin',
-  '2': [
-    {
-      '1': 'message_type',
-      '3': 1,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.KeyVerificationAdmin.MessageType',
-      '10': 'messageType'
-    },
-    {'1': 'remote_nodenum', '3': 2, '4': 1, '5': 13, '10': 'remoteNodenum'},
-    {'1': 'nonce', '3': 3, '4': 1, '5': 4, '10': 'nonce'},
-    {
-      '1': 'security_number',
-      '3': 4,
-      '4': 1,
-      '5': 13,
-      '9': 0,
-      '10': 'securityNumber',
-      '17': true
-    },
-  ],
-  '4': [KeyVerificationAdmin_MessageType$json],
-  '8': [
-    {'1': '_security_number'},
-  ],
-};
-
-@$core.Deprecated('Use keyVerificationAdminDescriptor instead')
-const KeyVerificationAdmin_MessageType$json = {
-  '1': 'MessageType',
-  '2': [
-    {'1': 'INITIATE_VERIFICATION', '2': 0},
-    {'1': 'PROVIDE_SECURITY_NUMBER', '2': 1},
-    {'1': 'DO_VERIFY', '2': 2},
-    {'1': 'DO_NOT_VERIFY', '2': 3},
-  ],
-};
-
-/// Descriptor for `KeyVerificationAdmin`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List keyVerificationAdminDescriptor = $convert.base64Decode(
-    'ChRLZXlWZXJpZmljYXRpb25BZG1pbhJPCgxtZXNzYWdlX3R5cGUYASABKA4yLC5tZXNodGFzdG'
-    'ljLktleVZlcmlmaWNhdGlvbkFkbWluLk1lc3NhZ2VUeXBlUgttZXNzYWdlVHlwZRIlCg5yZW1v'
-    'dGVfbm9kZW51bRgCIAEoDVINcmVtb3RlTm9kZW51bRIUCgVub25jZRgDIAEoBFIFbm9uY2USLA'
-    'oPc2VjdXJpdHlfbnVtYmVyGAQgASgNSABSDnNlY3VyaXR5TnVtYmVyiAEBImcKC01lc3NhZ2VU'
-    'eXBlEhkKFUlOSVRJQVRFX1ZFUklGSUNBVElPThAAEhsKF1BST1ZJREVfU0VDVVJJVFlfTlVNQk'
-    'VSEAESDQoJRE9fVkVSSUZZEAISEQoNRE9fTk9UX1ZFUklGWRADQhIKEF9zZWN1cml0eV9udW1i'
-    'ZXI=');
