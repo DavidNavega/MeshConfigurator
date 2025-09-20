@@ -1,14 +1,13 @@
-// This is a generated file - do not edit.
 //
-// Generated from meshtastic/powermon.proto.
-
-// @dart = 3.3
+//  Generated code. Do not modify.
+//  source: meshtastic/powermon.proto
+//
+// @dart = 2.12
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: curly_braces_in_flow_control_structures
-// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
-// ignore_for_file: non_constant_identifier_names, unused_import
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -52,14 +51,7 @@ final $typed_data.Uint8List powerMonDescriptor = $convert.base64Decode(
 const PowerStressMessage$json = {
   '1': 'PowerStressMessage',
   '2': [
-    {
-      '1': 'cmd',
-      '3': 1,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.PowerStressMessage.Opcode',
-      '10': 'cmd'
-    },
+    {'1': 'cmd', '3': 1, '4': 1, '5': 14, '6': '.meshtastic.PowerStressMessage.Opcode', '10': 'cmd'},
     {'1': 'num_seconds', '3': 2, '4': 1, '5': 2, '10': 'numSeconds'},
   ],
   '4': [PowerStressMessage_Opcode$json],
@@ -102,3 +94,4 @@ final $typed_data.Uint8List powerStressMessageDescriptor = $convert.base64Decode
     'VEX09GRhAxEgwKCExPUkFfT0ZGEEASCwoHTE9SQV9UWBBBEgsKB0xPUkFfUlgQQhIKCgZCVF9P'
     'RkYQUBIJCgVCVF9PThBREgwKCFdJRklfT0ZGEGASCwoHV0lGSV9PThBhEgsKB0dQU19PRkYQcB'
     'IKCgZHUFNfT04QcQ==');
+

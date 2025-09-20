@@ -1,14 +1,13 @@
-// This is a generated file - do not edit.
 //
-// Generated from meshtastic/telemetry.proto.
-
-// @dart = 3.3
+//  Generated code. Do not modify.
+//  source: meshtastic/telemetry.proto
+//
+// @dart = 2.12
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: curly_braces_in_flow_control_structures
-// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
-// ignore_for_file: non_constant_identifier_names, unused_import
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -76,51 +75,11 @@ final $typed_data.Uint8List telemetrySensorTypeDescriptor = $convert.base64Decod
 const DeviceMetrics$json = {
   '1': 'DeviceMetrics',
   '2': [
-    {
-      '1': 'battery_level',
-      '3': 1,
-      '4': 1,
-      '5': 13,
-      '9': 0,
-      '10': 'batteryLevel',
-      '17': true
-    },
-    {
-      '1': 'voltage',
-      '3': 2,
-      '4': 1,
-      '5': 2,
-      '9': 1,
-      '10': 'voltage',
-      '17': true
-    },
-    {
-      '1': 'channel_utilization',
-      '3': 3,
-      '4': 1,
-      '5': 2,
-      '9': 2,
-      '10': 'channelUtilization',
-      '17': true
-    },
-    {
-      '1': 'air_util_tx',
-      '3': 4,
-      '4': 1,
-      '5': 2,
-      '9': 3,
-      '10': 'airUtilTx',
-      '17': true
-    },
-    {
-      '1': 'uptime_seconds',
-      '3': 5,
-      '4': 1,
-      '5': 13,
-      '9': 4,
-      '10': 'uptimeSeconds',
-      '17': true
-    },
+    {'1': 'battery_level', '3': 1, '4': 1, '5': 13, '9': 0, '10': 'batteryLevel', '17': true},
+    {'1': 'voltage', '3': 2, '4': 1, '5': 2, '9': 1, '10': 'voltage', '17': true},
+    {'1': 'channel_utilization', '3': 3, '4': 1, '5': 2, '9': 2, '10': 'channelUtilization', '17': true},
+    {'1': 'air_util_tx', '3': 4, '4': 1, '5': 2, '9': 3, '10': 'airUtilTx', '17': true},
+    {'1': 'uptime_seconds', '3': 5, '4': 1, '5': 13, '9': 4, '10': 'uptimeSeconds', '17': true},
   ],
   '8': [
     {'1': '_battery_level'},
@@ -144,188 +103,28 @@ final $typed_data.Uint8List deviceMetricsDescriptor = $convert.base64Decode(
 const EnvironmentMetrics$json = {
   '1': 'EnvironmentMetrics',
   '2': [
-    {
-      '1': 'temperature',
-      '3': 1,
-      '4': 1,
-      '5': 2,
-      '9': 0,
-      '10': 'temperature',
-      '17': true
-    },
-    {
-      '1': 'relative_humidity',
-      '3': 2,
-      '4': 1,
-      '5': 2,
-      '9': 1,
-      '10': 'relativeHumidity',
-      '17': true
-    },
-    {
-      '1': 'barometric_pressure',
-      '3': 3,
-      '4': 1,
-      '5': 2,
-      '9': 2,
-      '10': 'barometricPressure',
-      '17': true
-    },
-    {
-      '1': 'gas_resistance',
-      '3': 4,
-      '4': 1,
-      '5': 2,
-      '9': 3,
-      '10': 'gasResistance',
-      '17': true
-    },
-    {
-      '1': 'voltage',
-      '3': 5,
-      '4': 1,
-      '5': 2,
-      '9': 4,
-      '10': 'voltage',
-      '17': true
-    },
-    {
-      '1': 'current',
-      '3': 6,
-      '4': 1,
-      '5': 2,
-      '9': 5,
-      '10': 'current',
-      '17': true
-    },
+    {'1': 'temperature', '3': 1, '4': 1, '5': 2, '9': 0, '10': 'temperature', '17': true},
+    {'1': 'relative_humidity', '3': 2, '4': 1, '5': 2, '9': 1, '10': 'relativeHumidity', '17': true},
+    {'1': 'barometric_pressure', '3': 3, '4': 1, '5': 2, '9': 2, '10': 'barometricPressure', '17': true},
+    {'1': 'gas_resistance', '3': 4, '4': 1, '5': 2, '9': 3, '10': 'gasResistance', '17': true},
+    {'1': 'voltage', '3': 5, '4': 1, '5': 2, '9': 4, '10': 'voltage', '17': true},
+    {'1': 'current', '3': 6, '4': 1, '5': 2, '9': 5, '10': 'current', '17': true},
     {'1': 'iaq', '3': 7, '4': 1, '5': 13, '9': 6, '10': 'iaq', '17': true},
-    {
-      '1': 'distance',
-      '3': 8,
-      '4': 1,
-      '5': 2,
-      '9': 7,
-      '10': 'distance',
-      '17': true
-    },
+    {'1': 'distance', '3': 8, '4': 1, '5': 2, '9': 7, '10': 'distance', '17': true},
     {'1': 'lux', '3': 9, '4': 1, '5': 2, '9': 8, '10': 'lux', '17': true},
-    {
-      '1': 'white_lux',
-      '3': 10,
-      '4': 1,
-      '5': 2,
-      '9': 9,
-      '10': 'whiteLux',
-      '17': true
-    },
-    {
-      '1': 'ir_lux',
-      '3': 11,
-      '4': 1,
-      '5': 2,
-      '9': 10,
-      '10': 'irLux',
-      '17': true
-    },
-    {
-      '1': 'uv_lux',
-      '3': 12,
-      '4': 1,
-      '5': 2,
-      '9': 11,
-      '10': 'uvLux',
-      '17': true
-    },
-    {
-      '1': 'wind_direction',
-      '3': 13,
-      '4': 1,
-      '5': 13,
-      '9': 12,
-      '10': 'windDirection',
-      '17': true
-    },
-    {
-      '1': 'wind_speed',
-      '3': 14,
-      '4': 1,
-      '5': 2,
-      '9': 13,
-      '10': 'windSpeed',
-      '17': true
-    },
-    {
-      '1': 'weight',
-      '3': 15,
-      '4': 1,
-      '5': 2,
-      '9': 14,
-      '10': 'weight',
-      '17': true
-    },
-    {
-      '1': 'wind_gust',
-      '3': 16,
-      '4': 1,
-      '5': 2,
-      '9': 15,
-      '10': 'windGust',
-      '17': true
-    },
-    {
-      '1': 'wind_lull',
-      '3': 17,
-      '4': 1,
-      '5': 2,
-      '9': 16,
-      '10': 'windLull',
-      '17': true
-    },
-    {
-      '1': 'radiation',
-      '3': 18,
-      '4': 1,
-      '5': 2,
-      '9': 17,
-      '10': 'radiation',
-      '17': true
-    },
-    {
-      '1': 'rainfall_1h',
-      '3': 19,
-      '4': 1,
-      '5': 2,
-      '9': 18,
-      '10': 'rainfall1h',
-      '17': true
-    },
-    {
-      '1': 'rainfall_24h',
-      '3': 20,
-      '4': 1,
-      '5': 2,
-      '9': 19,
-      '10': 'rainfall24h',
-      '17': true
-    },
-    {
-      '1': 'soil_moisture',
-      '3': 21,
-      '4': 1,
-      '5': 13,
-      '9': 20,
-      '10': 'soilMoisture',
-      '17': true
-    },
-    {
-      '1': 'soil_temperature',
-      '3': 22,
-      '4': 1,
-      '5': 2,
-      '9': 21,
-      '10': 'soilTemperature',
-      '17': true
-    },
+    {'1': 'white_lux', '3': 10, '4': 1, '5': 2, '9': 9, '10': 'whiteLux', '17': true},
+    {'1': 'ir_lux', '3': 11, '4': 1, '5': 2, '9': 10, '10': 'irLux', '17': true},
+    {'1': 'uv_lux', '3': 12, '4': 1, '5': 2, '9': 11, '10': 'uvLux', '17': true},
+    {'1': 'wind_direction', '3': 13, '4': 1, '5': 13, '9': 12, '10': 'windDirection', '17': true},
+    {'1': 'wind_speed', '3': 14, '4': 1, '5': 2, '9': 13, '10': 'windSpeed', '17': true},
+    {'1': 'weight', '3': 15, '4': 1, '5': 2, '9': 14, '10': 'weight', '17': true},
+    {'1': 'wind_gust', '3': 16, '4': 1, '5': 2, '9': 15, '10': 'windGust', '17': true},
+    {'1': 'wind_lull', '3': 17, '4': 1, '5': 2, '9': 16, '10': 'windLull', '17': true},
+    {'1': 'radiation', '3': 18, '4': 1, '5': 2, '9': 17, '10': 'radiation', '17': true},
+    {'1': 'rainfall_1h', '3': 19, '4': 1, '5': 2, '9': 18, '10': 'rainfall1h', '17': true},
+    {'1': 'rainfall_24h', '3': 20, '4': 1, '5': 2, '9': 19, '10': 'rainfall24h', '17': true},
+    {'1': 'soil_moisture', '3': 21, '4': 1, '5': 13, '9': 20, '10': 'soilMoisture', '17': true},
+    {'1': 'soil_temperature', '3': 22, '4': 1, '5': 2, '9': 21, '10': 'soilTemperature', '17': true},
   ],
   '8': [
     {'1': '_temperature'},
@@ -381,60 +180,12 @@ final $typed_data.Uint8List environmentMetricsDescriptor = $convert.base64Decode
 const PowerMetrics$json = {
   '1': 'PowerMetrics',
   '2': [
-    {
-      '1': 'ch1_voltage',
-      '3': 1,
-      '4': 1,
-      '5': 2,
-      '9': 0,
-      '10': 'ch1Voltage',
-      '17': true
-    },
-    {
-      '1': 'ch1_current',
-      '3': 2,
-      '4': 1,
-      '5': 2,
-      '9': 1,
-      '10': 'ch1Current',
-      '17': true
-    },
-    {
-      '1': 'ch2_voltage',
-      '3': 3,
-      '4': 1,
-      '5': 2,
-      '9': 2,
-      '10': 'ch2Voltage',
-      '17': true
-    },
-    {
-      '1': 'ch2_current',
-      '3': 4,
-      '4': 1,
-      '5': 2,
-      '9': 3,
-      '10': 'ch2Current',
-      '17': true
-    },
-    {
-      '1': 'ch3_voltage',
-      '3': 5,
-      '4': 1,
-      '5': 2,
-      '9': 4,
-      '10': 'ch3Voltage',
-      '17': true
-    },
-    {
-      '1': 'ch3_current',
-      '3': 6,
-      '4': 1,
-      '5': 2,
-      '9': 5,
-      '10': 'ch3Current',
-      '17': true
-    },
+    {'1': 'ch1_voltage', '3': 1, '4': 1, '5': 2, '9': 0, '10': 'ch1Voltage', '17': true},
+    {'1': 'ch1_current', '3': 2, '4': 1, '5': 2, '9': 1, '10': 'ch1Current', '17': true},
+    {'1': 'ch2_voltage', '3': 3, '4': 1, '5': 2, '9': 2, '10': 'ch2Voltage', '17': true},
+    {'1': 'ch2_current', '3': 4, '4': 1, '5': 2, '9': 3, '10': 'ch2Current', '17': true},
+    {'1': 'ch3_voltage', '3': 5, '4': 1, '5': 2, '9': 4, '10': 'ch3Voltage', '17': true},
+    {'1': 'ch3_current', '3': 6, '4': 1, '5': 2, '9': 5, '10': 'ch3Current', '17': true},
   ],
   '8': [
     {'1': '_ch1_voltage'},
@@ -460,114 +211,18 @@ final $typed_data.Uint8List powerMetricsDescriptor = $convert.base64Decode(
 const AirQualityMetrics$json = {
   '1': 'AirQualityMetrics',
   '2': [
-    {
-      '1': 'pm10_standard',
-      '3': 1,
-      '4': 1,
-      '5': 13,
-      '9': 0,
-      '10': 'pm10Standard',
-      '17': true
-    },
-    {
-      '1': 'pm25_standard',
-      '3': 2,
-      '4': 1,
-      '5': 13,
-      '9': 1,
-      '10': 'pm25Standard',
-      '17': true
-    },
-    {
-      '1': 'pm100_standard',
-      '3': 3,
-      '4': 1,
-      '5': 13,
-      '9': 2,
-      '10': 'pm100Standard',
-      '17': true
-    },
-    {
-      '1': 'pm10_environmental',
-      '3': 4,
-      '4': 1,
-      '5': 13,
-      '9': 3,
-      '10': 'pm10Environmental',
-      '17': true
-    },
-    {
-      '1': 'pm25_environmental',
-      '3': 5,
-      '4': 1,
-      '5': 13,
-      '9': 4,
-      '10': 'pm25Environmental',
-      '17': true
-    },
-    {
-      '1': 'pm100_environmental',
-      '3': 6,
-      '4': 1,
-      '5': 13,
-      '9': 5,
-      '10': 'pm100Environmental',
-      '17': true
-    },
-    {
-      '1': 'particles_03um',
-      '3': 7,
-      '4': 1,
-      '5': 13,
-      '9': 6,
-      '10': 'particles03um',
-      '17': true
-    },
-    {
-      '1': 'particles_05um',
-      '3': 8,
-      '4': 1,
-      '5': 13,
-      '9': 7,
-      '10': 'particles05um',
-      '17': true
-    },
-    {
-      '1': 'particles_10um',
-      '3': 9,
-      '4': 1,
-      '5': 13,
-      '9': 8,
-      '10': 'particles10um',
-      '17': true
-    },
-    {
-      '1': 'particles_25um',
-      '3': 10,
-      '4': 1,
-      '5': 13,
-      '9': 9,
-      '10': 'particles25um',
-      '17': true
-    },
-    {
-      '1': 'particles_50um',
-      '3': 11,
-      '4': 1,
-      '5': 13,
-      '9': 10,
-      '10': 'particles50um',
-      '17': true
-    },
-    {
-      '1': 'particles_100um',
-      '3': 12,
-      '4': 1,
-      '5': 13,
-      '9': 11,
-      '10': 'particles100um',
-      '17': true
-    },
+    {'1': 'pm10_standard', '3': 1, '4': 1, '5': 13, '9': 0, '10': 'pm10Standard', '17': true},
+    {'1': 'pm25_standard', '3': 2, '4': 1, '5': 13, '9': 1, '10': 'pm25Standard', '17': true},
+    {'1': 'pm100_standard', '3': 3, '4': 1, '5': 13, '9': 2, '10': 'pm100Standard', '17': true},
+    {'1': 'pm10_environmental', '3': 4, '4': 1, '5': 13, '9': 3, '10': 'pm10Environmental', '17': true},
+    {'1': 'pm25_environmental', '3': 5, '4': 1, '5': 13, '9': 4, '10': 'pm25Environmental', '17': true},
+    {'1': 'pm100_environmental', '3': 6, '4': 1, '5': 13, '9': 5, '10': 'pm100Environmental', '17': true},
+    {'1': 'particles_03um', '3': 7, '4': 1, '5': 13, '9': 6, '10': 'particles03um', '17': true},
+    {'1': 'particles_05um', '3': 8, '4': 1, '5': 13, '9': 7, '10': 'particles05um', '17': true},
+    {'1': 'particles_10um', '3': 9, '4': 1, '5': 13, '9': 8, '10': 'particles10um', '17': true},
+    {'1': 'particles_25um', '3': 10, '4': 1, '5': 13, '9': 9, '10': 'particles25um', '17': true},
+    {'1': 'particles_50um', '3': 11, '4': 1, '5': 13, '9': 10, '10': 'particles50um', '17': true},
+    {'1': 'particles_100um', '3': 12, '4': 1, '5': 13, '9': 11, '10': 'particles100um', '17': true},
     {'1': 'co2', '3': 13, '4': 1, '5': 13, '9': 12, '10': 'co2', '17': true},
   ],
   '8': [
@@ -611,34 +266,16 @@ const LocalStats$json = {
   '1': 'LocalStats',
   '2': [
     {'1': 'uptime_seconds', '3': 1, '4': 1, '5': 13, '10': 'uptimeSeconds'},
-    {
-      '1': 'channel_utilization',
-      '3': 2,
-      '4': 1,
-      '5': 2,
-      '10': 'channelUtilization'
-    },
+    {'1': 'channel_utilization', '3': 2, '4': 1, '5': 2, '10': 'channelUtilization'},
     {'1': 'air_util_tx', '3': 3, '4': 1, '5': 2, '10': 'airUtilTx'},
     {'1': 'num_packets_tx', '3': 4, '4': 1, '5': 13, '10': 'numPacketsTx'},
     {'1': 'num_packets_rx', '3': 5, '4': 1, '5': 13, '10': 'numPacketsRx'},
-    {
-      '1': 'num_packets_rx_bad',
-      '3': 6,
-      '4': 1,
-      '5': 13,
-      '10': 'numPacketsRxBad'
-    },
+    {'1': 'num_packets_rx_bad', '3': 6, '4': 1, '5': 13, '10': 'numPacketsRxBad'},
     {'1': 'num_online_nodes', '3': 7, '4': 1, '5': 13, '10': 'numOnlineNodes'},
     {'1': 'num_total_nodes', '3': 8, '4': 1, '5': 13, '10': 'numTotalNodes'},
     {'1': 'num_rx_dupe', '3': 9, '4': 1, '5': 13, '10': 'numRxDupe'},
     {'1': 'num_tx_relay', '3': 10, '4': 1, '5': 13, '10': 'numTxRelay'},
-    {
-      '1': 'num_tx_relay_canceled',
-      '3': 11,
-      '4': 1,
-      '5': 13,
-      '10': 'numTxRelayCanceled'
-    },
+    {'1': 'num_tx_relay_canceled', '3': 11, '4': 1, '5': 13, '10': 'numTxRelayCanceled'},
   ],
 };
 
@@ -658,25 +295,9 @@ final $typed_data.Uint8List localStatsDescriptor = $convert.base64Decode(
 const HealthMetrics$json = {
   '1': 'HealthMetrics',
   '2': [
-    {
-      '1': 'heart_bpm',
-      '3': 1,
-      '4': 1,
-      '5': 13,
-      '9': 0,
-      '10': 'heartBpm',
-      '17': true
-    },
+    {'1': 'heart_bpm', '3': 1, '4': 1, '5': 13, '9': 0, '10': 'heartBpm', '17': true},
     {'1': 'spO2', '3': 2, '4': 1, '5': 13, '9': 1, '10': 'spO2', '17': true},
-    {
-      '1': 'temperature',
-      '3': 3,
-      '4': 1,
-      '5': 2,
-      '9': 2,
-      '10': 'temperature',
-      '17': true
-    },
+    {'1': 'temperature', '3': 3, '4': 1, '5': 2, '9': 2, '10': 'temperature', '17': true},
   ],
   '8': [
     {'1': '_heart_bpm'},
@@ -696,60 +317,12 @@ const Telemetry$json = {
   '1': 'Telemetry',
   '2': [
     {'1': 'time', '3': 1, '4': 1, '5': 7, '10': 'time'},
-    {
-      '1': 'device_metrics',
-      '3': 2,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.DeviceMetrics',
-      '9': 0,
-      '10': 'deviceMetrics'
-    },
-    {
-      '1': 'environment_metrics',
-      '3': 3,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.EnvironmentMetrics',
-      '9': 0,
-      '10': 'environmentMetrics'
-    },
-    {
-      '1': 'air_quality_metrics',
-      '3': 4,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.AirQualityMetrics',
-      '9': 0,
-      '10': 'airQualityMetrics'
-    },
-    {
-      '1': 'power_metrics',
-      '3': 5,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.PowerMetrics',
-      '9': 0,
-      '10': 'powerMetrics'
-    },
-    {
-      '1': 'local_stats',
-      '3': 6,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.LocalStats',
-      '9': 0,
-      '10': 'localStats'
-    },
-    {
-      '1': 'health_metrics',
-      '3': 7,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.HealthMetrics',
-      '9': 0,
-      '10': 'healthMetrics'
-    },
+    {'1': 'device_metrics', '3': 2, '4': 1, '5': 11, '6': '.meshtastic.DeviceMetrics', '9': 0, '10': 'deviceMetrics'},
+    {'1': 'environment_metrics', '3': 3, '4': 1, '5': 11, '6': '.meshtastic.EnvironmentMetrics', '9': 0, '10': 'environmentMetrics'},
+    {'1': 'air_quality_metrics', '3': 4, '4': 1, '5': 11, '6': '.meshtastic.AirQualityMetrics', '9': 0, '10': 'airQualityMetrics'},
+    {'1': 'power_metrics', '3': 5, '4': 1, '5': 11, '6': '.meshtastic.PowerMetrics', '9': 0, '10': 'powerMetrics'},
+    {'1': 'local_stats', '3': 6, '4': 1, '5': 11, '6': '.meshtastic.LocalStats', '9': 0, '10': 'localStats'},
+    {'1': 'health_metrics', '3': 7, '4': 1, '5': 11, '6': '.meshtastic.HealthMetrics', '9': 0, '10': 'healthMetrics'},
   ],
   '8': [
     {'1': 'variant'},
@@ -773,13 +346,7 @@ const Nau7802Config$json = {
   '1': 'Nau7802Config',
   '2': [
     {'1': 'zeroOffset', '3': 1, '4': 1, '5': 5, '10': 'zeroOffset'},
-    {
-      '1': 'calibrationFactor',
-      '3': 2,
-      '4': 1,
-      '5': 2,
-      '10': 'calibrationFactor'
-    },
+    {'1': 'calibrationFactor', '3': 2, '4': 1, '5': 2, '10': 'calibrationFactor'},
   ],
 };
 
@@ -787,3 +354,4 @@ const Nau7802Config$json = {
 final $typed_data.Uint8List nau7802ConfigDescriptor = $convert.base64Decode(
     'Cg1OYXU3ODAyQ29uZmlnEh4KCnplcm9PZmZzZXQYASABKAVSCnplcm9PZmZzZXQSLAoRY2FsaW'
     'JyYXRpb25GYWN0b3IYAiABKAJSEWNhbGlicmF0aW9uRmFjdG9y');
+

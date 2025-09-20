@@ -1,14 +1,13 @@
-// This is a generated file - do not edit.
 //
-// Generated from meshtastic/config.proto.
-
-// @dart = 3.3
+//  Generated code. Do not modify.
+//  source: meshtastic/config.proto
+//
+// @dart = 2.12
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: curly_braces_in_flow_control_structures
-// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
-// ignore_for_file: non_constant_identifier_names, unused_import
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -18,108 +17,18 @@ import 'dart:typed_data' as $typed_data;
 const Config$json = {
   '1': 'Config',
   '2': [
-    {
-      '1': 'device',
-      '3': 1,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.Config.DeviceConfig',
-      '9': 0,
-      '10': 'device'
-    },
-    {
-      '1': 'position',
-      '3': 2,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.Config.PositionConfig',
-      '9': 0,
-      '10': 'position'
-    },
-    {
-      '1': 'power',
-      '3': 3,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.Config.PowerConfig',
-      '9': 0,
-      '10': 'power'
-    },
-    {
-      '1': 'network',
-      '3': 4,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.Config.NetworkConfig',
-      '9': 0,
-      '10': 'network'
-    },
-    {
-      '1': 'display',
-      '3': 5,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.Config.DisplayConfig',
-      '9': 0,
-      '10': 'display'
-    },
-    {
-      '1': 'lora',
-      '3': 6,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.Config.LoRaConfig',
-      '9': 0,
-      '10': 'lora'
-    },
-    {
-      '1': 'bluetooth',
-      '3': 7,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.Config.BluetoothConfig',
-      '9': 0,
-      '10': 'bluetooth'
-    },
-    {
-      '1': 'security',
-      '3': 8,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.Config.SecurityConfig',
-      '9': 0,
-      '10': 'security'
-    },
-    {
-      '1': 'sessionkey',
-      '3': 9,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.Config.SessionkeyConfig',
-      '9': 0,
-      '10': 'sessionkey'
-    },
-    {
-      '1': 'device_ui',
-      '3': 10,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.DeviceUIConfig',
-      '9': 0,
-      '10': 'deviceUi'
-    },
+    {'1': 'device', '3': 1, '4': 1, '5': 11, '6': '.meshtastic.Config.DeviceConfig', '9': 0, '10': 'device'},
+    {'1': 'position', '3': 2, '4': 1, '5': 11, '6': '.meshtastic.Config.PositionConfig', '9': 0, '10': 'position'},
+    {'1': 'power', '3': 3, '4': 1, '5': 11, '6': '.meshtastic.Config.PowerConfig', '9': 0, '10': 'power'},
+    {'1': 'network', '3': 4, '4': 1, '5': 11, '6': '.meshtastic.Config.NetworkConfig', '9': 0, '10': 'network'},
+    {'1': 'display', '3': 5, '4': 1, '5': 11, '6': '.meshtastic.Config.DisplayConfig', '9': 0, '10': 'display'},
+    {'1': 'lora', '3': 6, '4': 1, '5': 11, '6': '.meshtastic.Config.LoRaConfig', '9': 0, '10': 'lora'},
+    {'1': 'bluetooth', '3': 7, '4': 1, '5': 11, '6': '.meshtastic.Config.BluetoothConfig', '9': 0, '10': 'bluetooth'},
+    {'1': 'security', '3': 8, '4': 1, '5': 11, '6': '.meshtastic.Config.SecurityConfig', '9': 0, '10': 'security'},
+    {'1': 'sessionkey', '3': 9, '4': 1, '5': 11, '6': '.meshtastic.Config.SessionkeyConfig', '9': 0, '10': 'sessionkey'},
+    {'1': 'device_ui', '3': 10, '4': 1, '5': 11, '6': '.meshtastic.DeviceUIConfig', '9': 0, '10': 'deviceUi'},
   ],
-  '3': [
-    Config_DeviceConfig$json,
-    Config_PositionConfig$json,
-    Config_PowerConfig$json,
-    Config_NetworkConfig$json,
-    Config_DisplayConfig$json,
-    Config_LoRaConfig$json,
-    Config_BluetoothConfig$json,
-    Config_SecurityConfig$json,
-    Config_SessionkeyConfig$json
-  ],
+  '3': [Config_DeviceConfig$json, Config_PositionConfig$json, Config_PowerConfig$json, Config_NetworkConfig$json, Config_DisplayConfig$json, Config_LoRaConfig$json, Config_BluetoothConfig$json, Config_SecurityConfig$json, Config_SessionkeyConfig$json],
   '8': [
     {'1': 'payload_variant'},
   ],
@@ -129,14 +38,7 @@ const Config$json = {
 const Config_DeviceConfig$json = {
   '1': 'DeviceConfig',
   '2': [
-    {
-      '1': 'role',
-      '3': 1,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.Config.DeviceConfig.Role',
-      '10': 'role'
-    },
+    {'1': 'role', '3': 1, '4': 1, '5': 14, '6': '.meshtastic.Config.DeviceConfig.Role', '10': 'role'},
     {
       '1': 'serial_enabled',
       '3': 2,
@@ -147,28 +49,9 @@ const Config_DeviceConfig$json = {
     },
     {'1': 'button_gpio', '3': 4, '4': 1, '5': 13, '10': 'buttonGpio'},
     {'1': 'buzzer_gpio', '3': 5, '4': 1, '5': 13, '10': 'buzzerGpio'},
-    {
-      '1': 'rebroadcast_mode',
-      '3': 6,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.Config.DeviceConfig.RebroadcastMode',
-      '10': 'rebroadcastMode'
-    },
-    {
-      '1': 'node_info_broadcast_secs',
-      '3': 7,
-      '4': 1,
-      '5': 13,
-      '10': 'nodeInfoBroadcastSecs'
-    },
-    {
-      '1': 'double_tap_as_button_press',
-      '3': 8,
-      '4': 1,
-      '5': 8,
-      '10': 'doubleTapAsButtonPress'
-    },
+    {'1': 'rebroadcast_mode', '3': 6, '4': 1, '5': 14, '6': '.meshtastic.Config.DeviceConfig.RebroadcastMode', '10': 'rebroadcastMode'},
+    {'1': 'node_info_broadcast_secs', '3': 7, '4': 1, '5': 13, '10': 'nodeInfoBroadcastSecs'},
+    {'1': 'double_tap_as_button_press', '3': 8, '4': 1, '5': 8, '10': 'doubleTapAsButtonPress'},
     {
       '1': 'is_managed',
       '3': 9,
@@ -177,26 +60,11 @@ const Config_DeviceConfig$json = {
       '8': {'3': true},
       '10': 'isManaged',
     },
-    {
-      '1': 'disable_triple_click',
-      '3': 10,
-      '4': 1,
-      '5': 8,
-      '10': 'disableTripleClick'
-    },
+    {'1': 'disable_triple_click', '3': 10, '4': 1, '5': 8, '10': 'disableTripleClick'},
     {'1': 'tzdef', '3': 11, '4': 1, '5': 9, '10': 'tzdef'},
-    {
-      '1': 'led_heartbeat_disabled',
-      '3': 12,
-      '4': 1,
-      '5': 8,
-      '10': 'ledHeartbeatDisabled'
-    },
+    {'1': 'led_heartbeat_disabled', '3': 12, '4': 1, '5': 8, '10': 'ledHeartbeatDisabled'},
   ],
-  '4': [
-    Config_DeviceConfig_Role$json,
-    Config_DeviceConfig_RebroadcastMode$json
-  ],
+  '4': [Config_DeviceConfig_Role$json, Config_DeviceConfig_RebroadcastMode$json],
 };
 
 @$core.Deprecated('Use configDescriptor instead')
@@ -239,20 +107,8 @@ const Config_DeviceConfig_RebroadcastMode$json = {
 const Config_PositionConfig$json = {
   '1': 'PositionConfig',
   '2': [
-    {
-      '1': 'position_broadcast_secs',
-      '3': 1,
-      '4': 1,
-      '5': 13,
-      '10': 'positionBroadcastSecs'
-    },
-    {
-      '1': 'position_broadcast_smart_enabled',
-      '3': 2,
-      '4': 1,
-      '5': 8,
-      '10': 'positionBroadcastSmartEnabled'
-    },
+    {'1': 'position_broadcast_secs', '3': 1, '4': 1, '5': 13, '10': 'positionBroadcastSecs'},
+    {'1': 'position_broadcast_smart_enabled', '3': 2, '4': 1, '5': 8, '10': 'positionBroadcastSmartEnabled'},
     {'1': 'fixed_position', '3': 3, '4': 1, '5': 8, '10': 'fixedPosition'},
     {
       '1': 'gps_enabled',
@@ -262,13 +118,7 @@ const Config_PositionConfig$json = {
       '8': {'3': true},
       '10': 'gpsEnabled',
     },
-    {
-      '1': 'gps_update_interval',
-      '3': 5,
-      '4': 1,
-      '5': 13,
-      '10': 'gpsUpdateInterval'
-    },
+    {'1': 'gps_update_interval', '3': 5, '4': 1, '5': 13, '10': 'gpsUpdateInterval'},
     {
       '1': 'gps_attempt_time',
       '3': 6,
@@ -280,34 +130,12 @@ const Config_PositionConfig$json = {
     {'1': 'position_flags', '3': 7, '4': 1, '5': 13, '10': 'positionFlags'},
     {'1': 'rx_gpio', '3': 8, '4': 1, '5': 13, '10': 'rxGpio'},
     {'1': 'tx_gpio', '3': 9, '4': 1, '5': 13, '10': 'txGpio'},
-    {
-      '1': 'broadcast_smart_minimum_distance',
-      '3': 10,
-      '4': 1,
-      '5': 13,
-      '10': 'broadcastSmartMinimumDistance'
-    },
-    {
-      '1': 'broadcast_smart_minimum_interval_secs',
-      '3': 11,
-      '4': 1,
-      '5': 13,
-      '10': 'broadcastSmartMinimumIntervalSecs'
-    },
+    {'1': 'broadcast_smart_minimum_distance', '3': 10, '4': 1, '5': 13, '10': 'broadcastSmartMinimumDistance'},
+    {'1': 'broadcast_smart_minimum_interval_secs', '3': 11, '4': 1, '5': 13, '10': 'broadcastSmartMinimumIntervalSecs'},
     {'1': 'gps_en_gpio', '3': 12, '4': 1, '5': 13, '10': 'gpsEnGpio'},
-    {
-      '1': 'gps_mode',
-      '3': 13,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.Config.PositionConfig.GpsMode',
-      '10': 'gpsMode'
-    },
+    {'1': 'gps_mode', '3': 13, '4': 1, '5': 14, '6': '.meshtastic.Config.PositionConfig.GpsMode', '10': 'gpsMode'},
   ],
-  '4': [
-    Config_PositionConfig_PositionFlags$json,
-    Config_PositionConfig_GpsMode$json
-  ],
+  '4': [Config_PositionConfig_PositionFlags$json, Config_PositionConfig_GpsMode$json],
 };
 
 @$core.Deprecated('Use configDescriptor instead')
@@ -343,37 +171,13 @@ const Config_PowerConfig$json = {
   '1': 'PowerConfig',
   '2': [
     {'1': 'is_power_saving', '3': 1, '4': 1, '5': 8, '10': 'isPowerSaving'},
-    {
-      '1': 'on_battery_shutdown_after_secs',
-      '3': 2,
-      '4': 1,
-      '5': 13,
-      '10': 'onBatteryShutdownAfterSecs'
-    },
-    {
-      '1': 'adc_multiplier_override',
-      '3': 3,
-      '4': 1,
-      '5': 2,
-      '10': 'adcMultiplierOverride'
-    },
-    {
-      '1': 'wait_bluetooth_secs',
-      '3': 4,
-      '4': 1,
-      '5': 13,
-      '10': 'waitBluetoothSecs'
-    },
+    {'1': 'on_battery_shutdown_after_secs', '3': 2, '4': 1, '5': 13, '10': 'onBatteryShutdownAfterSecs'},
+    {'1': 'adc_multiplier_override', '3': 3, '4': 1, '5': 2, '10': 'adcMultiplierOverride'},
+    {'1': 'wait_bluetooth_secs', '3': 4, '4': 1, '5': 13, '10': 'waitBluetoothSecs'},
     {'1': 'sds_secs', '3': 6, '4': 1, '5': 13, '10': 'sdsSecs'},
     {'1': 'ls_secs', '3': 7, '4': 1, '5': 13, '10': 'lsSecs'},
     {'1': 'min_wake_secs', '3': 8, '4': 1, '5': 13, '10': 'minWakeSecs'},
-    {
-      '1': 'device_battery_ina_address',
-      '3': 9,
-      '4': 1,
-      '5': 13,
-      '10': 'deviceBatteryInaAddress'
-    },
+    {'1': 'device_battery_ina_address', '3': 9, '4': 1, '5': 13, '10': 'deviceBatteryInaAddress'},
     {'1': 'powermon_enables', '3': 32, '4': 1, '5': 4, '10': 'powermonEnables'},
   ],
 };
@@ -387,36 +191,13 @@ const Config_NetworkConfig$json = {
     {'1': 'wifi_psk', '3': 4, '4': 1, '5': 9, '10': 'wifiPsk'},
     {'1': 'ntp_server', '3': 5, '4': 1, '5': 9, '10': 'ntpServer'},
     {'1': 'eth_enabled', '3': 6, '4': 1, '5': 8, '10': 'ethEnabled'},
-    {
-      '1': 'address_mode',
-      '3': 7,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.Config.NetworkConfig.AddressMode',
-      '10': 'addressMode'
-    },
-    {
-      '1': 'ipv4_config',
-      '3': 8,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.Config.NetworkConfig.IpV4Config',
-      '10': 'ipv4Config'
-    },
+    {'1': 'address_mode', '3': 7, '4': 1, '5': 14, '6': '.meshtastic.Config.NetworkConfig.AddressMode', '10': 'addressMode'},
+    {'1': 'ipv4_config', '3': 8, '4': 1, '5': 11, '6': '.meshtastic.Config.NetworkConfig.IpV4Config', '10': 'ipv4Config'},
     {'1': 'rsyslog_server', '3': 9, '4': 1, '5': 9, '10': 'rsyslogServer'},
-    {
-      '1': 'enabled_protocols',
-      '3': 10,
-      '4': 1,
-      '5': 13,
-      '10': 'enabledProtocols'
-    },
+    {'1': 'enabled_protocols', '3': 10, '4': 1, '5': 13, '10': 'enabledProtocols'},
   ],
   '3': [Config_NetworkConfig_IpV4Config$json],
-  '4': [
-    Config_NetworkConfig_AddressMode$json,
-    Config_NetworkConfig_ProtocolFlags$json
-  ],
+  '4': [Config_NetworkConfig_AddressMode$json, Config_NetworkConfig_ProtocolFlags$json],
 };
 
 @$core.Deprecated('Use configDescriptor instead')
@@ -453,72 +234,19 @@ const Config_DisplayConfig$json = {
   '1': 'DisplayConfig',
   '2': [
     {'1': 'screen_on_secs', '3': 1, '4': 1, '5': 13, '10': 'screenOnSecs'},
-    {
-      '1': 'gps_format',
-      '3': 2,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.Config.DisplayConfig.GpsCoordinateFormat',
-      '10': 'gpsFormat'
-    },
-    {
-      '1': 'auto_screen_carousel_secs',
-      '3': 3,
-      '4': 1,
-      '5': 13,
-      '10': 'autoScreenCarouselSecs'
-    },
+    {'1': 'gps_format', '3': 2, '4': 1, '5': 14, '6': '.meshtastic.Config.DisplayConfig.GpsCoordinateFormat', '10': 'gpsFormat'},
+    {'1': 'auto_screen_carousel_secs', '3': 3, '4': 1, '5': 13, '10': 'autoScreenCarouselSecs'},
     {'1': 'compass_north_top', '3': 4, '4': 1, '5': 8, '10': 'compassNorthTop'},
     {'1': 'flip_screen', '3': 5, '4': 1, '5': 8, '10': 'flipScreen'},
-    {
-      '1': 'units',
-      '3': 6,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.Config.DisplayConfig.DisplayUnits',
-      '10': 'units'
-    },
-    {
-      '1': 'oled',
-      '3': 7,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.Config.DisplayConfig.OledType',
-      '10': 'oled'
-    },
-    {
-      '1': 'displaymode',
-      '3': 8,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.Config.DisplayConfig.DisplayMode',
-      '10': 'displaymode'
-    },
+    {'1': 'units', '3': 6, '4': 1, '5': 14, '6': '.meshtastic.Config.DisplayConfig.DisplayUnits', '10': 'units'},
+    {'1': 'oled', '3': 7, '4': 1, '5': 14, '6': '.meshtastic.Config.DisplayConfig.OledType', '10': 'oled'},
+    {'1': 'displaymode', '3': 8, '4': 1, '5': 14, '6': '.meshtastic.Config.DisplayConfig.DisplayMode', '10': 'displaymode'},
     {'1': 'heading_bold', '3': 9, '4': 1, '5': 8, '10': 'headingBold'},
-    {
-      '1': 'wake_on_tap_or_motion',
-      '3': 10,
-      '4': 1,
-      '5': 8,
-      '10': 'wakeOnTapOrMotion'
-    },
-    {
-      '1': 'compass_orientation',
-      '3': 11,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.Config.DisplayConfig.CompassOrientation',
-      '10': 'compassOrientation'
-    },
+    {'1': 'wake_on_tap_or_motion', '3': 10, '4': 1, '5': 8, '10': 'wakeOnTapOrMotion'},
+    {'1': 'compass_orientation', '3': 11, '4': 1, '5': 14, '6': '.meshtastic.Config.DisplayConfig.CompassOrientation', '10': 'compassOrientation'},
     {'1': 'use_12h_clock', '3': 12, '4': 1, '5': 8, '10': 'use12hClock'},
   ],
-  '4': [
-    Config_DisplayConfig_GpsCoordinateFormat$json,
-    Config_DisplayConfig_DisplayUnits$json,
-    Config_DisplayConfig_OledType$json,
-    Config_DisplayConfig_DisplayMode$json,
-    Config_DisplayConfig_CompassOrientation$json
-  ],
+  '4': [Config_DisplayConfig_GpsCoordinateFormat$json, Config_DisplayConfig_DisplayUnits$json, Config_DisplayConfig_OledType$json, Config_DisplayConfig_DisplayMode$json, Config_DisplayConfig_CompassOrientation$json],
 };
 
 @$core.Deprecated('Use configDescriptor instead')
@@ -585,61 +313,23 @@ const Config_LoRaConfig$json = {
   '1': 'LoRaConfig',
   '2': [
     {'1': 'use_preset', '3': 1, '4': 1, '5': 8, '10': 'usePreset'},
-    {
-      '1': 'modem_preset',
-      '3': 2,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.Config.LoRaConfig.ModemPreset',
-      '10': 'modemPreset'
-    },
+    {'1': 'modem_preset', '3': 2, '4': 1, '5': 14, '6': '.meshtastic.Config.LoRaConfig.ModemPreset', '10': 'modemPreset'},
     {'1': 'bandwidth', '3': 3, '4': 1, '5': 13, '10': 'bandwidth'},
     {'1': 'spread_factor', '3': 4, '4': 1, '5': 13, '10': 'spreadFactor'},
     {'1': 'coding_rate', '3': 5, '4': 1, '5': 13, '10': 'codingRate'},
     {'1': 'frequency_offset', '3': 6, '4': 1, '5': 2, '10': 'frequencyOffset'},
-    {
-      '1': 'region',
-      '3': 7,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.Config.LoRaConfig.RegionCode',
-      '10': 'region'
-    },
+    {'1': 'region', '3': 7, '4': 1, '5': 14, '6': '.meshtastic.Config.LoRaConfig.RegionCode', '10': 'region'},
     {'1': 'hop_limit', '3': 8, '4': 1, '5': 13, '10': 'hopLimit'},
     {'1': 'tx_enabled', '3': 9, '4': 1, '5': 8, '10': 'txEnabled'},
     {'1': 'tx_power', '3': 10, '4': 1, '5': 5, '10': 'txPower'},
     {'1': 'channel_num', '3': 11, '4': 1, '5': 13, '10': 'channelNum'},
-    {
-      '1': 'override_duty_cycle',
-      '3': 12,
-      '4': 1,
-      '5': 8,
-      '10': 'overrideDutyCycle'
-    },
-    {
-      '1': 'sx126x_rx_boosted_gain',
-      '3': 13,
-      '4': 1,
-      '5': 8,
-      '10': 'sx126xRxBoostedGain'
-    },
-    {
-      '1': 'override_frequency',
-      '3': 14,
-      '4': 1,
-      '5': 2,
-      '10': 'overrideFrequency'
-    },
+    {'1': 'override_duty_cycle', '3': 12, '4': 1, '5': 8, '10': 'overrideDutyCycle'},
+    {'1': 'sx126x_rx_boosted_gain', '3': 13, '4': 1, '5': 8, '10': 'sx126xRxBoostedGain'},
+    {'1': 'override_frequency', '3': 14, '4': 1, '5': 2, '10': 'overrideFrequency'},
     {'1': 'pa_fan_disabled', '3': 15, '4': 1, '5': 8, '10': 'paFanDisabled'},
     {'1': 'ignore_incoming', '3': 103, '4': 3, '5': 13, '10': 'ignoreIncoming'},
     {'1': 'ignore_mqtt', '3': 104, '4': 1, '5': 8, '10': 'ignoreMqtt'},
-    {
-      '1': 'config_ok_to_mqtt',
-      '3': 105,
-      '4': 1,
-      '5': 8,
-      '10': 'configOkToMqtt'
-    },
+    {'1': 'config_ok_to_mqtt', '3': 105, '4': 1, '5': 8, '10': 'configOkToMqtt'},
   ],
   '4': [Config_LoRaConfig_RegionCode$json, Config_LoRaConfig_ModemPreset$json],
 };
@@ -698,14 +388,7 @@ const Config_BluetoothConfig$json = {
   '1': 'BluetoothConfig',
   '2': [
     {'1': 'enabled', '3': 1, '4': 1, '5': 8, '10': 'enabled'},
-    {
-      '1': 'mode',
-      '3': 2,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.Config.BluetoothConfig.PairingMode',
-      '10': 'mode'
-    },
+    {'1': 'mode', '3': 2, '4': 1, '5': 14, '6': '.meshtastic.Config.BluetoothConfig.PairingMode', '10': 'mode'},
     {'1': 'fixed_pin', '3': 3, '4': 1, '5': 13, '10': 'fixedPin'},
   ],
   '4': [Config_BluetoothConfig_PairingMode$json],
@@ -730,20 +413,8 @@ const Config_SecurityConfig$json = {
     {'1': 'admin_key', '3': 3, '4': 3, '5': 12, '10': 'adminKey'},
     {'1': 'is_managed', '3': 4, '4': 1, '5': 8, '10': 'isManaged'},
     {'1': 'serial_enabled', '3': 5, '4': 1, '5': 8, '10': 'serialEnabled'},
-    {
-      '1': 'debug_log_api_enabled',
-      '3': 6,
-      '4': 1,
-      '5': 8,
-      '10': 'debugLogApiEnabled'
-    },
-    {
-      '1': 'admin_channel_enabled',
-      '3': 8,
-      '4': 1,
-      '5': 8,
-      '10': 'adminChannelEnabled'
-    },
+    {'1': 'debug_log_api_enabled', '3': 6, '4': 1, '5': 8, '10': 'debugLogApiEnabled'},
+    {'1': 'admin_channel_enabled', '3': 8, '4': 1, '5': 8, '10': 'adminChannelEnabled'},
   ],
 };
 
@@ -868,3 +539,4 @@ final $typed_data.Uint8List configDescriptor = $convert.base64Decode(
     'QYBiABKAhSEmRlYnVnTG9nQXBpRW5hYmxlZBIyChVhZG1pbl9jaGFubmVsX2VuYWJsZWQYCCAB'
     'KAhSE2FkbWluQ2hhbm5lbEVuYWJsZWQaEgoQU2Vzc2lvbmtleUNvbmZpZ0IRCg9wYXlsb2FkX3'
     'ZhcmlhbnQ=');
+

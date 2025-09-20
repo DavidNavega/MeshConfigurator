@@ -1,14 +1,13 @@
-// This is a generated file - do not edit.
 //
-// Generated from meshtastic/storeforward.proto.
-
-// @dart = 3.3
+//  Generated code. Do not modify.
+//  source: meshtastic/storeforward.proto
+//
+// @dart = 2.12
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: curly_braces_in_flow_control_structures
-// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
-// ignore_for_file: non_constant_identifier_names, unused_import
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -18,48 +17,13 @@ import 'dart:typed_data' as $typed_data;
 const StoreAndForward$json = {
   '1': 'StoreAndForward',
   '2': [
-    {
-      '1': 'rr',
-      '3': 1,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.StoreAndForward.RequestResponse',
-      '10': 'rr'
-    },
-    {
-      '1': 'stats',
-      '3': 2,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.StoreAndForward.Statistics',
-      '9': 0,
-      '10': 'stats'
-    },
-    {
-      '1': 'history',
-      '3': 3,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.StoreAndForward.History',
-      '9': 0,
-      '10': 'history'
-    },
-    {
-      '1': 'heartbeat',
-      '3': 4,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.StoreAndForward.Heartbeat',
-      '9': 0,
-      '10': 'heartbeat'
-    },
+    {'1': 'rr', '3': 1, '4': 1, '5': 14, '6': '.meshtastic.StoreAndForward.RequestResponse', '10': 'rr'},
+    {'1': 'stats', '3': 2, '4': 1, '5': 11, '6': '.meshtastic.StoreAndForward.Statistics', '9': 0, '10': 'stats'},
+    {'1': 'history', '3': 3, '4': 1, '5': 11, '6': '.meshtastic.StoreAndForward.History', '9': 0, '10': 'history'},
+    {'1': 'heartbeat', '3': 4, '4': 1, '5': 11, '6': '.meshtastic.StoreAndForward.Heartbeat', '9': 0, '10': 'heartbeat'},
     {'1': 'text', '3': 5, '4': 1, '5': 12, '9': 0, '10': 'text'},
   ],
-  '3': [
-    StoreAndForward_Statistics$json,
-    StoreAndForward_History$json,
-    StoreAndForward_Heartbeat$json
-  ],
+  '3': [StoreAndForward_Statistics$json, StoreAndForward_History$json, StoreAndForward_Heartbeat$json],
   '4': [StoreAndForward_RequestResponse$json],
   '8': [
     {'1': 'variant'},
@@ -147,3 +111,4 @@ final $typed_data.Uint8List storeAndForwardDescriptor = $convert.base64Decode(
     'WFRfQlJPQURDQVNUEAkSEAoMQ0xJRU5UX0VSUk9SEEASEgoOQ0xJRU5UX0hJU1RPUlkQQRIQCg'
     'xDTElFTlRfU1RBVFMQQhIPCgtDTElFTlRfUElORxBDEg8KC0NMSUVOVF9QT05HEEQSEAoMQ0xJ'
     'RU5UX0FCT1JUEGpCCQoHdmFyaWFudA==');
+

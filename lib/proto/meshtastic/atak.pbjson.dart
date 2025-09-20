@@ -1,14 +1,13 @@
-// This is a generated file - do not edit.
 //
-// Generated from meshtastic/atak.proto.
-
-// @dart = 3.3
+//  Generated code. Do not modify.
+//  source: meshtastic/atak.proto
+//
+// @dart = 2.12
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: curly_braces_in_flow_control_structures
-// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
-// ignore_for_file: non_constant_identifier_names, unused_import
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -70,48 +69,11 @@ const TAKPacket$json = {
   '1': 'TAKPacket',
   '2': [
     {'1': 'is_compressed', '3': 1, '4': 1, '5': 8, '10': 'isCompressed'},
-    {
-      '1': 'contact',
-      '3': 2,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.Contact',
-      '10': 'contact'
-    },
-    {
-      '1': 'group',
-      '3': 3,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.Group',
-      '10': 'group'
-    },
-    {
-      '1': 'status',
-      '3': 4,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.Status',
-      '10': 'status'
-    },
-    {
-      '1': 'pli',
-      '3': 5,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.PLI',
-      '9': 0,
-      '10': 'pli'
-    },
-    {
-      '1': 'chat',
-      '3': 6,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.GeoChat',
-      '9': 0,
-      '10': 'chat'
-    },
+    {'1': 'contact', '3': 2, '4': 1, '5': 11, '6': '.meshtastic.Contact', '10': 'contact'},
+    {'1': 'group', '3': 3, '4': 1, '5': 11, '6': '.meshtastic.Group', '10': 'group'},
+    {'1': 'status', '3': 4, '4': 1, '5': 11, '6': '.meshtastic.Status', '10': 'status'},
+    {'1': 'pli', '3': 5, '4': 1, '5': 11, '6': '.meshtastic.PLI', '9': 0, '10': 'pli'},
+    {'1': 'chat', '3': 6, '4': 1, '5': 11, '6': '.meshtastic.GeoChat', '9': 0, '10': 'chat'},
     {'1': 'detail', '3': 7, '4': 1, '5': 12, '9': 0, '10': 'detail'},
   ],
   '8': [
@@ -134,15 +96,7 @@ const GeoChat$json = {
   '2': [
     {'1': 'message', '3': 1, '4': 1, '5': 9, '10': 'message'},
     {'1': 'to', '3': 2, '4': 1, '5': 9, '9': 0, '10': 'to', '17': true},
-    {
-      '1': 'to_callsign',
-      '3': 3,
-      '4': 1,
-      '5': 9,
-      '9': 1,
-      '10': 'toCallsign',
-      '17': true
-    },
+    {'1': 'to_callsign', '3': 3, '4': 1, '5': 9, '9': 1, '10': 'toCallsign', '17': true},
   ],
   '8': [
     {'1': '_to'},
@@ -160,22 +114,8 @@ final $typed_data.Uint8List geoChatDescriptor = $convert.base64Decode(
 const Group$json = {
   '1': 'Group',
   '2': [
-    {
-      '1': 'role',
-      '3': 1,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.MemberRole',
-      '10': 'role'
-    },
-    {
-      '1': 'team',
-      '3': 2,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.Team',
-      '10': 'team'
-    },
+    {'1': 'role', '3': 1, '4': 1, '5': 14, '6': '.meshtastic.MemberRole', '10': 'role'},
+    {'1': 'team', '3': 2, '4': 1, '5': 14, '6': '.meshtastic.Team', '10': 'team'},
   ],
 };
 
@@ -193,8 +133,8 @@ const Status$json = {
 };
 
 /// Descriptor for `Status`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List statusDescriptor =
-    $convert.base64Decode('CgZTdGF0dXMSGAoHYmF0dGVyeRgBIAEoDVIHYmF0dGVyeQ==');
+final $typed_data.Uint8List statusDescriptor = $convert.base64Decode(
+    'CgZTdGF0dXMSGAoHYmF0dGVyeRgBIAEoDVIHYmF0dGVyeQ==');
 
 @$core.Deprecated('Use contactDescriptor instead')
 const Contact$json = {
@@ -227,3 +167,4 @@ final $typed_data.Uint8List pLIDescriptor = $convert.base64Decode(
     'CgNQTEkSHQoKbGF0aXR1ZGVfaRgBIAEoD1IJbGF0aXR1ZGVJEh8KC2xvbmdpdHVkZV9pGAIgAS'
     'gPUgpsb25naXR1ZGVJEhoKCGFsdGl0dWRlGAMgASgFUghhbHRpdHVkZRIUCgVzcGVlZBgEIAEo'
     'DVIFc3BlZWQSFgoGY291cnNlGAUgASgNUgZjb3Vyc2U=');
+

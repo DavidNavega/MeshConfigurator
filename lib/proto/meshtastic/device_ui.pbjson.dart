@@ -1,14 +1,13 @@
-// This is a generated file - do not edit.
 //
-// Generated from meshtastic/device_ui.proto.
-
-// @dart = 3.3
+//  Generated code. Do not modify.
+//  source: meshtastic/device_ui.proto
+//
+// @dart = 2.12
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: curly_braces_in_flow_control_structures
-// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
-// ignore_for_file: non_constant_identifier_names, unused_import
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -25,8 +24,8 @@ const Theme$json = {
 };
 
 /// Descriptor for `Theme`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List themeDescriptor = $convert
-    .base64Decode('CgVUaGVtZRIICgREQVJLEAASCQoFTElHSFQQARIHCgNSRUQQAg==');
+final $typed_data.Uint8List themeDescriptor = $convert.base64Decode(
+    'CgVUaGVtZRIICgREQVJLEAASCQoFTElHSFQQARIHCgNSRUQQAg==');
 
 @$core.Deprecated('Use languageDescriptor instead')
 const Language$json = {
@@ -66,67 +65,20 @@ const DeviceUIConfig$json = {
   '1': 'DeviceUIConfig',
   '2': [
     {'1': 'version', '3': 1, '4': 1, '5': 13, '10': 'version'},
-    {
-      '1': 'screen_brightness',
-      '3': 2,
-      '4': 1,
-      '5': 13,
-      '10': 'screenBrightness'
-    },
+    {'1': 'screen_brightness', '3': 2, '4': 1, '5': 13, '10': 'screenBrightness'},
     {'1': 'screen_timeout', '3': 3, '4': 1, '5': 13, '10': 'screenTimeout'},
     {'1': 'screen_lock', '3': 4, '4': 1, '5': 8, '10': 'screenLock'},
     {'1': 'settings_lock', '3': 5, '4': 1, '5': 8, '10': 'settingsLock'},
     {'1': 'pin_code', '3': 6, '4': 1, '5': 13, '10': 'pinCode'},
-    {
-      '1': 'theme',
-      '3': 7,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.Theme',
-      '10': 'theme'
-    },
+    {'1': 'theme', '3': 7, '4': 1, '5': 14, '6': '.meshtastic.Theme', '10': 'theme'},
     {'1': 'alert_enabled', '3': 8, '4': 1, '5': 8, '10': 'alertEnabled'},
     {'1': 'banner_enabled', '3': 9, '4': 1, '5': 8, '10': 'bannerEnabled'},
     {'1': 'ring_tone_id', '3': 10, '4': 1, '5': 13, '10': 'ringToneId'},
-    {
-      '1': 'language',
-      '3': 11,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.Language',
-      '10': 'language'
-    },
-    {
-      '1': 'node_filter',
-      '3': 12,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.NodeFilter',
-      '10': 'nodeFilter'
-    },
-    {
-      '1': 'node_highlight',
-      '3': 13,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.NodeHighlight',
-      '10': 'nodeHighlight'
-    },
-    {
-      '1': 'calibration_data',
-      '3': 14,
-      '4': 1,
-      '5': 12,
-      '10': 'calibrationData'
-    },
-    {
-      '1': 'map_data',
-      '3': 15,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.Map',
-      '10': 'mapData'
-    },
+    {'1': 'language', '3': 11, '4': 1, '5': 14, '6': '.meshtastic.Language', '10': 'language'},
+    {'1': 'node_filter', '3': 12, '4': 1, '5': 11, '6': '.meshtastic.NodeFilter', '10': 'nodeFilter'},
+    {'1': 'node_highlight', '3': 13, '4': 1, '5': 11, '6': '.meshtastic.NodeHighlight', '10': 'nodeHighlight'},
+    {'1': 'calibration_data', '3': 14, '4': 1, '5': 12, '10': 'calibrationData'},
+    {'1': 'map_data', '3': 15, '4': 1, '5': 11, '6': '.meshtastic.Map', '10': 'mapData'},
   ],
 };
 
@@ -205,14 +157,7 @@ final $typed_data.Uint8List geoPointDescriptor = $convert.base64Decode(
 const Map_$json = {
   '1': 'Map',
   '2': [
-    {
-      '1': 'home',
-      '3': 1,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.GeoPoint',
-      '10': 'home'
-    },
+    {'1': 'home', '3': 1, '4': 1, '5': 11, '6': '.meshtastic.GeoPoint', '10': 'home'},
     {'1': 'style', '3': 2, '4': 1, '5': 9, '10': 'style'},
     {'1': 'follow_gps', '3': 3, '4': 1, '5': 8, '10': 'followGps'},
   ],
@@ -222,3 +167,4 @@ const Map_$json = {
 final $typed_data.Uint8List map_Descriptor = $convert.base64Decode(
     'CgNNYXASKAoEaG9tZRgBIAEoCzIULm1lc2h0YXN0aWMuR2VvUG9pbnRSBGhvbWUSFAoFc3R5bG'
     'UYAiABKAlSBXN0eWxlEh0KCmZvbGxvd19ncHMYAyABKAhSCWZvbGxvd0dwcw==');
+

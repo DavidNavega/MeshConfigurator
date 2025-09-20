@@ -1,14 +1,13 @@
-// This is a generated file - do not edit.
 //
-// Generated from meshtastic/module_config.proto.
-
-// @dart = 3.3
+//  Generated code. Do not modify.
+//  source: meshtastic/module_config.proto
+//
+// @dart = 2.12
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: curly_braces_in_flow_control_structures
-// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
-// ignore_for_file: non_constant_identifier_names, unused_import
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -33,140 +32,21 @@ final $typed_data.Uint8List remoteHardwarePinTypeDescriptor = $convert.base64Dec
 const ModuleConfig$json = {
   '1': 'ModuleConfig',
   '2': [
-    {
-      '1': 'mqtt',
-      '3': 1,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.ModuleConfig.MQTTConfig',
-      '9': 0,
-      '10': 'mqtt'
-    },
-    {
-      '1': 'serial',
-      '3': 2,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.ModuleConfig.SerialConfig',
-      '9': 0,
-      '10': 'serial'
-    },
-    {
-      '1': 'external_notification',
-      '3': 3,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.ModuleConfig.ExternalNotificationConfig',
-      '9': 0,
-      '10': 'externalNotification'
-    },
-    {
-      '1': 'store_forward',
-      '3': 4,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.ModuleConfig.StoreForwardConfig',
-      '9': 0,
-      '10': 'storeForward'
-    },
-    {
-      '1': 'range_test',
-      '3': 5,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.ModuleConfig.RangeTestConfig',
-      '9': 0,
-      '10': 'rangeTest'
-    },
-    {
-      '1': 'telemetry',
-      '3': 6,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.ModuleConfig.TelemetryConfig',
-      '9': 0,
-      '10': 'telemetry'
-    },
-    {
-      '1': 'canned_message',
-      '3': 7,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.ModuleConfig.CannedMessageConfig',
-      '9': 0,
-      '10': 'cannedMessage'
-    },
-    {
-      '1': 'audio',
-      '3': 8,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.ModuleConfig.AudioConfig',
-      '9': 0,
-      '10': 'audio'
-    },
-    {
-      '1': 'remote_hardware',
-      '3': 9,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.ModuleConfig.RemoteHardwareConfig',
-      '9': 0,
-      '10': 'remoteHardware'
-    },
-    {
-      '1': 'neighbor_info',
-      '3': 10,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.ModuleConfig.NeighborInfoConfig',
-      '9': 0,
-      '10': 'neighborInfo'
-    },
-    {
-      '1': 'ambient_lighting',
-      '3': 11,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.ModuleConfig.AmbientLightingConfig',
-      '9': 0,
-      '10': 'ambientLighting'
-    },
-    {
-      '1': 'detection_sensor',
-      '3': 12,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.ModuleConfig.DetectionSensorConfig',
-      '9': 0,
-      '10': 'detectionSensor'
-    },
-    {
-      '1': 'paxcounter',
-      '3': 13,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.ModuleConfig.PaxcounterConfig',
-      '9': 0,
-      '10': 'paxcounter'
-    },
+    {'1': 'mqtt', '3': 1, '4': 1, '5': 11, '6': '.meshtastic.ModuleConfig.MQTTConfig', '9': 0, '10': 'mqtt'},
+    {'1': 'serial', '3': 2, '4': 1, '5': 11, '6': '.meshtastic.ModuleConfig.SerialConfig', '9': 0, '10': 'serial'},
+    {'1': 'external_notification', '3': 3, '4': 1, '5': 11, '6': '.meshtastic.ModuleConfig.ExternalNotificationConfig', '9': 0, '10': 'externalNotification'},
+    {'1': 'store_forward', '3': 4, '4': 1, '5': 11, '6': '.meshtastic.ModuleConfig.StoreForwardConfig', '9': 0, '10': 'storeForward'},
+    {'1': 'range_test', '3': 5, '4': 1, '5': 11, '6': '.meshtastic.ModuleConfig.RangeTestConfig', '9': 0, '10': 'rangeTest'},
+    {'1': 'telemetry', '3': 6, '4': 1, '5': 11, '6': '.meshtastic.ModuleConfig.TelemetryConfig', '9': 0, '10': 'telemetry'},
+    {'1': 'canned_message', '3': 7, '4': 1, '5': 11, '6': '.meshtastic.ModuleConfig.CannedMessageConfig', '9': 0, '10': 'cannedMessage'},
+    {'1': 'audio', '3': 8, '4': 1, '5': 11, '6': '.meshtastic.ModuleConfig.AudioConfig', '9': 0, '10': 'audio'},
+    {'1': 'remote_hardware', '3': 9, '4': 1, '5': 11, '6': '.meshtastic.ModuleConfig.RemoteHardwareConfig', '9': 0, '10': 'remoteHardware'},
+    {'1': 'neighbor_info', '3': 10, '4': 1, '5': 11, '6': '.meshtastic.ModuleConfig.NeighborInfoConfig', '9': 0, '10': 'neighborInfo'},
+    {'1': 'ambient_lighting', '3': 11, '4': 1, '5': 11, '6': '.meshtastic.ModuleConfig.AmbientLightingConfig', '9': 0, '10': 'ambientLighting'},
+    {'1': 'detection_sensor', '3': 12, '4': 1, '5': 11, '6': '.meshtastic.ModuleConfig.DetectionSensorConfig', '9': 0, '10': 'detectionSensor'},
+    {'1': 'paxcounter', '3': 13, '4': 1, '5': 11, '6': '.meshtastic.ModuleConfig.PaxcounterConfig', '9': 0, '10': 'paxcounter'},
   ],
-  '3': [
-    ModuleConfig_MQTTConfig$json,
-    ModuleConfig_MapReportSettings$json,
-    ModuleConfig_RemoteHardwareConfig$json,
-    ModuleConfig_NeighborInfoConfig$json,
-    ModuleConfig_DetectionSensorConfig$json,
-    ModuleConfig_AudioConfig$json,
-    ModuleConfig_PaxcounterConfig$json,
-    ModuleConfig_SerialConfig$json,
-    ModuleConfig_ExternalNotificationConfig$json,
-    ModuleConfig_StoreForwardConfig$json,
-    ModuleConfig_RangeTestConfig$json,
-    ModuleConfig_TelemetryConfig$json,
-    ModuleConfig_CannedMessageConfig$json,
-    ModuleConfig_AmbientLightingConfig$json
-  ],
+  '3': [ModuleConfig_MQTTConfig$json, ModuleConfig_MapReportSettings$json, ModuleConfig_RemoteHardwareConfig$json, ModuleConfig_NeighborInfoConfig$json, ModuleConfig_DetectionSensorConfig$json, ModuleConfig_AudioConfig$json, ModuleConfig_PaxcounterConfig$json, ModuleConfig_SerialConfig$json, ModuleConfig_ExternalNotificationConfig$json, ModuleConfig_StoreForwardConfig$json, ModuleConfig_RangeTestConfig$json, ModuleConfig_TelemetryConfig$json, ModuleConfig_CannedMessageConfig$json, ModuleConfig_AmbientLightingConfig$json],
   '8': [
     {'1': 'payload_variant'},
   ],
@@ -180,38 +60,13 @@ const ModuleConfig_MQTTConfig$json = {
     {'1': 'address', '3': 2, '4': 1, '5': 9, '10': 'address'},
     {'1': 'username', '3': 3, '4': 1, '5': 9, '10': 'username'},
     {'1': 'password', '3': 4, '4': 1, '5': 9, '10': 'password'},
-    {
-      '1': 'encryption_enabled',
-      '3': 5,
-      '4': 1,
-      '5': 8,
-      '10': 'encryptionEnabled'
-    },
+    {'1': 'encryption_enabled', '3': 5, '4': 1, '5': 8, '10': 'encryptionEnabled'},
     {'1': 'json_enabled', '3': 6, '4': 1, '5': 8, '10': 'jsonEnabled'},
     {'1': 'tls_enabled', '3': 7, '4': 1, '5': 8, '10': 'tlsEnabled'},
     {'1': 'root', '3': 8, '4': 1, '5': 9, '10': 'root'},
-    {
-      '1': 'proxy_to_client_enabled',
-      '3': 9,
-      '4': 1,
-      '5': 8,
-      '10': 'proxyToClientEnabled'
-    },
-    {
-      '1': 'map_reporting_enabled',
-      '3': 10,
-      '4': 1,
-      '5': 8,
-      '10': 'mapReportingEnabled'
-    },
-    {
-      '1': 'map_report_settings',
-      '3': 11,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.ModuleConfig.MapReportSettings',
-      '10': 'mapReportSettings'
-    },
+    {'1': 'proxy_to_client_enabled', '3': 9, '4': 1, '5': 8, '10': 'proxyToClientEnabled'},
+    {'1': 'map_reporting_enabled', '3': 10, '4': 1, '5': 8, '10': 'mapReportingEnabled'},
+    {'1': 'map_report_settings', '3': 11, '4': 1, '5': 11, '6': '.meshtastic.ModuleConfig.MapReportSettings', '10': 'mapReportSettings'},
   ],
 };
 
@@ -219,20 +74,8 @@ const ModuleConfig_MQTTConfig$json = {
 const ModuleConfig_MapReportSettings$json = {
   '1': 'MapReportSettings',
   '2': [
-    {
-      '1': 'publish_interval_secs',
-      '3': 1,
-      '4': 1,
-      '5': 13,
-      '10': 'publishIntervalSecs'
-    },
-    {
-      '1': 'position_precision',
-      '3': 2,
-      '4': 1,
-      '5': 13,
-      '10': 'positionPrecision'
-    },
+    {'1': 'publish_interval_secs', '3': 1, '4': 1, '5': 13, '10': 'publishIntervalSecs'},
+    {'1': 'position_precision', '3': 2, '4': 1, '5': 13, '10': 'positionPrecision'},
   ],
 };
 
@@ -241,21 +84,8 @@ const ModuleConfig_RemoteHardwareConfig$json = {
   '1': 'RemoteHardwareConfig',
   '2': [
     {'1': 'enabled', '3': 1, '4': 1, '5': 8, '10': 'enabled'},
-    {
-      '1': 'allow_undefined_pin_access',
-      '3': 2,
-      '4': 1,
-      '5': 8,
-      '10': 'allowUndefinedPinAccess'
-    },
-    {
-      '1': 'available_pins',
-      '3': 3,
-      '4': 3,
-      '5': 11,
-      '6': '.meshtastic.RemoteHardwarePin',
-      '10': 'availablePins'
-    },
+    {'1': 'allow_undefined_pin_access', '3': 2, '4': 1, '5': 8, '10': 'allowUndefinedPinAccess'},
+    {'1': 'available_pins', '3': 3, '4': 3, '5': 11, '6': '.meshtastic.RemoteHardwarePin', '10': 'availablePins'},
   ],
 };
 
@@ -265,13 +95,7 @@ const ModuleConfig_NeighborInfoConfig$json = {
   '2': [
     {'1': 'enabled', '3': 1, '4': 1, '5': 8, '10': 'enabled'},
     {'1': 'update_interval', '3': 2, '4': 1, '5': 13, '10': 'updateInterval'},
-    {
-      '1': 'transmit_over_lora',
-      '3': 3,
-      '4': 1,
-      '5': 8,
-      '10': 'transmitOverLora'
-    },
+    {'1': 'transmit_over_lora', '3': 3, '4': 1, '5': 8, '10': 'transmitOverLora'},
   ],
 };
 
@@ -280,31 +104,12 @@ const ModuleConfig_DetectionSensorConfig$json = {
   '1': 'DetectionSensorConfig',
   '2': [
     {'1': 'enabled', '3': 1, '4': 1, '5': 8, '10': 'enabled'},
-    {
-      '1': 'minimum_broadcast_secs',
-      '3': 2,
-      '4': 1,
-      '5': 13,
-      '10': 'minimumBroadcastSecs'
-    },
-    {
-      '1': 'state_broadcast_secs',
-      '3': 3,
-      '4': 1,
-      '5': 13,
-      '10': 'stateBroadcastSecs'
-    },
+    {'1': 'minimum_broadcast_secs', '3': 2, '4': 1, '5': 13, '10': 'minimumBroadcastSecs'},
+    {'1': 'state_broadcast_secs', '3': 3, '4': 1, '5': 13, '10': 'stateBroadcastSecs'},
     {'1': 'send_bell', '3': 4, '4': 1, '5': 8, '10': 'sendBell'},
     {'1': 'name', '3': 5, '4': 1, '5': 9, '10': 'name'},
     {'1': 'monitor_pin', '3': 6, '4': 1, '5': 13, '10': 'monitorPin'},
-    {
-      '1': 'detection_trigger_type',
-      '3': 7,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.ModuleConfig.DetectionSensorConfig.TriggerType',
-      '10': 'detectionTriggerType'
-    },
+    {'1': 'detection_trigger_type', '3': 7, '4': 1, '5': 14, '6': '.meshtastic.ModuleConfig.DetectionSensorConfig.TriggerType', '10': 'detectionTriggerType'},
     {'1': 'use_pullup', '3': 8, '4': 1, '5': 8, '10': 'usePullup'},
   ],
   '4': [ModuleConfig_DetectionSensorConfig_TriggerType$json],
@@ -329,14 +134,7 @@ const ModuleConfig_AudioConfig$json = {
   '2': [
     {'1': 'codec2_enabled', '3': 1, '4': 1, '5': 8, '10': 'codec2Enabled'},
     {'1': 'ptt_pin', '3': 2, '4': 1, '5': 13, '10': 'pttPin'},
-    {
-      '1': 'bitrate',
-      '3': 3,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.ModuleConfig.AudioConfig.Audio_Baud',
-      '10': 'bitrate'
-    },
+    {'1': 'bitrate', '3': 3, '4': 1, '5': 14, '6': '.meshtastic.ModuleConfig.AudioConfig.Audio_Baud', '10': 'bitrate'},
     {'1': 'i2s_ws', '3': 4, '4': 1, '5': 13, '10': 'i2sWs'},
     {'1': 'i2s_sd', '3': 5, '4': 1, '5': 13, '10': 'i2sSd'},
     {'1': 'i2s_din', '3': 6, '4': 1, '5': 13, '10': 'i2sDin'},
@@ -366,13 +164,7 @@ const ModuleConfig_PaxcounterConfig$json = {
   '1': 'PaxcounterConfig',
   '2': [
     {'1': 'enabled', '3': 1, '4': 1, '5': 8, '10': 'enabled'},
-    {
-      '1': 'paxcounter_update_interval',
-      '3': 2,
-      '4': 1,
-      '5': 13,
-      '10': 'paxcounterUpdateInterval'
-    },
+    {'1': 'paxcounter_update_interval', '3': 2, '4': 1, '5': 13, '10': 'paxcounterUpdateInterval'},
     {'1': 'wifi_threshold', '3': 3, '4': 1, '5': 5, '10': 'wifiThreshold'},
     {'1': 'ble_threshold', '3': 4, '4': 1, '5': 5, '10': 'bleThreshold'},
   ],
@@ -386,35 +178,12 @@ const ModuleConfig_SerialConfig$json = {
     {'1': 'echo', '3': 2, '4': 1, '5': 8, '10': 'echo'},
     {'1': 'rxd', '3': 3, '4': 1, '5': 13, '10': 'rxd'},
     {'1': 'txd', '3': 4, '4': 1, '5': 13, '10': 'txd'},
-    {
-      '1': 'baud',
-      '3': 5,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.ModuleConfig.SerialConfig.Serial_Baud',
-      '10': 'baud'
-    },
+    {'1': 'baud', '3': 5, '4': 1, '5': 14, '6': '.meshtastic.ModuleConfig.SerialConfig.Serial_Baud', '10': 'baud'},
     {'1': 'timeout', '3': 6, '4': 1, '5': 13, '10': 'timeout'},
-    {
-      '1': 'mode',
-      '3': 7,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.ModuleConfig.SerialConfig.Serial_Mode',
-      '10': 'mode'
-    },
-    {
-      '1': 'override_console_serial_port',
-      '3': 8,
-      '4': 1,
-      '5': 8,
-      '10': 'overrideConsoleSerialPort'
-    },
+    {'1': 'mode', '3': 7, '4': 1, '5': 14, '6': '.meshtastic.ModuleConfig.SerialConfig.Serial_Mode', '10': 'mode'},
+    {'1': 'override_console_serial_port', '3': 8, '4': 1, '5': 8, '10': 'overrideConsoleSerialPort'},
   ],
-  '4': [
-    ModuleConfig_SerialConfig_Serial_Baud$json,
-    ModuleConfig_SerialConfig_Serial_Mode$json
-  ],
+  '4': [ModuleConfig_SerialConfig_Serial_Baud$json, ModuleConfig_SerialConfig_Serial_Mode$json],
 };
 
 @$core.Deprecated('Use moduleConfigDescriptor instead')
@@ -465,29 +234,11 @@ const ModuleConfig_ExternalNotificationConfig$json = {
     {'1': 'output_buzzer', '3': 9, '4': 1, '5': 13, '10': 'outputBuzzer'},
     {'1': 'active', '3': 4, '4': 1, '5': 8, '10': 'active'},
     {'1': 'alert_message', '3': 5, '4': 1, '5': 8, '10': 'alertMessage'},
-    {
-      '1': 'alert_message_vibra',
-      '3': 10,
-      '4': 1,
-      '5': 8,
-      '10': 'alertMessageVibra'
-    },
-    {
-      '1': 'alert_message_buzzer',
-      '3': 11,
-      '4': 1,
-      '5': 8,
-      '10': 'alertMessageBuzzer'
-    },
+    {'1': 'alert_message_vibra', '3': 10, '4': 1, '5': 8, '10': 'alertMessageVibra'},
+    {'1': 'alert_message_buzzer', '3': 11, '4': 1, '5': 8, '10': 'alertMessageBuzzer'},
     {'1': 'alert_bell', '3': 6, '4': 1, '5': 8, '10': 'alertBell'},
     {'1': 'alert_bell_vibra', '3': 12, '4': 1, '5': 8, '10': 'alertBellVibra'},
-    {
-      '1': 'alert_bell_buzzer',
-      '3': 13,
-      '4': 1,
-      '5': 8,
-      '10': 'alertBellBuzzer'
-    },
+    {'1': 'alert_bell_buzzer', '3': 13, '4': 1, '5': 8, '10': 'alertBellBuzzer'},
     {'1': 'use_pwm', '3': 7, '4': 1, '5': 8, '10': 'usePwm'},
     {'1': 'nag_timeout', '3': 14, '4': 1, '5': 13, '10': 'nagTimeout'},
     {'1': 'use_i2s_as_buzzer', '3': 15, '4': 1, '5': 8, '10': 'useI2sAsBuzzer'},
@@ -501,20 +252,8 @@ const ModuleConfig_StoreForwardConfig$json = {
     {'1': 'enabled', '3': 1, '4': 1, '5': 8, '10': 'enabled'},
     {'1': 'heartbeat', '3': 2, '4': 1, '5': 8, '10': 'heartbeat'},
     {'1': 'records', '3': 3, '4': 1, '5': 13, '10': 'records'},
-    {
-      '1': 'history_return_max',
-      '3': 4,
-      '4': 1,
-      '5': 13,
-      '10': 'historyReturnMax'
-    },
-    {
-      '1': 'history_return_window',
-      '3': 5,
-      '4': 1,
-      '5': 13,
-      '10': 'historyReturnWindow'
-    },
+    {'1': 'history_return_max', '3': 4, '4': 1, '5': 13, '10': 'historyReturnMax'},
+    {'1': 'history_return_window', '3': 5, '4': 1, '5': 13, '10': 'historyReturnWindow'},
     {'1': 'is_server', '3': 6, '4': 1, '5': 8, '10': 'isServer'},
   ],
 };
@@ -533,97 +272,19 @@ const ModuleConfig_RangeTestConfig$json = {
 const ModuleConfig_TelemetryConfig$json = {
   '1': 'TelemetryConfig',
   '2': [
-    {
-      '1': 'device_update_interval',
-      '3': 1,
-      '4': 1,
-      '5': 13,
-      '10': 'deviceUpdateInterval'
-    },
-    {
-      '1': 'environment_update_interval',
-      '3': 2,
-      '4': 1,
-      '5': 13,
-      '10': 'environmentUpdateInterval'
-    },
-    {
-      '1': 'environment_measurement_enabled',
-      '3': 3,
-      '4': 1,
-      '5': 8,
-      '10': 'environmentMeasurementEnabled'
-    },
-    {
-      '1': 'environment_screen_enabled',
-      '3': 4,
-      '4': 1,
-      '5': 8,
-      '10': 'environmentScreenEnabled'
-    },
-    {
-      '1': 'environment_display_fahrenheit',
-      '3': 5,
-      '4': 1,
-      '5': 8,
-      '10': 'environmentDisplayFahrenheit'
-    },
-    {
-      '1': 'air_quality_enabled',
-      '3': 6,
-      '4': 1,
-      '5': 8,
-      '10': 'airQualityEnabled'
-    },
-    {
-      '1': 'air_quality_interval',
-      '3': 7,
-      '4': 1,
-      '5': 13,
-      '10': 'airQualityInterval'
-    },
-    {
-      '1': 'power_measurement_enabled',
-      '3': 8,
-      '4': 1,
-      '5': 8,
-      '10': 'powerMeasurementEnabled'
-    },
-    {
-      '1': 'power_update_interval',
-      '3': 9,
-      '4': 1,
-      '5': 13,
-      '10': 'powerUpdateInterval'
-    },
-    {
-      '1': 'power_screen_enabled',
-      '3': 10,
-      '4': 1,
-      '5': 8,
-      '10': 'powerScreenEnabled'
-    },
-    {
-      '1': 'health_measurement_enabled',
-      '3': 11,
-      '4': 1,
-      '5': 8,
-      '10': 'healthMeasurementEnabled'
-    },
-    {
-      '1': 'health_update_interval',
-      '3': 12,
-      '4': 1,
-      '5': 13,
-      '10': 'healthUpdateInterval'
-    },
-    {
-      '1': 'health_screen_enabled',
-      '3': 13,
-      '4': 1,
-      '5': 8,
-      '10': 'healthScreenEnabled'
-    },
+    {'1': 'device_update_interval', '3': 1, '4': 1, '5': 13, '10': 'deviceUpdateInterval'},
+    {'1': 'environment_update_interval', '3': 2, '4': 1, '5': 13, '10': 'environmentUpdateInterval'},
+    {'1': 'environment_measurement_enabled', '3': 3, '4': 1, '5': 8, '10': 'environmentMeasurementEnabled'},
+    {'1': 'environment_screen_enabled', '3': 4, '4': 1, '5': 8, '10': 'environmentScreenEnabled'},
+    {'1': 'environment_display_fahrenheit', '3': 5, '4': 1, '5': 8, '10': 'environmentDisplayFahrenheit'},
+    {'1': 'air_quality_enabled', '3': 6, '4': 1, '5': 8, '10': 'airQualityEnabled'},
+    {'1': 'air_quality_interval', '3': 7, '4': 1, '5': 13, '10': 'airQualityInterval'},
+    {'1': 'power_measurement_enabled', '3': 8, '4': 1, '5': 8, '10': 'powerMeasurementEnabled'},
+    {'1': 'power_update_interval', '3': 9, '4': 1, '5': 13, '10': 'powerUpdateInterval'},
+    {'1': 'power_screen_enabled', '3': 10, '4': 1, '5': 8, '10': 'powerScreenEnabled'},
+    {'1': 'health_measurement_enabled', '3': 11, '4': 1, '5': 8, '10': 'healthMeasurementEnabled'},
+    {'1': 'health_update_interval', '3': 12, '4': 1, '5': 13, '10': 'healthUpdateInterval'},
+    {'1': 'health_screen_enabled', '3': 13, '4': 1, '5': 8, '10': 'healthScreenEnabled'},
   ],
 };
 
@@ -632,60 +293,15 @@ const ModuleConfig_CannedMessageConfig$json = {
   '1': 'CannedMessageConfig',
   '2': [
     {'1': 'rotary1_enabled', '3': 1, '4': 1, '5': 8, '10': 'rotary1Enabled'},
-    {
-      '1': 'inputbroker_pin_a',
-      '3': 2,
-      '4': 1,
-      '5': 13,
-      '10': 'inputbrokerPinA'
-    },
-    {
-      '1': 'inputbroker_pin_b',
-      '3': 3,
-      '4': 1,
-      '5': 13,
-      '10': 'inputbrokerPinB'
-    },
-    {
-      '1': 'inputbroker_pin_press',
-      '3': 4,
-      '4': 1,
-      '5': 13,
-      '10': 'inputbrokerPinPress'
-    },
-    {
-      '1': 'inputbroker_event_cw',
-      '3': 5,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.ModuleConfig.CannedMessageConfig.InputEventChar',
-      '10': 'inputbrokerEventCw'
-    },
-    {
-      '1': 'inputbroker_event_ccw',
-      '3': 6,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.ModuleConfig.CannedMessageConfig.InputEventChar',
-      '10': 'inputbrokerEventCcw'
-    },
-    {
-      '1': 'inputbroker_event_press',
-      '3': 7,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.ModuleConfig.CannedMessageConfig.InputEventChar',
-      '10': 'inputbrokerEventPress'
-    },
+    {'1': 'inputbroker_pin_a', '3': 2, '4': 1, '5': 13, '10': 'inputbrokerPinA'},
+    {'1': 'inputbroker_pin_b', '3': 3, '4': 1, '5': 13, '10': 'inputbrokerPinB'},
+    {'1': 'inputbroker_pin_press', '3': 4, '4': 1, '5': 13, '10': 'inputbrokerPinPress'},
+    {'1': 'inputbroker_event_cw', '3': 5, '4': 1, '5': 14, '6': '.meshtastic.ModuleConfig.CannedMessageConfig.InputEventChar', '10': 'inputbrokerEventCw'},
+    {'1': 'inputbroker_event_ccw', '3': 6, '4': 1, '5': 14, '6': '.meshtastic.ModuleConfig.CannedMessageConfig.InputEventChar', '10': 'inputbrokerEventCcw'},
+    {'1': 'inputbroker_event_press', '3': 7, '4': 1, '5': 14, '6': '.meshtastic.ModuleConfig.CannedMessageConfig.InputEventChar', '10': 'inputbrokerEventPress'},
     {'1': 'updown1_enabled', '3': 8, '4': 1, '5': 8, '10': 'updown1Enabled'},
     {'1': 'enabled', '3': 9, '4': 1, '5': 8, '10': 'enabled'},
-    {
-      '1': 'allow_input_source',
-      '3': 10,
-      '4': 1,
-      '5': 9,
-      '10': 'allowInputSource'
-    },
+    {'1': 'allow_input_source', '3': 10, '4': 1, '5': 9, '10': 'allowInputSource'},
     {'1': 'send_bell', '3': 11, '4': 1, '5': 8, '10': 'sendBell'},
   ],
   '4': [ModuleConfig_CannedMessageConfig_InputEventChar$json],
@@ -843,14 +459,7 @@ const RemoteHardwarePin$json = {
   '2': [
     {'1': 'gpio_pin', '3': 1, '4': 1, '5': 13, '10': 'gpioPin'},
     {'1': 'name', '3': 2, '4': 1, '5': 9, '10': 'name'},
-    {
-      '1': 'type',
-      '3': 3,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.RemoteHardwarePinType',
-      '10': 'type'
-    },
+    {'1': 'type', '3': 3, '4': 1, '5': 14, '6': '.meshtastic.RemoteHardwarePinType', '10': 'type'},
   ],
 };
 
@@ -859,3 +468,4 @@ final $typed_data.Uint8List remoteHardwarePinDescriptor = $convert.base64Decode(
     'ChFSZW1vdGVIYXJkd2FyZVBpbhIZCghncGlvX3BpbhgBIAEoDVIHZ3Bpb1BpbhISCgRuYW1lGA'
     'IgASgJUgRuYW1lEjUKBHR5cGUYAyABKA4yIS5tZXNodGFzdGljLlJlbW90ZUhhcmR3YXJlUGlu'
     'VHlwZVIEdHlwZQ==');
+

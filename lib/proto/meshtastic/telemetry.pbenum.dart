@@ -1,14 +1,13 @@
-// This is a generated file - do not edit.
 //
-// Generated from meshtastic/telemetry.proto.
-
-// @dart = 3.3
+//  Generated code. Do not modify.
+//  source: meshtastic/telemetry.proto
+//
+// @dart = 2.12
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: curly_braces_in_flow_control_structures
-// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
-// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:core' as $core;
 
@@ -17,197 +16,46 @@ import 'package:protobuf/protobuf.dart' as $pb;
 ///
 ///  Supported I2C Sensors for telemetry in Meshtastic
 class TelemetrySensorType extends $pb.ProtobufEnum {
-  ///
-  ///  No external telemetry sensor explicitly set
-  static const TelemetrySensorType SENSOR_UNSET =
-      TelemetrySensorType._(0, _omitEnumNames ? '' : 'SENSOR_UNSET');
+  static const TelemetrySensorType SENSOR_UNSET = TelemetrySensorType._(0, _omitEnumNames ? '' : 'SENSOR_UNSET');
+  static const TelemetrySensorType BME280 = TelemetrySensorType._(1, _omitEnumNames ? '' : 'BME280');
+  static const TelemetrySensorType BME680 = TelemetrySensorType._(2, _omitEnumNames ? '' : 'BME680');
+  static const TelemetrySensorType MCP9808 = TelemetrySensorType._(3, _omitEnumNames ? '' : 'MCP9808');
+  static const TelemetrySensorType INA260 = TelemetrySensorType._(4, _omitEnumNames ? '' : 'INA260');
+  static const TelemetrySensorType INA219 = TelemetrySensorType._(5, _omitEnumNames ? '' : 'INA219');
+  static const TelemetrySensorType BMP280 = TelemetrySensorType._(6, _omitEnumNames ? '' : 'BMP280');
+  static const TelemetrySensorType SHTC3 = TelemetrySensorType._(7, _omitEnumNames ? '' : 'SHTC3');
+  static const TelemetrySensorType LPS22 = TelemetrySensorType._(8, _omitEnumNames ? '' : 'LPS22');
+  static const TelemetrySensorType QMC6310 = TelemetrySensorType._(9, _omitEnumNames ? '' : 'QMC6310');
+  static const TelemetrySensorType QMI8658 = TelemetrySensorType._(10, _omitEnumNames ? '' : 'QMI8658');
+  static const TelemetrySensorType QMC5883L = TelemetrySensorType._(11, _omitEnumNames ? '' : 'QMC5883L');
+  static const TelemetrySensorType SHT31 = TelemetrySensorType._(12, _omitEnumNames ? '' : 'SHT31');
+  static const TelemetrySensorType PMSA003I = TelemetrySensorType._(13, _omitEnumNames ? '' : 'PMSA003I');
+  static const TelemetrySensorType INA3221 = TelemetrySensorType._(14, _omitEnumNames ? '' : 'INA3221');
+  static const TelemetrySensorType BMP085 = TelemetrySensorType._(15, _omitEnumNames ? '' : 'BMP085');
+  static const TelemetrySensorType RCWL9620 = TelemetrySensorType._(16, _omitEnumNames ? '' : 'RCWL9620');
+  static const TelemetrySensorType SHT4X = TelemetrySensorType._(17, _omitEnumNames ? '' : 'SHT4X');
+  static const TelemetrySensorType VEML7700 = TelemetrySensorType._(18, _omitEnumNames ? '' : 'VEML7700');
+  static const TelemetrySensorType MLX90632 = TelemetrySensorType._(19, _omitEnumNames ? '' : 'MLX90632');
+  static const TelemetrySensorType OPT3001 = TelemetrySensorType._(20, _omitEnumNames ? '' : 'OPT3001');
+  static const TelemetrySensorType LTR390UV = TelemetrySensorType._(21, _omitEnumNames ? '' : 'LTR390UV');
+  static const TelemetrySensorType TSL25911FN = TelemetrySensorType._(22, _omitEnumNames ? '' : 'TSL25911FN');
+  static const TelemetrySensorType AHT10 = TelemetrySensorType._(23, _omitEnumNames ? '' : 'AHT10');
+  static const TelemetrySensorType DFROBOT_LARK = TelemetrySensorType._(24, _omitEnumNames ? '' : 'DFROBOT_LARK');
+  static const TelemetrySensorType NAU7802 = TelemetrySensorType._(25, _omitEnumNames ? '' : 'NAU7802');
+  static const TelemetrySensorType BMP3XX = TelemetrySensorType._(26, _omitEnumNames ? '' : 'BMP3XX');
+  static const TelemetrySensorType ICM20948 = TelemetrySensorType._(27, _omitEnumNames ? '' : 'ICM20948');
+  static const TelemetrySensorType MAX17048 = TelemetrySensorType._(28, _omitEnumNames ? '' : 'MAX17048');
+  static const TelemetrySensorType CUSTOM_SENSOR = TelemetrySensorType._(29, _omitEnumNames ? '' : 'CUSTOM_SENSOR');
+  static const TelemetrySensorType MAX30102 = TelemetrySensorType._(30, _omitEnumNames ? '' : 'MAX30102');
+  static const TelemetrySensorType MLX90614 = TelemetrySensorType._(31, _omitEnumNames ? '' : 'MLX90614');
+  static const TelemetrySensorType SCD4X = TelemetrySensorType._(32, _omitEnumNames ? '' : 'SCD4X');
+  static const TelemetrySensorType RADSENS = TelemetrySensorType._(33, _omitEnumNames ? '' : 'RADSENS');
+  static const TelemetrySensorType INA226 = TelemetrySensorType._(34, _omitEnumNames ? '' : 'INA226');
+  static const TelemetrySensorType DFROBOT_RAIN = TelemetrySensorType._(35, _omitEnumNames ? '' : 'DFROBOT_RAIN');
+  static const TelemetrySensorType DPS310 = TelemetrySensorType._(36, _omitEnumNames ? '' : 'DPS310');
+  static const TelemetrySensorType RAK12035 = TelemetrySensorType._(37, _omitEnumNames ? '' : 'RAK12035');
 
-  ///
-  ///  High accuracy temperature, pressure, humidity
-  static const TelemetrySensorType BME280 =
-      TelemetrySensorType._(1, _omitEnumNames ? '' : 'BME280');
-
-  ///
-  ///  High accuracy temperature, pressure, humidity, and air resistance
-  static const TelemetrySensorType BME680 =
-      TelemetrySensorType._(2, _omitEnumNames ? '' : 'BME680');
-
-  ///
-  ///  Very high accuracy temperature
-  static const TelemetrySensorType MCP9808 =
-      TelemetrySensorType._(3, _omitEnumNames ? '' : 'MCP9808');
-
-  ///
-  ///  Moderate accuracy current and voltage
-  static const TelemetrySensorType INA260 =
-      TelemetrySensorType._(4, _omitEnumNames ? '' : 'INA260');
-
-  ///
-  ///  Moderate accuracy current and voltage
-  static const TelemetrySensorType INA219 =
-      TelemetrySensorType._(5, _omitEnumNames ? '' : 'INA219');
-
-  ///
-  ///  High accuracy temperature and pressure
-  static const TelemetrySensorType BMP280 =
-      TelemetrySensorType._(6, _omitEnumNames ? '' : 'BMP280');
-
-  ///
-  ///  High accuracy temperature and humidity
-  static const TelemetrySensorType SHTC3 =
-      TelemetrySensorType._(7, _omitEnumNames ? '' : 'SHTC3');
-
-  ///
-  ///  High accuracy pressure
-  static const TelemetrySensorType LPS22 =
-      TelemetrySensorType._(8, _omitEnumNames ? '' : 'LPS22');
-
-  ///
-  ///  3-Axis magnetic sensor
-  static const TelemetrySensorType QMC6310 =
-      TelemetrySensorType._(9, _omitEnumNames ? '' : 'QMC6310');
-
-  ///
-  ///  6-Axis inertial measurement sensor
-  static const TelemetrySensorType QMI8658 =
-      TelemetrySensorType._(10, _omitEnumNames ? '' : 'QMI8658');
-
-  ///
-  ///  3-Axis magnetic sensor
-  static const TelemetrySensorType QMC5883L =
-      TelemetrySensorType._(11, _omitEnumNames ? '' : 'QMC5883L');
-
-  ///
-  ///  High accuracy temperature and humidity
-  static const TelemetrySensorType SHT31 =
-      TelemetrySensorType._(12, _omitEnumNames ? '' : 'SHT31');
-
-  ///
-  ///  PM2.5 air quality sensor
-  static const TelemetrySensorType PMSA003I =
-      TelemetrySensorType._(13, _omitEnumNames ? '' : 'PMSA003I');
-
-  ///
-  ///  INA3221 3 Channel Voltage / Current Sensor
-  static const TelemetrySensorType INA3221 =
-      TelemetrySensorType._(14, _omitEnumNames ? '' : 'INA3221');
-
-  ///
-  ///  BMP085/BMP180 High accuracy temperature and pressure (older Version of BMP280)
-  static const TelemetrySensorType BMP085 =
-      TelemetrySensorType._(15, _omitEnumNames ? '' : 'BMP085');
-
-  ///
-  ///  RCWL-9620 Doppler Radar Distance Sensor, used for water level detection
-  static const TelemetrySensorType RCWL9620 =
-      TelemetrySensorType._(16, _omitEnumNames ? '' : 'RCWL9620');
-
-  ///
-  ///  Sensirion High accuracy temperature and humidity
-  static const TelemetrySensorType SHT4X =
-      TelemetrySensorType._(17, _omitEnumNames ? '' : 'SHT4X');
-
-  ///
-  ///  VEML7700 high accuracy ambient light(Lux) digital 16-bit resolution sensor.
-  static const TelemetrySensorType VEML7700 =
-      TelemetrySensorType._(18, _omitEnumNames ? '' : 'VEML7700');
-
-  ///
-  ///  MLX90632 non-contact IR temperature sensor.
-  static const TelemetrySensorType MLX90632 =
-      TelemetrySensorType._(19, _omitEnumNames ? '' : 'MLX90632');
-
-  ///
-  ///  TI OPT3001 Ambient Light Sensor
-  static const TelemetrySensorType OPT3001 =
-      TelemetrySensorType._(20, _omitEnumNames ? '' : 'OPT3001');
-
-  ///
-  ///  Lite On LTR-390UV-01 UV Light Sensor
-  static const TelemetrySensorType LTR390UV =
-      TelemetrySensorType._(21, _omitEnumNames ? '' : 'LTR390UV');
-
-  ///
-  ///  AMS TSL25911FN RGB Light Sensor
-  static const TelemetrySensorType TSL25911FN =
-      TelemetrySensorType._(22, _omitEnumNames ? '' : 'TSL25911FN');
-
-  ///
-  ///  AHT10 Integrated temperature and humidity sensor
-  static const TelemetrySensorType AHT10 =
-      TelemetrySensorType._(23, _omitEnumNames ? '' : 'AHT10');
-
-  ///
-  ///  DFRobot Lark Weather station (temperature, humidity, pressure, wind speed and direction)
-  static const TelemetrySensorType DFROBOT_LARK =
-      TelemetrySensorType._(24, _omitEnumNames ? '' : 'DFROBOT_LARK');
-
-  ///
-  ///  NAU7802 Scale Chip or compatible
-  static const TelemetrySensorType NAU7802 =
-      TelemetrySensorType._(25, _omitEnumNames ? '' : 'NAU7802');
-
-  ///
-  ///  BMP3XX High accuracy temperature and pressure
-  static const TelemetrySensorType BMP3XX =
-      TelemetrySensorType._(26, _omitEnumNames ? '' : 'BMP3XX');
-
-  ///
-  ///  ICM-20948 9-Axis digital motion processor
-  static const TelemetrySensorType ICM20948 =
-      TelemetrySensorType._(27, _omitEnumNames ? '' : 'ICM20948');
-
-  ///
-  ///  MAX17048 1S lipo battery sensor (voltage, state of charge, time to go)
-  static const TelemetrySensorType MAX17048 =
-      TelemetrySensorType._(28, _omitEnumNames ? '' : 'MAX17048');
-
-  ///
-  ///  Custom I2C sensor implementation based on https://github.com/meshtastic/i2c-sensor
-  static const TelemetrySensorType CUSTOM_SENSOR =
-      TelemetrySensorType._(29, _omitEnumNames ? '' : 'CUSTOM_SENSOR');
-
-  ///
-  ///  MAX30102 Pulse Oximeter and Heart-Rate Sensor
-  static const TelemetrySensorType MAX30102 =
-      TelemetrySensorType._(30, _omitEnumNames ? '' : 'MAX30102');
-
-  ///
-  ///  MLX90614 non-contact IR temperature sensor
-  static const TelemetrySensorType MLX90614 =
-      TelemetrySensorType._(31, _omitEnumNames ? '' : 'MLX90614');
-
-  ///
-  ///  SCD40/SCD41 CO2, humidity, temperature sensor
-  static const TelemetrySensorType SCD4X =
-      TelemetrySensorType._(32, _omitEnumNames ? '' : 'SCD4X');
-
-  ///
-  ///  ClimateGuard RadSens, radiation, Geiger-Muller Tube
-  static const TelemetrySensorType RADSENS =
-      TelemetrySensorType._(33, _omitEnumNames ? '' : 'RADSENS');
-
-  ///
-  ///  High accuracy current and voltage
-  static const TelemetrySensorType INA226 =
-      TelemetrySensorType._(34, _omitEnumNames ? '' : 'INA226');
-
-  ///
-  ///  DFRobot Gravity tipping bucket rain gauge
-  static const TelemetrySensorType DFROBOT_RAIN =
-      TelemetrySensorType._(35, _omitEnumNames ? '' : 'DFROBOT_RAIN');
-
-  ///
-  ///  Infineon DPS310 High accuracy pressure and temperature
-  static const TelemetrySensorType DPS310 =
-      TelemetrySensorType._(36, _omitEnumNames ? '' : 'DPS310');
-
-  ///
-  ///  RAKWireless RAK12035 Soil Moisture Sensor Module
-  static const TelemetrySensorType RAK12035 =
-      TelemetrySensorType._(37, _omitEnumNames ? '' : 'RAK12035');
-
-  static const $core.List<TelemetrySensorType> values = <TelemetrySensorType>[
+  static const $core.List<TelemetrySensorType> values = <TelemetrySensorType> [
     SENSOR_UNSET,
     BME280,
     BME680,
@@ -248,13 +96,11 @@ class TelemetrySensorType extends $pb.ProtobufEnum {
     RAK12035,
   ];
 
-  static final $core.List<TelemetrySensorType?> _byValue =
-      $pb.ProtobufEnum.$_initByValueList(values, 37);
-  static TelemetrySensorType? valueOf($core.int value) =>
-      value < 0 || value >= _byValue.length ? null : _byValue[value];
+  static final $core.Map<$core.int, TelemetrySensorType> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static TelemetrySensorType? valueOf($core.int value) => _byValue[value];
 
-  const TelemetrySensorType._(super.value, super.name);
+  const TelemetrySensorType._($core.int v, $core.String n) : super(v, n);
 }
 
-const $core.bool _omitEnumNames =
-    $core.bool.fromEnvironment('protobuf.omit_enum_names');
+
+const _omitEnumNames = $core.bool.fromEnvironment('protobuf.omit_enum_names');

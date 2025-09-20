@@ -1,14 +1,13 @@
-// This is a generated file - do not edit.
 //
-// Generated from meshtastic/channel.proto.
-
-// @dart = 3.3
+//  Generated code. Do not modify.
+//  source: meshtastic/channel.proto
+//
+// @dart = 2.12
 
 // ignore_for_file: annotate_overrides, camel_case_types, comment_references
-// ignore_for_file: constant_identifier_names
-// ignore_for_file: curly_braces_in_flow_control_structures
-// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
-// ignore_for_file: non_constant_identifier_names, unused_import
+// ignore_for_file: constant_identifier_names, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_final_fields
+// ignore_for_file: unnecessary_import, unnecessary_this, unused_import
 
 import 'dart:convert' as $convert;
 import 'dart:core' as $core;
@@ -31,14 +30,7 @@ const ChannelSettings$json = {
     {'1': 'id', '3': 4, '4': 1, '5': 7, '10': 'id'},
     {'1': 'uplink_enabled', '3': 5, '4': 1, '5': 8, '10': 'uplinkEnabled'},
     {'1': 'downlink_enabled', '3': 6, '4': 1, '5': 8, '10': 'downlinkEnabled'},
-    {
-      '1': 'module_settings',
-      '3': 7,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.ModuleSettings',
-      '10': 'moduleSettings'
-    },
+    {'1': 'module_settings', '3': 7, '4': 1, '5': 11, '6': '.meshtastic.ModuleSettings', '10': 'moduleSettings'},
   ],
 };
 
@@ -54,13 +46,7 @@ final $typed_data.Uint8List channelSettingsDescriptor = $convert.base64Decode(
 const ModuleSettings$json = {
   '1': 'ModuleSettings',
   '2': [
-    {
-      '1': 'position_precision',
-      '3': 1,
-      '4': 1,
-      '5': 13,
-      '10': 'positionPrecision'
-    },
+    {'1': 'position_precision', '3': 1, '4': 1, '5': 13, '10': 'positionPrecision'},
     {'1': 'is_client_muted', '3': 2, '4': 1, '5': 8, '10': 'isClientMuted'},
   ],
 };
@@ -75,22 +61,8 @@ const Channel$json = {
   '1': 'Channel',
   '2': [
     {'1': 'index', '3': 1, '4': 1, '5': 5, '10': 'index'},
-    {
-      '1': 'settings',
-      '3': 2,
-      '4': 1,
-      '5': 11,
-      '6': '.meshtastic.ChannelSettings',
-      '10': 'settings'
-    },
-    {
-      '1': 'role',
-      '3': 3,
-      '4': 1,
-      '5': 14,
-      '6': '.meshtastic.Channel.Role',
-      '10': 'role'
-    },
+    {'1': 'settings', '3': 2, '4': 1, '5': 11, '6': '.meshtastic.ChannelSettings', '10': 'settings'},
+    {'1': 'role', '3': 3, '4': 1, '5': 14, '6': '.meshtastic.Channel.Role', '10': 'role'},
   ],
   '4': [Channel_Role$json],
 };
@@ -111,3 +83,4 @@ final $typed_data.Uint8List channelDescriptor = $convert.base64Decode(
     'h0YXN0aWMuQ2hhbm5lbFNldHRpbmdzUghzZXR0aW5ncxIsCgRyb2xlGAMgASgOMhgubWVzaHRh'
     'c3RpYy5DaGFubmVsLlJvbGVSBHJvbGUiMAoEUm9sZRIMCghESVNBQkxFRBAAEgsKB1BSSU1BUl'
     'kQARINCglTRUNPTkRBUlkQAg==');
+

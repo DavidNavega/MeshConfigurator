@@ -8,28 +8,30 @@ import 'package:permission_handler/permission_handler.dart';
 import '../models/node_config.dart';
 import 'ble_uuids.dart';
 
-// Protobuf generados (ajusta los paths si fuera necesario)
+// Protobuf 2.6.1
 import 'package:meshtastic_configurator/proto/meshtastic/mesh.pb.dart' as mesh;
 import 'package:meshtastic_configurator/proto/meshtastic/admin.pb.dart' as admin;
 import 'package:meshtastic_configurator/proto/meshtastic/channel.pb.dart' as ch;
 import 'package:meshtastic_configurator/proto/meshtastic/module_config.pb.dart' as mod;
 import 'package:meshtastic_configurator/proto/meshtastic/config.pb.dart' as cfg;
-import 'package:meshtastic_configurator/proto/meshtastic/mesh.pb.dart' as usr;
+import 'package:meshtastic_configurator/proto/meshtastic/portnums.pbenum.dart' as port;
 
 class BluetoothService {
-  final FlutterBluePlus _ble = FlutterBluePlus.instance;
   BluetoothDevice? _dev;
   BluetoothCharacteristic? _toRadio;
   BluetoothCharacteristic? _fromRadio;
   BluetoothCharacteristic? _fromNum;
+
   StreamController<mesh.FromRadio>? _fromRadioController;
   StreamSubscription<List<int>>? _fromRadioSubscription;
   StreamQueue<mesh.FromRadio>? _fromRadioQueue;
+
   Completer<void>? _pendingRequest;
 
   static const Duration _defaultResponseTimeout = Duration(seconds: 5);
   static const Duration _postResponseWindow = Duration(milliseconds: 200);
 
+  // -------- permisos ----------
   Future<bool> _ensurePermissions() async {
     final statuses = await [
       Permission.bluetoothScan,
@@ -38,6 +40,8 @@ class BluetoothService {
     ].request();
     return statuses.values.every((s) => s.isGranted);
   }
+
+  // -------- streams ----------
   Future<void> _disposeRadioStreams() async {
     await _fromRadioSubscription?.cancel();
     _fromRadioSubscription = null;
@@ -68,16 +72,15 @@ class BluetoothService {
         try {
           final frame = mesh.FromRadio.fromBuffer(data);
           _fromRadioController?.add(frame);
-        } catch (error, stackTrace) {
-          _fromRadioController?.addError(error, stackTrace);
+        } catch (err, st) {
+          _fromRadioController?.addError(err, st);
         }
       },
-      onError: (error, stackTrace) {
-        _fromRadioController?.addError(error, stackTrace);
-      },
+      onError: (err, st) => _fromRadioController?.addError(err, st),
     );
   }
 
+  // -------- exclusión de petición ----------
   Future<T> _withRequestLock<T>(Future<T> Function() action) async {
     while (_pendingRequest != null) {
       try {
@@ -86,27 +89,23 @@ class BluetoothService {
         break;
       }
     }
-
     final completer = Completer<void>();
     _pendingRequest = completer;
     try {
       return await action();
     } finally {
       _pendingRequest = null;
-      if (!completer.isCompleted) {
-        completer.complete();
-      }
+      if (!completer.isCompleted) completer.complete();
     }
   }
 
+  // -------- recolector de respuestas ----------
   Future<List<mesh.FromRadio>> _collectResponses({
     required bool Function(List<mesh.FromRadio>) isComplete,
     Duration timeout = _defaultResponseTimeout,
   }) async {
     final queue = _fromRadioQueue;
-    if (queue == null) {
-      throw StateError('Radio stream not initialized');
-    }
+    if (queue == null) throw StateError('Radio stream not initialized');
 
     final responses = <mesh.FromRadio>[];
     final stopwatch = Stopwatch()..start();
@@ -136,9 +135,10 @@ class BluetoothService {
       responses.add(frame);
 
       if (isComplete(responses)) {
-        final postStopwatch = Stopwatch()..start();
-        while (postStopwatch.elapsed < _postResponseWindow) {
-          final postRemaining = _postResponseWindow - postStopwatch.elapsed;
+        // pequeña ventana para “colas” de frames
+        final post = Stopwatch()..start();
+        while (post.elapsed < _postResponseWindow) {
+          final postRemaining = _postResponseWindow - post.elapsed;
           if (postRemaining <= Duration.zero) break;
           try {
             final extra = await queue.next.timeout(postRemaining);
@@ -154,8 +154,19 @@ class BluetoothService {
     }
   }
 
+  // -------- empaquetador: AdminMessage -> MeshPacket.decoded ----------
+  mesh.ToRadio _wrapAdminToToRadio(admin.AdminMessage msg) {
+    final data = mesh.Data()
+      ..portnum = port.PortNum.ADMIN_APP
+      ..payload = msg.writeToBuffer(); // bytes
+
+    return mesh.ToRadio()
+      ..packet = (mesh.MeshPacket()..decoded = data);
+  }
+
+  // -------- envío + recepción ----------
   Future<List<mesh.FromRadio>> _sendAndReceive(
-      mesh.ToRadio message, {
+      mesh.ToRadio toRadioMsg, {
         bool Function(List<mesh.FromRadio>)? isComplete,
         Duration timeout = _defaultResponseTimeout,
       }) {
@@ -166,7 +177,7 @@ class BluetoothService {
       }
 
       await toCharacteristic.write(
-        message.writeToBuffer(),
+        toRadioMsg.writeToBuffer(),
         withoutResponse: false,
       );
 
@@ -177,26 +188,35 @@ class BluetoothService {
     });
   }
 
+  // -------- conexión ----------
   Future<bool> connectAndInit() async {
     if (!await _ensurePermissions()) return false;
+
     await FlutterBluePlus.startScan(timeout: const Duration(seconds: 8));
     BluetoothDevice? found;
+
     await for (final results in FlutterBluePlus.scanResults) {
       for (final r in results) {
         final name = (r.device.platformName ?? '').toUpperCase();
-        if (name.contains('MESHTASTIC') || name.contains('TBEAM') ||
-            name.contains('HELTEC') || name.contains('XIAO')) {
-          found = r.device; break;
+        if (name.contains('MESHTASTIC') ||
+            name.contains('TBEAM') ||
+            name.contains('HELTEC') ||
+            name.contains('XIAO')) {
+          found = r.device;
+          break;
         }
       }
       if (found != null) break;
     }
-    await _ble.stopScan();
+    await FlutterBluePlus.stopScan();
+
     if (found == null) return false;
 
     _dev = found;
     await _dev!.connect(autoConnect: false);
-    try { await _dev!.requestMtu(512); } catch (_) {}
+    try {
+      await _dev!.requestMtu(512);
+    } catch (_) {}
 
     final services = await _dev!.discoverServices();
     for (final s in services) {
@@ -208,14 +228,21 @@ class BluetoothService {
         }
       }
     }
+
     if (_toRadio == null || _fromRadio == null || _fromNum == null) {
-      await _dev!.disconnect();
+      try {
+        await _dev!.disconnect();
+      } catch (_) {}
       return false;
     }
+
     await _initializeFromRadioNotifications();
     if (_fromNum!.properties.notify) {
-      await _fromNum!.setNotifyValue(true);
+      try {
+        await _fromNum!.setNotifyValue(true);
+      } catch (_) {}
     }
+
     return true;
   }
 
@@ -229,7 +256,9 @@ class BluetoothService {
 
     await _disposeRadioStreams();
 
-    try { await _dev?.disconnect(); } catch (_) {}
+    try {
+      await _dev?.disconnect();
+    } catch (_) {}
 
     _dev = null;
     _toRadio = null;
@@ -237,108 +266,113 @@ class BluetoothService {
     _fromNum = null;
   }
 
+  // -------- lectura de configuración ----------
   Future<NodeConfig?> readConfig() async {
     if (_toRadio == null || _fromRadioQueue == null) return null;
     final cfgOut = NodeConfig();
 
-    void _applyFrameToConfig(NodeConfig cfg, mesh.FromRadio fr) {
-      if (fr.hasUser()) {
-        final u = fr.user;
-        if (u.hasLongName()) cfg.longName = u.longName;
-        if (u.hasShortName()) cfg.shortName = u.shortName;
-      }
-      if (fr.hasChannel()) {
-        final c = fr.channel;
-        if (c.hasIndex()) cfg.channelIndex = c.index;
-        if (c.hasSettings() && c.settings.hasPsk()) {
-          cfg.key = Uint8List.fromList(c.settings.psk);
+    void _applyFrameToConfig(NodeConfig out, mesh.FromRadio fr) {
+      if (fr.hasConfig()) {
+        final conf = fr.config;
+
+        // Device (tu build no trae .owner, así que lo quitamos)
+        if (conf.hasDevice()) {
+          final dev = conf.device;
+          // se puede leer otros campos si tu proto lo define
         }
-      }
-      if (fr.hasModuleConfig() && fr.moduleConfig.hasSerial()) {
-        final s = fr.moduleConfig.serial;
-        cfg.serialOutputMode =
-        (s.mode == mod.ModuleConfig_SerialConfig_SerialMode.CALTOPO) ? 'WPL' : 'TLL';
-        if (s.hasBaud()) cfg.baudRate = s.baud;
-      }
-      if (fr.hasRadio()) {
-        final r = fr.radio;
-        if (r.hasLora()) {
-          final region = r.lora.region;
-          switch (region) {
-            case 2:
-              cfg.frequencyRegion = '433';
-              break; // EU433
-            case 3:
-              cfg.frequencyRegion = '868';
-              break; // EU868
-            case 1:
-              cfg.frequencyRegion = '915';
-              break; // US915
-            default:
-              break;
-            }
+
+        if (conf.hasLora()) {
+          final l = conf.lora;
+          if (l.hasRegion()) {
+            out.setFrequencyRegionFromString(_regionEnumToString(l.region));
           }
         }
       }
-    }
 
-  Future<void> requestAndApply(
-      mesh.ToRadio message,
-      bool Function(mesh.FromRadio) matcher,
-      ) async {
-    try {
-      final frames = await _sendAndReceive(
-        message,
-        isComplete: (responses) => responses.any(matcher),
-        timeout: _defaultResponseTimeout,
-      );
-      for (final frame in frames) {
-        _applyFrameToConfig(cfgOut, frame);
+      if (fr.hasModuleConfig() && fr.moduleConfig.hasSerial()) {
+        final s = fr.moduleConfig.serial;
+        if (s.hasMode()) {
+          out.setSerialModeFromString(_serialModeEnumToString(s.mode));
+        }
+        if (s.hasBaud()) {
+          out.baudRate = s.baud;
+        }
       }
-    } on TimeoutException {
-      // Ignore timeouts to allow partial configuration reads.
+
+      if (fr.hasChannel()) {
+        final c = fr.channel;
+        if (c.hasIndex()) out.channelIndex = c.index;
+        if (c.hasSettings() && c.settings.hasPsk()) {
+          out.key = Uint8List.fromList(c.settings.psk);
+        }
+      }
+
+      if (fr.hasNodeInfo()) {
+        try {
+          final ni = fr.nodeInfo;
+          if (ni.hasUser()) {
+            final u = ni.user;
+            if (u.hasShortName()) out.shortName = u.shortName;
+            if (u.hasLongName()) out.longName = u.longName;
+          }
+        } catch (_) {}
+      }
     }
+
+    Future<void> _requestAndApply(admin.AdminMessage msg,
+        bool Function(mesh.FromRadio) matcher) async {
+      try {
+        final frames = await _sendAndReceive(
+          _wrapAdminToToRadio(msg),
+          isComplete: (responses) => responses.any(matcher),
+          timeout: _defaultResponseTimeout,
+        );
+        for (final f in frames) {
+          _applyFrameToConfig(cfgOut, f);
+        }
+      } on TimeoutException {}
+    }
+
+    try {
+      await _requestAndApply(
+        admin.AdminMessage()
+          ..getConfigRequest = admin.AdminMessage_ConfigType.LORA_CONFIG,
+            (fr) => fr.hasConfig() && fr.config.hasLora(),
+      );
+
+      await _requestAndApply(
+        admin.AdminMessage()
+          ..getConfigRequest = admin.AdminMessage_ConfigType.DEVICE_CONFIG,
+            (fr) => fr.hasConfig() && fr.config.hasDevice(),
+      );
+
+      await _requestAndApply(
+        admin.AdminMessage()
+          ..getConfigRequest = admin.AdminMessage_ConfigType.NETWORK_CONFIG,
+            (fr) => fr.hasChannel(),
+      );
+
+      await _requestAndApply(
+        admin.AdminMessage()
+          ..getModuleConfigRequest =
+              admin.AdminMessage_ModuleConfigType.SERIAL_CONFIG,
+            (fr) => fr.hasModuleConfig() && fr.moduleConfig.hasSerial(),
+      );
+    } catch (_) {
+      return null;
+    }
+
+    return cfgOut;
   }
 
-  try {
-  await requestAndApply(
-  mesh.ToRadio()
-  ..admin = (admin.AdminMessage()
-  ..getConfigRequest = (admin.AdminMessage_ConfigType.USER)),
-  (frame) => frame.hasUser(),
-  );
-  await requestAndApply(
-  mesh.ToRadio()
-  ..admin = (admin.AdminMessage()
-  ..getConfigRequest = (admin.AdminMessage_ConfigType.CHANNEL)),
-  (frame) => frame.hasChannel(),
-  );
-  await requestAndApply(
-  mesh.ToRadio()
-  ..admin = (admin.AdminMessage()
-  ..getModuleConfigRequest = (admin.ModuleConfigType.SERIAL)),
-  (frame) => frame.hasModuleConfig() && frame.moduleConfig.hasSerial(),
-  );
-  await requestAndApply(
-  mesh.ToRadio()
-  ..admin = (admin.AdminMessage()
-  ..getConfigRequest = (admin.AdminMessage_ConfigType.RADIO)),
-  (frame) => frame.hasRadio(),
-  );
-  } catch (_) {
-  return null;
-  }
-
-  return cfgOut;
-}
-
+  // -------- escritura de configuración ----------
   Future<void> writeConfig(NodeConfig cfgIn) async {
     if (_toRadio == null || _fromRadioQueue == null) return;
 
-    Future<void> send(mesh.ToRadio message) async {
+    Future<void> send(admin.AdminMessage msg) async {
       try {
         await _sendAndReceive(
-          message,
+          _wrapAdminToToRadio(msg),
           isComplete: (responses) => responses.isNotEmpty,
           timeout: _defaultResponseTimeout,
         );
@@ -347,34 +381,590 @@ class BluetoothService {
       }
     }
 
-    final u = usr.User()
-      ..shortName = cfgIn.shortName
-      ..longName  = cfgIn.longName;
-    await send(mesh.ToRadio()..admin = (admin.AdminMessage()..setUser = u));
-
     final settings = ch.ChannelSettings()
       ..name = "CH${cfgIn.channelIndex}"
-      ..psk  = cfgIn.key;
+      ..psk = cfgIn.key;
     final channel = ch.Channel()
       ..index = cfgIn.channelIndex
-      ..role  = ch.Channel_Role.PRIMARY
+      ..role = ch.Channel_Role.PRIMARY
       ..settings = settings;
-    await send(mesh.ToRadio()..admin = (admin.AdminMessage()..setChannel = channel));
+
+    await send(admin.AdminMessage()..setChannel = channel);
 
     final serialCfg = mod.ModuleConfig_SerialConfig()
       ..enabled = true
       ..baud = cfgIn.baudRate
-      ..mode = (cfgIn.serialOutputMode == 'WPL')
-        ? mod.ModuleConfig_SerialConfig_SerialMode.CALTOPO
-        : mod.ModuleConfig_SerialConfig_SerialMode.NMEA;
+      ..mode = _serialModeFromString(cfgIn.serialModeAsString);
     final moduleCfg = mod.ModuleConfig()..serial = serialCfg;
-    await send(mesh.ToRadio()..admin = (admin.AdminMessage()..setModuleConfig = moduleCfg));
 
-    int regionEnum = 3; // EU868
-    if (cfgIn.frequencyRegion == '433') regionEnum = 2;
-    if (cfgIn.frequencyRegion == '915') regionEnum = 1;
-    final lora = cfg.LoRaConfig()..region = regionEnum;
-    final radio = cfg.RadioConfig()..lora = lora;
-    await send(mesh.ToRadio()..admin = (admin.AdminMessage()..setRadio = radio));
+    await send(admin.AdminMessage()..setModuleConfig = moduleCfg);
+
+    final lora = cfg.Config_LoRaConfig()
+      ..region = _regionFromString(cfgIn.frequencyRegionAsString);
+    final configMsg = cfg.Config()..lora = lora;
+
+    await send(admin.AdminMessage()..setConfig = configMsg);
+  }
+
+  // ------- helpers enum <-> string -------
+  String _serialModeEnumToString(
+      mod.ModuleConfig_SerialConfig_Serial_Mode m) {
+    switch (m) {
+      case mod.ModuleConfig_SerialConfig_Serial_Mode.PROTO:
+        return 'PROTO';
+      case mod.ModuleConfig_SerialConfig_Serial_Mode.TEXTMSG:
+        return 'TEXTMSG';
+      case mod.ModuleConfig_SerialConfig_Serial_Mode.NMEA:
+        return 'NMEA';
+      case mod.ModuleConfig_SerialConfig_Serial_Mode.CALTOPO:
+        return 'CALTOPO';
+      default:
+        return 'DEFAULT';
+    }
+  }
+
+  mod.ModuleConfig_SerialConfig_Serial_Mode _serialModeFromString(String s) {
+    switch (s.toUpperCase()) {
+      case 'PROTO':
+        return mod.ModuleConfig_SerialConfig_Serial_Mode.PROTO;
+      case 'TEXTMSG':
+        return mod.ModuleConfig_SerialConfig_Serial_Mode.TEXTMSG;
+      case 'NMEA':
+        return mod.ModuleConfig_SerialConfig_Serial_Mode.NMEA;
+      case 'CALTOPO':
+        return mod.ModuleConfig_SerialConfig_Serial_Mode.CALTOPO;
+      default:
+        return mod.ModuleConfig_SerialConfig_Serial_Mode.DEFAULT;
+    }
+  }
+
+  String _regionEnumToString(cfg.Config_LoRaConfig_RegionCode r) {
+    switch (r) {
+      case cfg.Config_LoRaConfig_RegionCode.EU_433:
+        return '433';
+      case cfg.Config_LoRaConfig_RegionCode.US:
+        return '915';
+      case cfg.Config_LoRaConfig_RegionCode.EU_868:
+      default:
+        return '868';
+    }
+  }
+
+  cfg.Config_LoRaConfig_RegionCode _regionFromString(String s) {
+    switch (s) {
+      case '433':
+        return cfg.Config_LoRaConfig_RegionCode.EU_433;
+      case '915':
+        return cfg.Config_LoRaConfig_RegionCode.US;
+      case '868':
+      default:
+        return cfg.Config_LoRaConfig_RegionCode.EU_868;
+    }
   }
 }
+
+
+/*
+import 'dart:async';
+import 'dart:typed_data';
+
+import 'package:async/async.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+import '../models/node_config.dart';
+import 'ble_uuids.dart';
+
+// Protobuf 2.6.1 (ajusta los paths si fuera necesario)
+import 'package:meshtastic_configurator/proto/meshtastic/mesh.pb.dart' as mesh;
+import 'package:meshtastic_configurator/proto/meshtastic/admin.pb.dart' as admin;
+import 'package:meshtastic_configurator/proto/meshtastic/channel.pb.dart' as ch;
+import 'package:meshtastic_configurator/proto/meshtastic/module_config.pb.dart' as mod;
+import 'package:meshtastic_configurator/proto/meshtastic/config.pb.dart' as cfg;
+import 'package:meshtastic_configurator/proto/meshtastic/portnums.pbenum.dart' as port;
+
+class BluetoothService {
+  BluetoothDevice? _dev;
+  BluetoothCharacteristic? _toRadio;
+  BluetoothCharacteristic? _fromRadio;
+  BluetoothCharacteristic? _fromNum;
+
+  StreamController<mesh.FromRadio>? _fromRadioController;
+  StreamSubscription<List<int>>? _fromRadioSubscription;
+  StreamQueue<mesh.FromRadio>? _fromRadioQueue;
+
+  Completer<void>? _pendingRequest;
+
+  static const Duration _defaultResponseTimeout = Duration(seconds: 5);
+  static const Duration _postResponseWindow = Duration(milliseconds: 200);
+
+  // -------- permisos ----------
+  Future<bool> _ensurePermissions() async {
+    final statuses = await [
+      Permission.bluetoothScan,
+      Permission.bluetoothConnect,
+      Permission.locationWhenInUse,
+    ].request();
+    return statuses.values.every((s) => s.isGranted);
+  }
+
+  // -------- streams ----------
+  Future<void> _disposeRadioStreams() async {
+    await _fromRadioSubscription?.cancel();
+    _fromRadioSubscription = null;
+    await _fromRadioQueue?.cancel();
+    _fromRadioQueue = null;
+    await _fromRadioController?.close();
+    _fromRadioController = null;
+  }
+
+  Future<void> _initializeFromRadioNotifications() async {
+    final characteristic = _fromRadio;
+    if (characteristic == null) return;
+
+    await _disposeRadioStreams();
+
+    _fromRadioController = StreamController<mesh.FromRadio>.broadcast();
+    _fromRadioQueue = StreamQueue(_fromRadioController!.stream);
+
+    if (characteristic.properties.notify) {
+      try {
+        await characteristic.setNotifyValue(true);
+      } catch (_) {}
+    }
+
+    _fromRadioSubscription = characteristic.onValueReceived.listen(
+          (data) {
+        if (data.isEmpty) return;
+        try {
+          final frame = mesh.FromRadio.fromBuffer(data);
+          _fromRadioController?.add(frame);
+        } catch (err, st) {
+          _fromRadioController?.addError(err, st);
+        }
+      },
+      onError: (err, st) => _fromRadioController?.addError(err, st),
+    );
+  }
+
+  // -------- exclusión de petición ----------
+  Future<T> _withRequestLock<T>(Future<T> Function() action) async {
+    while (_pendingRequest != null) {
+      try {
+        await _pendingRequest!.future;
+      } catch (_) {
+        break;
+      }
+    }
+    final completer = Completer<void>();
+    _pendingRequest = completer;
+    try {
+      return await action();
+    } finally {
+      _pendingRequest = null;
+      if (!completer.isCompleted) completer.complete();
+    }
+  }
+
+  // -------- recolector de respuestas ----------
+  Future<List<mesh.FromRadio>> _collectResponses({
+    required bool Function(List<mesh.FromRadio>) isComplete,
+    Duration timeout = _defaultResponseTimeout,
+  }) async {
+    final queue = _fromRadioQueue;
+    if (queue == null) throw StateError('Radio stream not initialized');
+
+    final responses = <mesh.FromRadio>[];
+    final stopwatch = Stopwatch()..start();
+
+    while (true) {
+      final remaining = timeout - stopwatch.elapsed;
+      if (remaining <= Duration.zero) {
+        if (responses.isEmpty) {
+          throw TimeoutException('Timeout waiting for radio response');
+        }
+        return responses;
+      }
+
+      mesh.FromRadio frame;
+      try {
+        frame = await queue.next.timeout(remaining);
+      } on TimeoutException {
+        if (responses.isEmpty) {
+          throw TimeoutException('Timeout waiting for radio response');
+        }
+        return responses;
+      } on StateError {
+        if (responses.isEmpty) rethrow;
+        return responses;
+      }
+
+      responses.add(frame);
+
+      if (isComplete(responses)) {
+        // pequeña ventana para “colas” de frames
+        final post = Stopwatch()..start();
+        while (post.elapsed < _postResponseWindow) {
+          final postRemaining = _postResponseWindow - post.elapsed;
+          if (postRemaining <= Duration.zero) break;
+          try {
+            final extra = await queue.next.timeout(postRemaining);
+            responses.add(extra);
+          } on TimeoutException {
+            break;
+          } on StateError {
+            break;
+          }
+        }
+        return responses;
+      }
+    }
+  }
+
+  // -------- empaquetador: AdminMessage -> MeshPacket.decoded ----------
+  mesh.ToRadio _wrapAdminToToRadio(admin.AdminMessage msg) {
+    final data = mesh.Data()
+      ..portnum = port.PortNum.ADMIN_APP
+      ..payload = msg.writeToBuffer(); // bytes
+
+    return mesh.ToRadio()
+      ..packet = (mesh.MeshPacket()..decoded = data);
+  }
+
+  // -------- envío + recepción ----------
+  Future<List<mesh.FromRadio>> _sendAndReceive(
+      mesh.ToRadio toRadioMsg, {
+        bool Function(List<mesh.FromRadio>)? isComplete,
+        Duration timeout = _defaultResponseTimeout,
+      }) {
+    return _withRequestLock(() async {
+      final toCharacteristic = _toRadio;
+      if (toCharacteristic == null) {
+        throw StateError('Radio write characteristic not available');
+      }
+
+      // escribir (con respuesta)
+      await toCharacteristic.write(
+        toRadioMsg.writeToBuffer(),
+        withoutResponse: false,
+      );
+
+      // leer frames hasta condición de parada
+      return _collectResponses(
+        isComplete: isComplete ?? (responses) => responses.isNotEmpty,
+        timeout: timeout,
+      );
+    });
+  }
+
+  // -------- conexión ----------
+  Future<bool> connectAndInit() async {
+    if (!await _ensurePermissions()) return false;
+
+    await FlutterBluePlus.startScan(timeout: const Duration(seconds: 8));
+    BluetoothDevice? found;
+
+    await for (final results in FlutterBluePlus.scanResults) {
+      for (final r in results) {
+        final name = (r.device.platformName ?? '').toUpperCase();
+        if (name.contains('MESHTASTIC') ||
+            name.contains('TBEAM') ||
+            name.contains('HELTEC') ||
+            name.contains('XIAO')) {
+          found = r.device;
+          break;
+        }
+      }
+      if (found != null) break;
+    }
+    await FlutterBluePlus.stopScan();
+
+    if (found == null) return false;
+
+    _dev = found;
+    await _dev!.connect(autoConnect: false);
+    try {
+      await _dev!.requestMtu(512);
+    } catch (_) {}
+
+    final services = await _dev!.discoverServices();
+    for (final s in services) {
+      if (s.uuid == MeshUuids.service) {
+        for (final c in s.characteristics) {
+          if (c.uuid == MeshUuids.toRadio) _toRadio = c;
+          if (c.uuid == MeshUuids.fromRadio) _fromRadio = c;
+          if (c.uuid == MeshUuids.fromNum) _fromNum = c;
+        }
+      }
+    }
+
+    if (_toRadio == null || _fromRadio == null || _fromNum == null) {
+      try {
+        await _dev!.disconnect();
+      } catch (_) {}
+      return false;
+    }
+
+    await _initializeFromRadioNotifications();
+    if (_fromNum!.properties.notify) {
+      try {
+        await _fromNum!.setNotifyValue(true);
+      } catch (_) {}
+    }
+
+    return true;
+  }
+
+  Future<void> disconnect() async {
+    try {
+      await _fromRadio?.setNotifyValue(false);
+    } catch (_) {}
+    try {
+      await _fromNum?.setNotifyValue(false);
+    } catch (_) {}
+
+    await _disposeRadioStreams();
+
+    try {
+      await _dev?.disconnect();
+    } catch (_) {}
+
+    _dev = null;
+    _toRadio = null;
+    _fromRadio = null;
+    _fromNum = null;
+  }
+
+  // -------- lectura de configuración ----------
+  Future<NodeConfig?> readConfig() async {
+    if (_toRadio == null || _fromRadioQueue == null) return null;
+    final cfgOut = NodeConfig();
+
+    void _applyFrameToConfig(NodeConfig out, mesh.FromRadio fr) {
+      // 1) Config “grande” (viene dentro de FromRadio.config)
+      if (fr.hasConfig()) {
+        final conf = fr.config;
+
+        // Device (para nombres / valores generales si existieran)
+        if (conf.hasDevice()) {
+          final dev = conf.device;
+          // Algunos firmwares publican nombres en Device/NodeInfo; aquí dejamos opcional:
+          try {
+            if (dev.hasOwner()) {
+              // Si tu proto tiene owner con nombres, adapta aquí
+            }
+          } catch (_) {}
+        }
+
+        // LoRa (región)
+        if (conf.hasLora()) {
+          final l = conf.lora;
+          if (l.hasRegion()) {
+            // Enum cfg.Config_LoRaConfig_RegionCode
+            out.setFrequencyRegionFromString(_regionEnumToString(l.region));
+          }
+        }
+      }
+
+      // 2) ModuleConfig -> Serial
+      if (fr.hasModuleConfig() && fr.moduleConfig.hasSerial()) {
+        final s = fr.moduleConfig.serial;
+        if (s.hasMode()) {
+          out.setSerialModeFromString(_serialModeEnumToString(s.mode));
+        }
+        if (s.hasBaud()) {
+          out.baudRate = s.baud; // enum
+        }
+      }
+
+      // 3) Channel (indice + PSK)
+      if (fr.hasChannel()) {
+        final c = fr.channel;
+        if (c.hasIndex()) out.channelIndex = c.index;
+        if (c.hasSettings() && c.settings.hasPsk()) {
+          out.key = Uint8List.fromList(c.settings.psk);
+        }
+      }
+
+      // 4) NodeInfo (nombres, si existiera user adentro)
+      if (fr.hasNodeInfo()) {
+        try {
+          final ni = fr.nodeInfo;
+          // Muchos esquemas tienen ni.user.shortName/longName
+          // Si tu 'node_info.proto' trae user, se puede leer así:
+          if (ni.hasUser()) {
+            final u = ni.user;
+            if (u.hasShortName()) out.shortName = u.shortName;
+            if (u.hasLongName()) out.longName = u.longName;
+          }
+        } catch (_) {
+          // Si tu variante no trae user dentro de NodeInfo, se ignora.
+        }
+      }
+    }
+
+    Future<void> _requestAndApply(admin.AdminMessage msg,
+        bool Function(mesh.FromRadio) matcher) async {
+      try {
+        final frames = await _sendAndReceive(
+          _wrapAdminToToRadio(msg),
+          isComplete: (responses) => responses.any(matcher),
+          timeout: _defaultResponseTimeout,
+        );
+        for (final f in frames) {
+          _applyFrameToConfig(cfgOut, f);
+        }
+      } on TimeoutException {
+        // Permitimos lectura parcial
+      }
+    }
+
+    try {
+      // LORA_CONFIG
+      await _requestAndApply(
+        admin.AdminMessage()
+          ..getConfigRequest = admin.AdminMessage_ConfigType.LORA_CONFIG,
+            (fr) => fr.hasConfig() && fr.config.hasLora(),
+      );
+
+      // DEVICE_CONFIG (por si se expone algo útil como nombres/owner)
+      await _requestAndApply(
+        admin.AdminMessage()
+          ..getConfigRequest = admin.AdminMessage_ConfigType.DEVICE_CONFIG,
+            (fr) => fr.hasConfig() && fr.config.hasDevice(),
+      );
+
+      // CHANNEL (para PSK/índice)
+      await _requestAndApply(
+        admin.AdminMessage()
+          ..getConfigRequest = admin.AdminMessage_ConfigType.NETWORK_CONFIG,
+        // Algunas builds devuelven Channel por separado:
+            (fr) => fr.hasChannel() || (fr.hasConfig() && fr.config.hasDevice()),
+      );
+
+      // ModuleConfig SERIAL
+      await _requestAndApply(
+        admin.AdminMessage()
+          ..getModuleConfigRequest =
+              admin.AdminMessage_ModuleConfigType.SERIAL_CONFIG,
+            (fr) => fr.hasModuleConfig() && fr.moduleConfig.hasSerial(),
+      );
+
+      // NodeInfo (nombres)
+      // Nota: Para refrescar NodeInfo suele bastar with wantConfigId completo,
+      // pero aquí probamos completar con una petición “heartbeat” o similar si lo deseas.
+      // Lo dejamos opcional; el flujo normal suele traerte NodeInfo al conectar.
+    } catch (_) {
+      return null;
+    }
+
+    return cfgOut;
+  }
+
+  // -------- escritura de configuración ----------
+  Future<void> writeConfig(NodeConfig cfgIn) async {
+    if (_toRadio == null || _fromRadioQueue == null) return;
+
+    Future<void> send(admin.AdminMessage msg) async {
+      try {
+        await _sendAndReceive(
+          _wrapAdminToToRadio(msg),
+          isComplete: (responses) => responses.isNotEmpty,
+          timeout: _defaultResponseTimeout,
+        );
+      } on TimeoutException {
+        throw TimeoutException('Timeout waiting for radio acknowledgement');
+      }
+    }
+
+    // 1) Nombres (si tu firmware usa DeviceConfig para owner/nombres,
+    // adapta aquí: setDevice con el sub-mensaje correspondiente)
+    // Mucho firmware espera los nombres en User/NodeInfo por paquetes NODEINFO,
+    // pero por Admin generalmente se setean en device/ui/config. Lo mantenemos opcional.
+
+    // 2) Canal + PSK
+    final settings = ch.ChannelSettings()
+      ..name = "CH${cfgIn.channelIndex}"
+      ..psk = cfgIn.key;
+    final channel = ch.Channel()
+      ..index = cfgIn.channelIndex
+      ..role = ch.Channel_Role.PRIMARY
+      ..settings = settings;
+
+    await send(admin.AdminMessage()..setChannel = channel);
+
+    // 3) Serial (baud + mode)
+    final serialCfg = mod.ModuleConfig_SerialConfig()
+      ..enabled = true
+      ..baud = cfgIn.baudRate
+      ..mode = _serialModeFromString(cfgIn.serialModeAsString);
+    final moduleCfg = mod.ModuleConfig()..serial = serialCfg;
+
+    await send(admin.AdminMessage()..setModuleConfig = moduleCfg);
+
+    // 4) Lora region
+    final lora = cfg.LoRaConfig()
+      ..region = _regionFromString(cfgIn.frequencyRegionAsString);
+    final radio = cfg.RadioConfig()..lora = lora;
+
+    await send(admin.AdminMessage()..setRadio = radio);
+  }
+
+  // ------- helpers enum <-> string -------
+
+  String _serialModeEnumToString(
+      mod.ModuleConfig_SerialConfig_Serial_Mode m) {
+    switch (m) {
+      case mod.ModuleConfig_SerialConfig_Serial_Mode.PROTO:
+        return 'PROTO';
+      case mod.ModuleConfig_SerialConfig_Serial_Mode.TEXTMSG:
+        return 'TEXTMSG';
+      case mod.ModuleConfig_SerialConfig_Serial_Mode.NMEA:
+        return 'NMEA';
+      case mod.ModuleConfig_SerialConfig_Serial_Mode.CALTOPO:
+        return 'CALTOPO';
+      default:
+        return 'DEFAULT';
+    }
+  }
+
+  mod.ModuleConfig_SerialConfig_Serial_Mode _serialModeFromString(String s) {
+    switch (s.toUpperCase()) {
+      case 'PROTO':
+        return mod.ModuleConfig_SerialConfig_Serial_Mode.PROTO;
+      case 'TEXTMSG':
+        return mod.ModuleConfig_SerialConfig_Serial_Mode.TEXTMSG;
+      case 'NMEA':
+        return mod.ModuleConfig_SerialConfig_Serial_Mode.NMEA;
+      case 'CALTOPO':
+        return mod.ModuleConfig_SerialConfig_Serial_Mode.CALTOPO;
+      default:
+        return mod.ModuleConfig_SerialConfig_Serial_Mode.DEFAULT;
+    }
+  }
+
+  String _regionEnumToString(cfg.Config_LoRaConfig_RegionCode r) {
+    switch (r) {
+      case cfg.Config_LoRaConfig_RegionCode.EU_433:
+        return '433';
+      case cfg.Config_LoRaConfig_RegionCode.US:
+        return '915';
+      case cfg.Config_LoRaConfig_RegionCode.EU_868:
+      default:
+        return '868';
+    }
+  }
+
+  cfg.Config_LoRaConfig_RegionCode _regionFromString(String s) {
+    switch (s) {
+      case '433':
+        return cfg.Config_LoRaConfig_RegionCode.EU_433;
+      case '915':
+        return cfg.Config_LoRaConfig_RegionCode.US;
+      case '868':
+      default:
+        return cfg.Config_LoRaConfig_RegionCode.EU_868;
+    }
+  }
+}
+*/
