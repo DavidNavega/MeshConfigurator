@@ -29,6 +29,8 @@ class BluetoothService {
 
   Completer<void>? _pendingRequest;
 
+  int _lastFromNum = 0;
+
   static const Duration _defaultResponseTimeout = Duration(seconds: 5);
   static const Duration _postResponseWindow = Duration(milliseconds: 200);
 
@@ -98,6 +100,8 @@ class BluetoothService {
     await _fromNumSubscription?.cancel();
     _fromNumSubscription = null;
 
+    _lastFromNum = 0;
+
     if (!characteristic.properties.notify) return;
 
     try {
@@ -129,8 +133,14 @@ class BluetoothService {
   Future<void> _handleFromNumNotification(List<int> data) async {
     if (data.isEmpty) return;
 
-    final pending = _decodeLittleEndian(data);
-    if (pending <= 0) return;
+    if (data.length < 4) return;
+
+    final current = _decodeLittleEndian(data.sublist(0, 4));
+    final pending = (current - _lastFromNum) & 0xFFFFFFFF;
+    if (pending == 0) {
+      _lastFromNum = current;
+      return;
+    }
 
     final radioCharacteristic = _fromRadio;
     final controller = _fromRadioController;
@@ -138,6 +148,7 @@ class BluetoothService {
       return;
     }
 
+    var processed = 0;
     for (var i = 0; i < pending; i++) {
       if (controller.isClosed) break;
       List<int> raw;
@@ -149,6 +160,8 @@ class BluetoothService {
         }
         break;
       }
+
+      processed++;
 
       if (raw.isEmpty) {
         continue;
@@ -164,6 +177,10 @@ class BluetoothService {
           controller.addError(err, st);
         }
       }
+    }
+
+    if (processed == pending) {
+      _lastFromNum = current;
     }
   }
 
@@ -357,6 +374,7 @@ class BluetoothService {
       return false;
     }
 
+    _lastFromNum = 0;
     await _initializeFromRadioNotifications();
     await _initializeFromNumNotifications();
 
@@ -381,12 +399,16 @@ class BluetoothService {
     _toRadio = null;
     _fromRadio = null;
     _fromNum = null;
+    _lastFromNum = 0;
   }
 
   // -------- lectura de configuración ----------
   Future<NodeConfig?> readConfig() async {
     if (_toRadio == null || _fromRadioQueue == null) return null;
     final cfgOut = NodeConfig();
+
+    var primaryChannelCaptured = false;
+
 
     void _applyFrameToConfig(NodeConfig out, mesh.FromRadio fr) {
       if (fr.hasConfig()) {
@@ -418,9 +440,15 @@ class BluetoothService {
 
       if (fr.hasChannel()) {
         final c = fr.channel;
-        if (c.hasIndex()) out.channelIndex = c.index;
-        if (c.hasSettings() && c.settings.hasPsk()) {
-          out.key = Uint8List.fromList(c.settings.psk);
+        final isPrimary = c.role == ch.Channel_Role.PRIMARY;
+        if (isPrimary || !primaryChannelCaptured) {
+          if (c.hasIndex()) out.channelIndex = c.index;
+          if (c.hasSettings() && c.settings.hasPsk()) {
+            out.key = Uint8List.fromList(c.settings.psk);
+          }
+        }
+        if (isPrimary) {
+          primaryChannelCaptured = true;
         }
       }
 
@@ -462,13 +490,17 @@ class BluetoothService {
           ..getConfigRequest = admin.AdminMessage_ConfigType.DEVICE_CONFIG,
             (fr) => fr.hasConfig() && fr.config.hasDevice(),
       );
-
-      await _requestAndApply(
-        admin.AdminMessage()
-          ..getConfigRequest = admin.AdminMessage_ConfigType.NETWORK_CONFIG,
-            (fr) => fr.hasChannel(),
-      );
-
+      final indicesToQuery = <int>{cfgOut.channelIndex};
+      for (var i = 0; i < 8; i++) {
+        indicesToQuery.add(i);
+      }
+      for (final index in indicesToQuery) {
+        await _requestAndApply(
+          admin.AdminMessage()..getChannelRequest = index,
+              (fr) => fr.hasChannel(),
+        );
+        if (primaryChannelCaptured) break;
+      }
       await _requestAndApply(
         admin.AdminMessage()
           ..getModuleConfigRequest =

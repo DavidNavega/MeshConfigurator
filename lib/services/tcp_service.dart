@@ -124,6 +124,8 @@ class TcpHttpService {
   Future<NodeConfig?> readConfig() async {
     final cfgOut = NodeConfig();
 
+    var primaryChannelCaptured = false;
+
     void applyFrame(mesh.FromRadio fr) {
       if (fr.hasNodeInfo() && fr.nodeInfo.hasUser()) {
         final u = fr.nodeInfo.user;
@@ -133,9 +135,15 @@ class TcpHttpService {
 
       if (fr.hasChannel()) {
         final c = fr.channel;
-        if (c.hasIndex()) cfgOut.channelIndex = c.index;
-        if (c.hasSettings() && c.settings.hasPsk()) {
-          cfgOut.key = Uint8List.fromList(c.settings.psk);
+        final isPrimary = c.role == ch.Channel_Role.PRIMARY;
+        if (isPrimary || !primaryChannelCaptured) {
+          if (c.hasIndex()) cfgOut.channelIndex = c.index;
+          if (c.hasSettings() && c.settings.hasPsk()) {
+            cfgOut.key = Uint8List.fromList(c.settings.psk);
+          }
+        }
+        if (isPrimary) {
+          primaryChannelCaptured = true;
         }
       }
 
@@ -177,11 +185,17 @@ class TcpHttpService {
         ..getConfigRequest = admin.AdminMessage_ConfigType.DEVICE_CONFIG,
           (fr) => fr.hasConfig() && fr.config.hasDevice(),
     );
-    await request(
-      admin.AdminMessage()
-        ..getConfigRequest = admin.AdminMessage_ConfigType.NETWORK_CONFIG,
-          (fr) => fr.hasChannel(),
-    );
+    final indicesToQuery = <int>{cfgOut.channelIndex};
+    for (var i = 0; i < 8; i++) {
+      indicesToQuery.add(i);
+    }
+    for (final index in indicesToQuery) {
+      await request(
+        admin.AdminMessage()..getChannelRequest = index,
+            (fr) => fr.hasChannel(),
+      );
+      if (primaryChannelCaptured) break;
+    }
     await request(
       admin.AdminMessage()
         ..getModuleConfigRequest =
