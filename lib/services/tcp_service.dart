@@ -125,6 +125,7 @@ class TcpHttpService {
     final cfgOut = NodeConfig();
 
     var primaryChannelCaptured = false;
+    var primaryChannelLogged = false;
 
     void applyAdmin(admin.AdminMessage message) {
       if (message.hasGetOwnerResponse()) {
@@ -142,7 +143,8 @@ class TcpHttpService {
         final isPrimary = channel.role == ch.Channel_Role.PRIMARY;
         if (isPrimary || !primaryChannelCaptured) {
           if (channel.hasIndex()) {
-            cfgOut.channelIndex = channel.index;
+            final rawIndex = channel.index;
+            cfgOut.channelIndex = rawIndex > 0 ? rawIndex - 1 : rawIndex;
           }
           if (channel.hasSettings() && channel.settings.hasPsk()) {
             cfgOut.key = Uint8List.fromList(channel.settings.psk);
@@ -150,6 +152,11 @@ class TcpHttpService {
         }
         if (isPrimary) {
           primaryChannelCaptured = true;
+          if (!primaryChannelLogged) {
+            primaryChannelLogged = true;
+            print(
+                '[TcpHttpService] readConfig() capturó canal ${cfgOut.channelIndex} con PSK (${cfgOut.key.length} bytes).');
+          }
         }
       }
 
@@ -224,7 +231,7 @@ class TcpHttpService {
     }
     for (final index in indicesToQuery) {
       final channelReceived = await request(
-        admin.AdminMessage()..getChannelRequest = index,
+        admin.AdminMessage()..getChannelRequest = index + 1,
             (msg) => msg.hasGetChannelResponse(),
       );
       receivedAnyResponse = receivedAnyResponse || channelReceived;

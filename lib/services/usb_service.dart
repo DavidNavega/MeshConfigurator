@@ -87,6 +87,7 @@ class UsbService {
     final cfgOut = NodeConfig();
 
     var primaryChannelCaptured = false;
+    var primaryChannelLogged = false;
 
     void _applyAdmin(admin.AdminMessage message) {
       if (message.hasGetOwnerResponse()) {
@@ -103,7 +104,8 @@ class UsbService {
         final isPrimary = channel.role == ch.Channel_Role.PRIMARY;
         if (isPrimary || !primaryChannelCaptured) {
           if (channel.hasIndex()) {
-            cfgOut.channelIndex = channel.index;
+            final rawIndex = channel.index;
+            cfgOut.channelIndex = rawIndex > 0 ? rawIndex - 1 : rawIndex;
           }
           if (channel.hasSettings() && channel.settings.hasPsk()) {
             cfgOut.key = Uint8List.fromList(channel.settings.psk);
@@ -111,6 +113,11 @@ class UsbService {
         }
         if (isPrimary) {
           primaryChannelCaptured = true;
+          if (!primaryChannelLogged) {
+            primaryChannelLogged = true;
+            print(
+                '[UsbService] readConfig() capturó canal ${cfgOut.channelIndex} con PSK (${cfgOut.key.length} bytes).');
+          }
         }
       }
       if (message.hasGetModuleConfigResponse() &&
@@ -173,7 +180,7 @@ class UsbService {
       }
       for (final index in indicesToQuery) {
         final channelReceived = await request(
-          admin.AdminMessage()..getChannelRequest = index,
+          admin.AdminMessage()..getChannelRequest = index + 1,
               (msg) => msg.hasGetChannelResponse(),
         );
         receivedAnyResponse = receivedAnyResponse || channelReceived;

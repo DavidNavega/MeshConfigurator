@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:async/async.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -301,12 +302,26 @@ class BluetoothService {
         throw StateError('Radio write characteristic not available');
       }
 
-      await toCharacteristic.write(
-        toRadioMsg.writeToBuffer(),
-        withoutResponse: false,
-      );
+      await _writeToRadio(toCharacteristic, toRadioMsg.writeToBuffer());
       var ackSeen = false;
       var userSatisfied = false;
+
+      try {
+        await toCharacteristic.write(
+          toRadioMsg.writeToBuffer(),
+          withoutResponse: false,
+        );
+      } on FlutterBluePlusException catch (err) {
+        final message = err.description?.toLowerCase() ?? '';
+        if (message.contains('write not permitted')) {
+          await toCharacteristic.write(
+            toRadioMsg.writeToBuffer(),
+            withoutResponse: true,
+          );
+        } else {
+          rethrow;
+        }
+      }
 
       try {
         return await _collectResponses(
@@ -326,6 +341,71 @@ class BluetoothService {
     });
   }
 
+  Future<void> _writeToRadio(
+      BluetoothCharacteristic characteristic, List<int> payload) async {
+    final supportsWriteWithoutResponse =
+        characteristic.properties.writeWithoutResponse;
+    final supportsWriteWithResponse = characteristic.properties.write;
+
+    final attempts = <bool>[];
+    if (supportsWriteWithoutResponse) {
+      attempts.add(true);
+    }
+    if (supportsWriteWithResponse) {
+      attempts.add(false);
+    }
+
+    if (attempts.isEmpty) {
+      throw StateError('Characteristic does not support write operations');
+    }
+
+    FlutterBluePlusException? lastWriteNotPermitted;
+    for (final withoutResponse in attempts) {
+      try {
+        await characteristic.write(
+          payload,
+          withoutResponse: withoutResponse,
+        );
+        return;
+      } on FlutterBluePlusException catch (err) {
+        if (_isWriteNotPermittedError(err)) {
+          lastWriteNotPermitted = err;
+          continue;
+        }
+        rethrow;
+      }
+    }
+
+    if (lastWriteNotPermitted != null &&
+        attempts.length == 1 &&
+        attempts.first == false) {
+      try {
+        await characteristic.write(
+          payload,
+          withoutResponse: true,
+        );
+        return;
+      } on FlutterBluePlusException catch (err) {
+        if (_isWriteNotPermittedError(err)) {
+          lastWriteNotPermitted = err;
+        } else {
+          rethrow;
+        }
+      }
+    }
+
+    if (lastWriteNotPermitted != null) {
+      throw lastWriteNotPermitted;
+    }
+
+    throw StateError('Failed to write to characteristic');
+  }
+
+  bool _isWriteNotPermittedError(FlutterBluePlusException err) {
+    final message = err.description?.toLowerCase() ?? '';
+    return message.contains('write not permitted');
+  }
+
   // -------- conexión ----------
   Future<bool> connectAndInit() async {
     if (!await _ensurePermissions()) return false;
@@ -335,7 +415,7 @@ class BluetoothService {
 
     await for (final results in FlutterBluePlus.scanResults) {
       for (final r in results) {
-        final name = (r.device.platformName ?? '').toUpperCase();
+        final name = r.device.platformName.toUpperCase();
         if (name.contains('MESHTASTIC') ||
             name.contains('TBEAM') ||
             name.contains('HELTEC') ||
@@ -408,6 +488,7 @@ class BluetoothService {
     final cfgOut = NodeConfig();
 
     var primaryChannelCaptured = false;
+    var primaryChannelLogged = false;
 
     void _applyAdminToConfig(admin.AdminMessage message) {
       if (message.hasGetOwnerResponse()) {
@@ -425,7 +506,8 @@ class BluetoothService {
         final isPrimary = channel.role == ch.Channel_Role.PRIMARY;
         if (isPrimary || !primaryChannelCaptured) {
           if (channel.hasIndex()) {
-            cfgOut.channelIndex = channel.index;
+            final rawIndex = channel.index;
+            cfgOut.channelIndex = rawIndex > 0 ? rawIndex - 1 : rawIndex;
           }
           if (channel.hasSettings() && channel.settings.hasPsk()) {
             cfgOut.key = Uint8List.fromList(channel.settings.psk);
@@ -433,6 +515,11 @@ class BluetoothService {
         }
         if (isPrimary) {
           primaryChannelCaptured = true;
+          if (!primaryChannelLogged) {
+            primaryChannelLogged = true;
+            print(
+                '[BluetoothService] readConfig() capturó canal ${cfgOut.channelIndex} con PSK (${cfgOut.key.length} bytes).');
+          }
         }
       }
 
@@ -476,6 +563,7 @@ class BluetoothService {
         if (adminMsg == null) {
           continue;
         }
+        debugPrint('Received admin response: ${adminMsg.toString()}');
         if (matcher(adminMsg)) {
           matched = true;
         }
@@ -508,7 +596,7 @@ class BluetoothService {
     }
     for (final index in indicesToQuery) {
       final channelReceived = await _requestAndApply(
-        admin.AdminMessage()..getChannelRequest = index,
+        admin.AdminMessage()..getChannelRequest = index + 1,
             (msg) => msg.hasGetChannelResponse(),
       );
       receivedAnyResponse = receivedAnyResponse || channelReceived;
