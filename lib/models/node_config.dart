@@ -68,9 +68,11 @@ class NodeConfig {
       case 'TEXTMSG':
         serialOutputMode = pb.ModuleConfig_SerialConfig_Serial_Mode.TEXTMSG;
         break;
-      case 'NMEA':
+        case 'TLL':
+        case 'NMEA':
         serialOutputMode = pb.ModuleConfig_SerialConfig_Serial_Mode.NMEA;
         break;
+      case 'WPL':
       case 'CALTOPO':
         serialOutputMode = pb.ModuleConfig_SerialConfig_Serial_Mode.CALTOPO;
         break;
@@ -86,9 +88,9 @@ class NodeConfig {
       case pb.ModuleConfig_SerialConfig_Serial_Mode.TEXTMSG:
         return 'TEXTMSG';
       case pb.ModuleConfig_SerialConfig_Serial_Mode.NMEA:
-        return 'NMEA';
+        return 'TLL';
       case pb.ModuleConfig_SerialConfig_Serial_Mode.CALTOPO:
-        return 'CALTOPO';
+        return 'WPL';
       default:
         return 'DEFAULT';
     }

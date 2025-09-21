@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/config_provider.dart';
 
-import 'dart:typed_data';
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
   @override
@@ -14,7 +12,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final _shortC = TextEditingController();
   final _longC = TextEditingController();
   final _keyC = TextEditingController();
-  final _tcpUrlC = TextEditingController(text: "http://meshtastic.local");
+  final _tcpUrlC = TextEditingController(text: "http://192.168.1.4");
   ConfigProvider? _provider;
 
   void _syncControllers(ConfigProvider provider) {
@@ -84,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.red,
-        title: const Text('Meshtastic Configurator'),
+        title: const Text('Buoys Configurator'),
       ),
       backgroundColor: Colors.black,
       body: SingleChildScrollView(
@@ -146,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               controller: _tcpUrlC,
                               style: const TextStyle(color: Colors.white),
                               decoration: deco(
-                                  'URL TCP/HTTP (p.ej. http://meshtastic.local)'),
+                                  'URL TCP/HTTP (p.ej. http://192.168.4.1)'),
                             ),
                           ),
                           ElevatedButton.icon(
@@ -216,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: const EdgeInsets.all(12),
                   child: Column(
                     children: [
-                      Text('Parámetros del Nodo',
+                      Text('Parámetros Boya',
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
@@ -264,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           'Vacío, 16 o 32 bytes en hex o Base64.',
                         ),
                         onChanged: (v) =>
-                            context.read<ConfigProvider>().setKey(v.codeUnits as Uint8List),
+                            context.read<ConfigProvider>().setKeyText(v),
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
@@ -274,22 +272,22 @@ class _HomeScreenState extends State<HomeScreen> {
                               value: 'DEFAULT',
                               child: Text('DEFAULT',
                                   style:
-                                  TextStyle(color: Colors.black))),
+                                      TextStyle(color: Colors.black))),
                           DropdownMenuItem(
                               value: 'PROTO',
                               child: Text('PROTO',
                                   style:
-                                  TextStyle(color: Colors.black))),
+                                      TextStyle(color: Colors.black))),
                           DropdownMenuItem(
-                              value: 'NMEA',
-                              child: Text('NMEA',
+                              value: 'TLL',
+                              child: Text('TLL',
                                   style:
-                                  TextStyle(color: Colors.black))),
+                                      TextStyle(color: Colors.black))),
                           DropdownMenuItem(
-                              value: 'CALTOPO',
-                              child: Text('CALTOPO',
+                              value: 'WPL',
+                              child: Text('WPL',
                                   style:
-                                  TextStyle(color: Colors.black))),
+                                      TextStyle(color: Colors.black))),
                         ],
                         onChanged: (v) =>
                             context.read<ConfigProvider>().setSerialMode(v ?? 'DEFAULT'),
@@ -301,18 +299,18 @@ class _HomeScreenState extends State<HomeScreen> {
                         value: p.baudDisplay,
                         items: const [
                           DropdownMenuItem(
+                              value: '4800',
+                              child: Text('4800',
+                                  style:
+                                  TextStyle(color: Colors.black))),
+                          DropdownMenuItem(
                               value: '9600',
                               child: Text('9600',
                                   style:
                                   TextStyle(color: Colors.black))),
                           DropdownMenuItem(
-                              value: '115200',
-                              child: Text('115200',
-                                  style:
-                                  TextStyle(color: Colors.black))),
-                          DropdownMenuItem(
-                              value: '921600',
-                              child: Text('921600',
+                              value: '38400',
+                              child: Text('38400',
                                   style:
                                   TextStyle(color: Colors.black))),
                         ],
@@ -327,24 +325,24 @@ class _HomeScreenState extends State<HomeScreen> {
                         items: const [
                           DropdownMenuItem(
                               value: '433',
-                              child: Text('433 MHz (EU433)',
+                              child: Text('433 MHz',
                                   style:
                                   TextStyle(color: Colors.black))),
                           DropdownMenuItem(
                               value: '868',
-                              child: Text('868 MHz (EU868)',
+                              child: Text('868 MHz',
                                   style:
                                   TextStyle(color: Colors.black))),
                           DropdownMenuItem(
                               value: '915',
-                              child: Text('915 MHz (US915)',
+                              child: Text('915 MHz',
                                   style:
                                   TextStyle(color: Colors.black))),
                         ],
                         onChanged: (v) => context
                             .read<ConfigProvider>()
                             .setFrequencyRegion(v ?? '868'),
-                        decoration: deco('Frecuencia LoRa'),
+                        decoration: deco('Frecuencia'),
                         dropdownColor: Colors.white,
                       ),
                     ],

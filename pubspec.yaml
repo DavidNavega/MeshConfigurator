@@ -1,5 +1,5 @@
-name: meshtastic_configurator
-description: App Flutter para configurar dispositivos Meshtastic (BLE / TCP / USB) con Protobuf.
+name: Buoys_configurator
+description: App Flutter para configurar Boyas Navega (BLE / TCP / USB) con Protobuf.
 publish_to: 'none'
 version: 1.2.0+3
 
@@ -20,8 +20,15 @@ dependencies:
 dev_dependencies:
   protoc_plugin: ^21.1.2
   flutter_lints: ^3.0.2
+  flutter_launcher_icons: ^0.13.1
   flutter_test:
     sdk: flutter
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon.png"
+  remove_alpha_ios: true
 
 flutter:
   uses-material-design: true

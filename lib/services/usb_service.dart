@@ -5,12 +5,12 @@ import 'package:usb_serial/usb_serial.dart';
 import '../models/node_config.dart';
 import 'stream_framing.dart';
 
-import 'package:meshtastic_configurator/proto/meshtastic/mesh.pb.dart' as mesh;
-import 'package:meshtastic_configurator/proto/meshtastic/admin.pb.dart' as admin;
-import 'package:meshtastic_configurator/proto/meshtastic/channel.pb.dart' as ch;
-import 'package:meshtastic_configurator/proto/meshtastic/module_config.pb.dart' as mod;
-import 'package:meshtastic_configurator/proto/meshtastic/config.pb.dart' as cfg;
-import 'package:meshtastic_configurator/proto/meshtastic/portnums.pbenum.dart' as port;
+import 'package:Buoys_configurator/proto/meshtastic/mesh.pb.dart' as mesh;
+import 'package:Buoys_configurator/proto/meshtastic/admin.pb.dart' as admin;
+import 'package:Buoys_configurator/proto/meshtastic/channel.pb.dart' as ch;
+import 'package:Buoys_configurator/proto/meshtastic/module_config.pb.dart' as mod;
+import 'package:Buoys_configurator/proto/meshtastic/config.pb.dart' as cfg;
+import 'package:Buoys_configurator/proto/meshtastic/portnums.pbenum.dart' as port;
 
 class UsbService {
   UsbPort? _port;
@@ -72,9 +72,11 @@ class UsbService {
         if (fr.hasModuleConfig() && fr.moduleConfig.hasSerial()) {
           final s = fr.moduleConfig.serial;
           cfgOut.setSerialModeFromString(
-              (s.mode == mod.ModuleConfig_SerialConfig_Serial_Mode.CALTOPO)
+              /*(s.mode == mod.ModuleConfig_SerialConfig_Serial_Mode.CALTOPO)
                   ? 'WPL'
                   : 'TLL');
+              */
+              _serialModeEnumToString(s.mode));
           if (s.hasBaud()) cfgOut.baudRate = s.baud;
         }
         if (fr.hasConfig() && fr.config.hasLora()) {
@@ -165,14 +167,29 @@ class UsbService {
         return cfg.Config_LoRaConfig_RegionCode.EU_868;
     }
   }
+  String _serialModeEnumToString(
+      mod.ModuleConfig_SerialConfig_Serial_Mode mode) {
+    switch (mode) {
+      case mod.ModuleConfig_SerialConfig_Serial_Mode.PROTO:
+        return 'PROTO';
+      case mod.ModuleConfig_SerialConfig_Serial_Mode.TEXTMSG:
+        return 'TEXTMSG';
+      case mod.ModuleConfig_SerialConfig_Serial_Mode.CALTOPO:
+        return 'WPL';
+      case mod.ModuleConfig_SerialConfig_Serial_Mode.NMEA:
+        return 'TLL';
+      default:
+        return 'DEFAULT';
+    }
+  }
 
   mod.ModuleConfig_SerialConfig_Serial_Mode _serialModeFromString(String s) {
     switch (s.toUpperCase()) {
       case 'PROTO':
         return mod.ModuleConfig_SerialConfig_Serial_Mode.PROTO;
-      case 'NMEA':
+      case 'TLL':
         return mod.ModuleConfig_SerialConfig_Serial_Mode.NMEA;
-      case 'CALTOPO':
+      case 'WPL':
         return mod.ModuleConfig_SerialConfig_Serial_Mode.CALTOPO;
       default:
         return mod.ModuleConfig_SerialConfig_Serial_Mode.DEFAULT;

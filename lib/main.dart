@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/config_provider.dart';
 import 'screens/home_screen.dart';
+import 'services/bluetooth_service.dart';
+import 'services/tcp_service.dart';
+import 'services/usb_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,9 +15,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => ConfigProvider(),
+      create: (_) => ConfigProvider(
+        bluetoothService: BluetoothService(),
+        usbService: UsbService(),
+        tcpService: TcpHttpService(),
+      ),
       child: MaterialApp(
-        title: 'Meshtastic Configurator',
+        title: 'Buoys Configurator',
         theme: ThemeData(
           colorScheme: const ColorScheme.dark(
             primary: Colors.red,

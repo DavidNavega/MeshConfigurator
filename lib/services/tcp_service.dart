@@ -3,16 +3,39 @@ import 'package:http/http.dart' as http;
 
 import '../models/node_config.dart';
 
-import 'package:meshtastic_configurator/proto/meshtastic/mesh.pb.dart' as mesh;
-import 'package:meshtastic_configurator/proto/meshtastic/admin.pb.dart' as admin;
-import 'package:meshtastic_configurator/proto/meshtastic/channel.pb.dart' as ch;
-import 'package:meshtastic_configurator/proto/meshtastic/module_config.pb.dart' as mod;
-import 'package:meshtastic_configurator/proto/meshtastic/config.pb.dart' as cfg;
-import 'package:meshtastic_configurator/proto/meshtastic/portnums.pbenum.dart' as port;
+import 'package:Buoys_configurator/proto/meshtastic/mesh.pb.dart' as mesh;
+import 'package:Buoys_configurator/proto/meshtastic/admin.pb.dart' as admin;
+import 'package:Buoys_configurator/proto/meshtastic/channel.pb.dart' as ch;
+import 'package:Buoys_configurator/proto/meshtastic/module_config.pb.dart' as mod;
+import 'package:Buoys_configurator/proto/meshtastic/config.pb.dart' as cfg;
+import 'package:Buoys_configurator/proto/meshtastic/portnums.pbenum.dart' as port;
 
 class TcpHttpService {
-  final Uri base;
-  TcpHttpService(String baseUrl) : base = Uri.parse(baseUrl);
+  Uri? _base;
+
+  TcpHttpService([String? baseUrl]) {
+    if (baseUrl != null && baseUrl.isNotEmpty) {
+      updateBaseUrl(baseUrl);
+    }
+  }
+
+  bool get isConfigured => _base != null;
+
+  Uri get base {
+    final current = _base;
+    if (current == null) {
+      throw StateError('Base URL not configured');
+    }
+    return current;
+  }
+
+  void updateBaseUrl(String baseUrl) {
+    _base = Uri.parse(baseUrl);
+  }
+
+  void clearBaseUrl() {
+    _base = null;
+  }
 
   // Empaqueta un AdminMessage como Data ADMIN_APP dentro de ToRadio.packet
   mesh.ToRadio _wrapAdmin(admin.AdminMessage msg) {
@@ -25,6 +48,8 @@ class TcpHttpService {
 
   Future<NodeConfig?> readConfig() async {
     final cfgOut = NodeConfig();
+
+    final base = this.base;
 
     Future<void> send(admin.AdminMessage msg) async {
       final to = _wrapAdmin(msg);
@@ -58,9 +83,11 @@ class TcpHttpService {
         if (fr.hasModuleConfig() && fr.moduleConfig.hasSerial()) {
           final s = fr.moduleConfig.serial;
           cfgOut.setSerialModeFromString(
-            (s.mode == mod.ModuleConfig_SerialConfig_Serial_Mode.CALTOPO)
+            /*(s.mode == mod.ModuleConfig_SerialConfig_Serial_Mode.CALTOPO)
                 ? 'WPL'
                 : 'TLL',
+            */
+            _serialModeEnumToString(s.mode),
           );
           if (s.hasBaud()) cfgOut.baudRate = s.baud;
         }
@@ -85,6 +112,8 @@ class TcpHttpService {
   }
 
   Future<void> writeConfig(NodeConfig cfgIn) async {
+    final base = this.base;
+
     Future<void> send(admin.AdminMessage msg) async {
       final to = _wrapAdmin(msg);
       await http.put(
@@ -154,12 +183,31 @@ class TcpHttpService {
     switch (s.toUpperCase()) {
       case 'PROTO':
         return mod.ModuleConfig_SerialConfig_Serial_Mode.PROTO;
+      case 'TEXTMSG':
+        return mod.ModuleConfig_SerialConfig_Serial_Mode.TEXTMSG;
+      case 'TLL':
       case 'NMEA':
         return mod.ModuleConfig_SerialConfig_Serial_Mode.NMEA;
+      case 'WPL':
       case 'CALTOPO':
         return mod.ModuleConfig_SerialConfig_Serial_Mode.CALTOPO;
       default:
         return mod.ModuleConfig_SerialConfig_Serial_Mode.DEFAULT;
+    }
+  }
+  String _serialModeEnumToString(
+      mod.ModuleConfig_SerialConfig_Serial_Mode mode) {
+    switch (mode) {
+      case mod.ModuleConfig_SerialConfig_Serial_Mode.PROTO:
+        return 'PROTO';
+      case mod.ModuleConfig_SerialConfig_Serial_Mode.TEXTMSG:
+        return 'TEXTMSG';
+      case mod.ModuleConfig_SerialConfig_Serial_Mode.CALTOPO:
+        return 'WPL';
+      case mod.ModuleConfig_SerialConfig_Serial_Mode.NMEA:
+        return 'TLL';
+      default:
+        return 'DEFAULT';
     }
   }
 }
