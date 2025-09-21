@@ -172,51 +172,65 @@ class TcpHttpService {
       }
     }
 
-    Future<void> request(
+    Future<bool> request(
         admin.AdminMessage msg,
         bool Function(admin.AdminMessage) matcher,
         ) async {
+      List<mesh.FromRadio> frames;
       try {
-        final frames = await _sendAndReceive(
+        frames = await _sendAndReceive(
           msg,
           isComplete: (responses) => responses.any((frame) {
             final adminMsg = _decodeAdminMessage(frame);
             return adminMsg != null && matcher(adminMsg);
           }),
         );
-        for (final frame in frames) {
-          final adminMsg = _decodeAdminMessage(frame);
-          if (adminMsg != null) {
-            applyAdmin(adminMsg);
-          }
-        }
       } on TimeoutException {
-        // Ignoramos para continuar intentando leer el resto de la config
+        return false;
       }
+
+      var matched = false;
+      for (final frame in frames) {
+        final adminMsg = _decodeAdminMessage(frame);
+        if (adminMsg == null) {
+          continue;
+        }
+        if (matcher(adminMsg)) {
+          matched = true;
+        }
+        applyAdmin(adminMsg);
+      }
+      return matched;
     }
 
-    await request(
+    var receivedAnyResponse = false;
+
+    final ownerReceived = await request(
       admin.AdminMessage()..getOwnerRequest = true,
           (msg) => msg.hasGetOwnerResponse(),
     );
-    await request(
+    receivedAnyResponse = receivedAnyResponse || ownerReceived;
+
+    final deviceConfigReceived = await request(
       admin.AdminMessage()
         ..getConfigRequest = admin.AdminMessage_ConfigType.DEVICE_CONFIG,
           (msg) =>
       msg.hasGetConfigResponse() && msg.getConfigResponse.hasDevice(),
     );
+    receivedAnyResponse = receivedAnyResponse || deviceConfigReceived;
     final indicesToQuery = <int>{cfgOut.channelIndex};
     for (var i = 0; i < 8; i++) {
       indicesToQuery.add(i);
     }
     for (final index in indicesToQuery) {
-      await request(
+      final channelReceived = await request(
         admin.AdminMessage()..getChannelRequest = index,
             (msg) => msg.hasGetChannelResponse(),
       );
+      receivedAnyResponse = receivedAnyResponse || channelReceived;
       if (primaryChannelCaptured) break;
     }
-    await request(
+    final serialReceived = await request(
       admin.AdminMessage()
         ..getModuleConfigRequest =
             admin.AdminMessage_ModuleConfigType.SERIAL_CONFIG,
@@ -224,7 +238,9 @@ class TcpHttpService {
       msg.hasGetModuleConfigResponse() &&
           msg.getModuleConfigResponse.hasSerial(),
     );
-    await request(
+    receivedAnyResponse = receivedAnyResponse || serialReceived;
+
+    final loraReceived = await request(
       admin.AdminMessage()
         ..getConfigRequest = admin.AdminMessage_ConfigType.LORA_CONFIG,
           (msg) =>
@@ -232,6 +248,11 @@ class TcpHttpService {
           msg.getConfigResponse.hasLora() &&
           msg.getConfigResponse.lora.hasRegion(),
     );
+    receivedAnyResponse = receivedAnyResponse || loraReceived;
+
+    if (!receivedAnyResponse) {
+      throw TimeoutException('No se recibió respuesta de configuración');
+    }
 
     return cfgOut;
   }

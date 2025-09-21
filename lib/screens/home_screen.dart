@@ -241,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 8),
                       TextField(
                         controller: _shortC,
-                        style: const TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Colors.red),
                         decoration: deco('Nombre Corto'),
                         onChanged: (v) =>
                             context.read<ConfigProvider>().setNames(v, p.cfg.longName),
@@ -249,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 8),
                       TextField(
                         controller: _longC,
-                        style: const TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Colors.red),
                         decoration: deco('Nombre Largo'),
                         onChanged: (v) =>
                             context.read<ConfigProvider>().setNames(p.cfg.shortName, v),
@@ -273,7 +273,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 8),
                       TextField(
                         controller: _keyC,
-                        style: const TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Colors.red),
                         decoration: deco(
                           'Llave (PSK)',
                           errorText: p.keyError,

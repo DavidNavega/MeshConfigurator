@@ -139,35 +139,47 @@ class UsbService {
 
     final subscription = _frameController!.stream.listen(_consumeFrame);
 
-    Future<void> request(
+    Future<bool> request(
         admin.AdminMessage msg,
         bool Function(admin.AdminMessage) matcher,
         ) async {
-      await _sendAdminAndWait(msg, matcher: matcher);
+      try {
+        await _sendAdminAndWait(msg, matcher: matcher);
+        return true;
+      } on TimeoutException {
+        return false;
+      }
     }
+
+    var receivedAnyResponse = false;
+
     try {
-      await request(
+      final ownerReceived = await request(
         admin.AdminMessage()..getOwnerRequest = true,
             (msg) => msg.hasGetOwnerResponse(),
       );
-      await request(
+      receivedAnyResponse = receivedAnyResponse || ownerReceived;
+
+      final deviceConfigReceived = await request(
         admin.AdminMessage()
           ..getConfigRequest = admin.AdminMessage_ConfigType.DEVICE_CONFIG,
             (msg) =>
         msg.hasGetConfigResponse() && msg.getConfigResponse.hasDevice(),
       );
+      receivedAnyResponse = receivedAnyResponse || deviceConfigReceived;
       final indicesToQuery = <int>{cfgOut.channelIndex};
       for (var i = 0; i < 8; i++) {
         indicesToQuery.add(i);
       }
       for (final index in indicesToQuery) {
-        await request(
+        final channelReceived = await request(
           admin.AdminMessage()..getChannelRequest = index,
               (msg) => msg.hasGetChannelResponse(),
         );
+        receivedAnyResponse = receivedAnyResponse || channelReceived;
         if (primaryChannelCaptured) break;
       }
-      await request(
+      final serialReceived = await request(
         admin.AdminMessage()
           ..getModuleConfigRequest =
               admin.AdminMessage_ModuleConfigType.SERIAL_CONFIG,
@@ -175,7 +187,9 @@ class UsbService {
         msg.hasGetModuleConfigResponse() &&
             msg.getModuleConfigResponse.hasSerial(),
       );
-      await request(
+      receivedAnyResponse = receivedAnyResponse || serialReceived;
+
+      final loraReceived = await request(
         admin.AdminMessage()
           ..getConfigRequest = admin.AdminMessage_ConfigType.LORA_CONFIG,
             (msg) =>
@@ -183,6 +197,11 @@ class UsbService {
             msg.getConfigResponse.hasLora() &&
             msg.getConfigResponse.lora.hasRegion(),
       );
+      receivedAnyResponse = receivedAnyResponse || loraReceived;
+
+      if (!receivedAnyResponse) {
+        throw TimeoutException('No se recibió respuesta de configuración');
+      }
     } finally {
       await subscription.cancel();
     }
@@ -231,7 +250,7 @@ class UsbService {
     await port.write(StreamFraming.frame(to.writeToBuffer()));
   }
 
-  Future<mesh.FromRadio?> _sendAdminAndWait(
+  Future<void> _sendAdminAndWait(
       admin.AdminMessage msg, {
         required bool Function(admin.AdminMessage) matcher,
         Duration timeout = const Duration(seconds: 2),
@@ -243,16 +262,18 @@ class UsbService {
     );
   }
 
-  Future<mesh.FromRadio?> _sendToRadioAndWait(
+  Future<void> _sendToRadioAndWait(
       mesh.ToRadio to, {
         required bool Function(admin.AdminMessage) matcher,
         Duration timeout = const Duration(seconds: 2),
       }) async {
     final port = _port;
     final controller = _frameController;
-    if (port == null || controller == null || controller.isClosed) return null;
+    if (port == null || controller == null || controller.isClosed) {
+      throw StateError('Puerto USB no disponible');
+    }
 
-    final completer = Completer<mesh.FromRadio>();
+    final completer = Completer<void>();
     var allowMatch = false;
     Future<void>? cancelFuture;
     late StreamSubscription<mesh.FromRadio> sub;
@@ -261,7 +282,7 @@ class UsbService {
       final adminMsg = _decodeAdminMessage(frame);
       if (adminMsg == null) return;
       if (!completer.isCompleted && matcher(adminMsg)) {
-        completer.complete(frame);
+        completer.complete();
         cancelFuture ??= sub.cancel();
       }
     });
@@ -270,9 +291,7 @@ class UsbService {
       final writeFuture = port.write(StreamFraming.frame(to.writeToBuffer()));
       allowMatch = true;
       await writeFuture;
-      return await completer.future.timeout(timeout);
-    } on TimeoutException {
-      return null;
+      await completer.future.timeout(timeout);
     } finally {
       await (cancelFuture ?? sub.cancel());
     }
@@ -291,7 +310,7 @@ class UsbService {
     }
   }
 
- mod.ModuleConfig_SerialConfig_Serial_Mode _serialModeFromString(String s) {
+  mod.ModuleConfig_SerialConfig_Serial_Mode _serialModeFromString(String s) {
     switch (s.toUpperCase()) {
       case 'PROTO':
         return mod.ModuleConfig_SerialConfig_Serial_Mode.PROTO;

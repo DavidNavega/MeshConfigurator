@@ -454,10 +454,11 @@ class BluetoothService {
       }
     }
 
-    Future<void> _requestAndApply(admin.AdminMessage msg,
+    Future<bool> _requestAndApply(admin.AdminMessage msg,
         bool Function(admin.AdminMessage) matcher) async {
+      List<mesh.FromRadio> frames;
       try {
-        final frames = await _sendAndReceive(
+        frames = await _sendAndReceive(
           _wrapAdminToToRadio(msg),
           isComplete: (responses) => responses.any((fr) {
             final adminMsg = _decodeAdminMessage(fr);
@@ -465,51 +466,66 @@ class BluetoothService {
           }),
           timeout: _defaultResponseTimeout,
         );
-        for (final f in frames) {
-          final adminMsg = _decodeAdminMessage(f);
-          if (adminMsg != null) {
-            _applyAdminToConfig(adminMsg);
-          }
+      } on TimeoutException {
+        return false;
+      }
+
+      var matched = false;
+      for (final f in frames) {
+        final adminMsg = _decodeAdminMessage(f);
+        if (adminMsg == null) {
+          continue;
         }
-      } on TimeoutException {}
+        if (matcher(adminMsg)) {
+          matched = true;
+        }
+        _applyAdminToConfig(adminMsg);
+      }
+      return matched;
     }
 
-    try {
-      await _requestAndApply(
-        admin.AdminMessage()..getOwnerRequest = true,
-            (msg) => msg.hasGetOwnerResponse(),
-      );
+    var receivedAnyResponse = false;
 
-      await _requestAndApply(
-        admin.AdminMessage()
-          ..getConfigRequest = admin.AdminMessage_ConfigType.LORA_CONFIG,
-            (msg) =>
-        msg.hasGetConfigResponse() &&
-            msg.getConfigResponse.hasLora() &&
-            msg.getConfigResponse.lora.hasRegion(),
-      );
+    final ownerReceived = await _requestAndApply(
+      admin.AdminMessage()..getOwnerRequest = true,
+          (msg) => msg.hasGetOwnerResponse(),
+    );
+    receivedAnyResponse = receivedAnyResponse || ownerReceived;
 
-      final indicesToQuery = <int>{cfgOut.channelIndex};
-      for (var i = 0; i < 8; i++) {
-        indicesToQuery.add(i);
-      }
-      for (final index in indicesToQuery) {
-        await _requestAndApply(
-          admin.AdminMessage()..getChannelRequest = index,
-              (msg) => msg.hasGetChannelResponse(),
-        );
-        if (primaryChannelCaptured) break;
-      }
-      await _requestAndApply(
-        admin.AdminMessage()
-          ..getModuleConfigRequest =
-              admin.AdminMessage_ModuleConfigType.SERIAL_CONFIG,
-            (msg) =>
-        msg.hasGetModuleConfigResponse() &&
-            msg.getModuleConfigResponse.hasSerial(),
+    final loraReceived = await _requestAndApply(
+      admin.AdminMessage()
+        ..getConfigRequest = admin.AdminMessage_ConfigType.LORA_CONFIG,
+          (msg) =>
+      msg.hasGetConfigResponse() &&
+          msg.getConfigResponse.hasLora() &&
+          msg.getConfigResponse.lora.hasRegion(),
+    );
+    receivedAnyResponse = receivedAnyResponse || loraReceived;
+
+    final indicesToQuery = <int>{cfgOut.channelIndex};
+    for (var i = 0; i < 8; i++) {
+      indicesToQuery.add(i);
+    }
+    for (final index in indicesToQuery) {
+      final channelReceived = await _requestAndApply(
+        admin.AdminMessage()..getChannelRequest = index,
+            (msg) => msg.hasGetChannelResponse(),
       );
-    } catch (_) {
-      return null;
+      receivedAnyResponse = receivedAnyResponse || channelReceived;
+      if (primaryChannelCaptured) break;
+    }
+    final serialReceived = await _requestAndApply(
+      admin.AdminMessage()
+        ..getModuleConfigRequest =
+            admin.AdminMessage_ModuleConfigType.SERIAL_CONFIG,
+          (msg) =>
+      msg.hasGetModuleConfigResponse() &&
+          msg.getModuleConfigResponse.hasSerial(),
+    );
+    receivedAnyResponse = receivedAnyResponse || serialReceived;
+
+    if (!receivedAnyResponse) {
+      throw TimeoutException('No se recibió respuesta de configuración');
     }
 
     return cfgOut;
