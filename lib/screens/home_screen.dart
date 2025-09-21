@@ -244,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 value: i,
                                 child: Text('Canal $i',
                                     style: const TextStyle(
-                                        color: Colors.black)))),
+                                        color: Colors.red)))),
                         onChanged: (v) => context
                             .read<ConfigProvider>()
                             .setChannelIndex(v ?? 0),
@@ -272,22 +272,22 @@ class _HomeScreenState extends State<HomeScreen> {
                               value: 'DEFAULT',
                               child: Text('DEFAULT',
                                   style:
-                                      TextStyle(color: Colors.black))),
+                                      TextStyle(color: Colors.red))),
                           DropdownMenuItem(
                               value: 'PROTO',
                               child: Text('PROTO',
                                   style:
-                                      TextStyle(color: Colors.black))),
+                                      TextStyle(color: Colors.red))),
                           DropdownMenuItem(
                               value: 'TLL',
                               child: Text('TLL',
                                   style:
-                                      TextStyle(color: Colors.black))),
+                                      TextStyle(color: Colors.red))),
                           DropdownMenuItem(
                               value: 'WPL',
                               child: Text('WPL',
                                   style:
-                                      TextStyle(color: Colors.black))),
+                                      TextStyle(color: Colors.red))),
                         ],
                         onChanged: (v) =>
                             context.read<ConfigProvider>().setSerialMode(v ?? 'DEFAULT'),
@@ -302,17 +302,17 @@ class _HomeScreenState extends State<HomeScreen> {
                               value: '4800',
                               child: Text('4800',
                                   style:
-                                  TextStyle(color: Colors.black))),
+                                  TextStyle(color: Colors.red))),
                           DropdownMenuItem(
                               value: '9600',
                               child: Text('9600',
                                   style:
-                                  TextStyle(color: Colors.black))),
+                                  TextStyle(color: Colors.red))),
                           DropdownMenuItem(
                               value: '38400',
                               child: Text('38400',
                                   style:
-                                  TextStyle(color: Colors.black))),
+                                  TextStyle(color: Colors.red))),
                         ],
                         onChanged: (v) =>
                             context.read<ConfigProvider>().setBaud(v ?? '9600'),
@@ -327,17 +327,17 @@ class _HomeScreenState extends State<HomeScreen> {
                               value: '433',
                               child: Text('433 MHz',
                                   style:
-                                  TextStyle(color: Colors.black))),
+                                  TextStyle(color: Colors.red))),
                           DropdownMenuItem(
                               value: '868',
                               child: Text('868 MHz',
                                   style:
-                                  TextStyle(color: Colors.black))),
+                                  TextStyle(color: Colors.red))),
                           DropdownMenuItem(
                               value: '915',
                               child: Text('915 MHz',
                                   style:
-                                  TextStyle(color: Colors.black))),
+                                  TextStyle(color: Colors.red))),
                         ],
                         onChanged: (v) => context
                             .read<ConfigProvider>()

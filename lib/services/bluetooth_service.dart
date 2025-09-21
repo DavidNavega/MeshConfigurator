@@ -24,6 +24,7 @@ class BluetoothService {
 
   StreamController<mesh.FromRadio>? _fromRadioController;
   StreamSubscription<List<int>>? _fromRadioSubscription;
+  StreamSubscription<List<int>>? _fromNumSubscription;
   StreamQueue<mesh.FromRadio>? _fromRadioQueue;
 
   Completer<void>? _pendingRequest;
@@ -43,6 +44,8 @@ class BluetoothService {
 
   // -------- streams ----------
   Future<void> _disposeRadioStreams() async {
+    await _fromNumSubscription?.cancel();
+    _fromNumSubscription = null;
     await _fromRadioSubscription?.cancel();
     _fromRadioSubscription = null;
     await _fromRadioQueue?.cancel();
@@ -71,13 +74,105 @@ class BluetoothService {
         if (data.isEmpty) return;
         try {
           final frame = mesh.FromRadio.fromBuffer(data);
-          _fromRadioController?.add(frame);
+          final controller = _fromRadioController;
+          if (controller == null || controller.isClosed) return;
+          controller.add(frame);
         } catch (err, st) {
-          _fromRadioController?.addError(err, st);
+          final controller = _fromRadioController;
+          if (controller == null || controller.isClosed) return;
+          controller.addError(err, st);
         }
       },
-      onError: (err, st) => _fromRadioController?.addError(err, st),
+      onError: (err, st) {
+        final controller = _fromRadioController;
+        if (controller == null || controller.isClosed) return;
+        controller.addError(err, st);
+      },
     );
+  }
+
+  Future<void> _initializeFromNumNotifications() async {
+    final characteristic = _fromNum;
+    if (characteristic == null) return;
+
+    await _fromNumSubscription?.cancel();
+    _fromNumSubscription = null;
+
+    if (!characteristic.properties.notify) return;
+
+    try {
+      await characteristic.setNotifyValue(true);
+    } catch (_) {}
+
+    late final StreamSubscription<List<int>> subscription;
+    subscription = characteristic.onValueReceived.listen(
+          (data) {
+        subscription.pause();
+        _handleFromNumNotification(data).whenComplete(() {
+          try {
+            if (subscription.isPaused) {
+              subscription.resume();
+            }
+          } catch (_) {}
+        });
+      },
+      onError: (err, st) {
+        final controller = _fromRadioController;
+        if (controller == null || controller.isClosed) return;
+        controller.addError(err, st);
+      },
+    );
+
+    _fromNumSubscription = subscription;
+  }
+
+  Future<void> _handleFromNumNotification(List<int> data) async {
+    if (data.isEmpty) return;
+
+    final pending = _decodeLittleEndian(data);
+    if (pending <= 0) return;
+
+    final radioCharacteristic = _fromRadio;
+    final controller = _fromRadioController;
+    if (radioCharacteristic == null || controller == null || controller.isClosed) {
+      return;
+    }
+
+    for (var i = 0; i < pending; i++) {
+      if (controller.isClosed) break;
+      List<int> raw;
+      try {
+        raw = await radioCharacteristic.read();
+      } catch (err, st) {
+        if (!controller.isClosed) {
+          controller.addError(err, st);
+        }
+        break;
+      }
+
+      if (raw.isEmpty) {
+        continue;
+      }
+
+      try {
+        final frame = mesh.FromRadio.fromBuffer(raw);
+        if (!controller.isClosed) {
+          controller.add(frame);
+        }
+      } catch (err, st) {
+        if (!controller.isClosed) {
+          controller.addError(err, st);
+        }
+      }
+    }
+  }
+
+  int _decodeLittleEndian(List<int> bytes) {
+    var value = 0;
+    for (var i = 0; i < bytes.length; i++) {
+      value |= (bytes[i] & 0xff) << (8 * i);
+    }
+    return value;
   }
 
   // -------- exclusión de petición ----------
@@ -130,6 +225,8 @@ class BluetoothService {
       } on StateError {
         if (responses.isEmpty) rethrow;
         return responses;
+      } catch (_) {
+        continue;
       }
 
       responses.add(frame);
@@ -146,6 +243,8 @@ class BluetoothService {
           } on TimeoutException {
             break;
           } on StateError {
+            break;
+          } catch (_) {
             break;
           }
         }
@@ -237,11 +336,7 @@ class BluetoothService {
     }
 
     await _initializeFromRadioNotifications();
-    if (_fromNum!.properties.notify) {
-      try {
-        await _fromNum!.setNotifyValue(true);
-      } catch (_) {}
-    }
+    await _initializeFromNumNotifications();
 
     return true;
   }
@@ -380,6 +475,12 @@ class BluetoothService {
         throw TimeoutException('Timeout waiting for radio acknowledgement');
       }
     }
+
+    final user = mesh.User()
+      ..shortName = cfgIn.shortName
+      ..longName = cfgIn.longName;
+
+    await send(admin.AdminMessage()..setOwner = user);
 
     final settings = ch.ChannelSettings()
       ..name = "CH${cfgIn.channelIndex}"
