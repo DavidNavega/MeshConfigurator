@@ -208,20 +208,14 @@ class BluetoothService {
     while (true) {
       final remaining = timeout - stopwatch.elapsed;
       if (remaining <= Duration.zero) {
-        if (responses.isEmpty) {
-          throw TimeoutException('Timeout waiting for radio response');
-        }
-        return responses;
+        throw TimeoutException('Timeout waiting for radio response');
       }
 
       mesh.FromRadio frame;
       try {
         frame = await queue.next.timeout(remaining);
       } on TimeoutException {
-        if (responses.isEmpty) {
-          throw TimeoutException('Timeout waiting for radio response');
-        }
-        return responses;
+        throw TimeoutException('Timeout waiting for radio response');
       } on StateError {
         if (responses.isEmpty) rethrow;
         return responses;
@@ -232,13 +226,20 @@ class BluetoothService {
       responses.add(frame);
 
       if (isComplete(responses)) {
-        // pequeña ventana para “colas” de frames
+
         final post = Stopwatch()..start();
         while (post.elapsed < _postResponseWindow) {
           final postRemaining = _postResponseWindow - post.elapsed;
           if (postRemaining <= Duration.zero) break;
+
+          final totalRemaining = timeout - stopwatch.elapsed;
+          if (totalRemaining <= Duration.zero) break;
+
+          final waitFor =
+          postRemaining <= totalRemaining ? postRemaining : totalRemaining;
+
           try {
-            final extra = await queue.next.timeout(postRemaining);
+            final extra = await queue.next.timeout(waitFor);
             responses.add(extra);
           } on TimeoutException {
             break;
@@ -248,19 +249,27 @@ class BluetoothService {
             break;
           }
         }
+
         return responses;
       }
     }
+  }
+
+  bool _isAckOrResponseFrame(mesh.FromRadio frame) {
+    return frame.hasPacket() && frame.packet.hasDecoded();
   }
 
   // -------- empaquetador: AdminMessage -> MeshPacket.decoded ----------
   mesh.ToRadio _wrapAdminToToRadio(admin.AdminMessage msg) {
     final data = mesh.Data()
       ..portnum = port.PortNum.ADMIN_APP
-      ..payload = msg.writeToBuffer(); // bytes
+      ..payload = msg.writeToBuffer()
+      ..wantResponse = true;
 
     return mesh.ToRadio()
-      ..packet = (mesh.MeshPacket()..decoded = data);
+      ..packet = (mesh.MeshPacket()
+        ..wantAck = true
+        ..decoded = data);
   }
 
   // -------- envío + recepción ----------
@@ -279,11 +288,24 @@ class BluetoothService {
         toRadioMsg.writeToBuffer(),
         withoutResponse: false,
       );
+      var ackSeen = false;
+      var userSatisfied = false;
 
-      return _collectResponses(
-        isComplete: isComplete ?? (responses) => responses.isNotEmpty,
-        timeout: timeout,
-      );
+      try {
+        return await _collectResponses(
+          isComplete: (responses) {
+            ackSeen = responses.any(_isAckOrResponseFrame);
+            userSatisfied = isComplete?.call(responses) ?? true;
+            return ackSeen && userSatisfied;
+          },
+          timeout: timeout,
+        );
+      } on TimeoutException {
+        if (!ackSeen) {
+          throw TimeoutException('Timeout waiting for radio acknowledgement');
+        }
+        throw TimeoutException('Timeout waiting for radio response');
+      }
     });
   }
 
@@ -465,15 +487,10 @@ class BluetoothService {
     if (_toRadio == null || _fromRadioQueue == null) return;
 
     Future<void> send(admin.AdminMessage msg) async {
-      try {
-        await _sendAndReceive(
-          _wrapAdminToToRadio(msg),
-          isComplete: (responses) => responses.isNotEmpty,
-          timeout: _defaultResponseTimeout,
-        );
-      } on TimeoutException {
-        throw TimeoutException('Timeout waiting for radio acknowledgement');
-      }
+      await _sendAndReceive(
+        _wrapAdminToToRadio(msg),
+        timeout: _defaultResponseTimeout,
+      );
     }
 
     final user = mesh.User()

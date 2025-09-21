@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
@@ -12,6 +13,10 @@ import 'package:Buoys_configurator/proto/meshtastic/portnums.pbenum.dart' as por
 
 class TcpHttpService {
   Uri? _base;
+
+  static const Duration _defaultResponseTimeout = Duration(seconds: 5);
+  static const Duration _pollDelay = Duration(milliseconds: 200);
+  static const Duration _postResponseWindow = Duration(milliseconds: 200);
 
   TcpHttpService([String? baseUrl]) {
     if (baseUrl != null && baseUrl.isNotEmpty) {
@@ -41,93 +46,164 @@ class TcpHttpService {
   mesh.ToRadio _wrapAdmin(admin.AdminMessage msg) {
     final data = mesh.Data()
       ..portnum = port.PortNum.ADMIN_APP
-      ..payload = msg.writeToBuffer();
+      ..payload = msg.writeToBuffer()
+      ..wantResponse = true;
 
-    return mesh.ToRadio()..packet = (mesh.MeshPacket()..decoded = data);
+    return mesh.ToRadio()
+      ..packet = (mesh.MeshPacket()
+        ..wantAck = true
+        ..decoded = data);
+  }
+
+  bool _isAckOrResponse(mesh.FromRadio frame) {
+    return frame.hasPacket() && frame.packet.hasDecoded();
+  }
+
+  Future<List<mesh.FromRadio>> _sendAndReceive(
+      admin.AdminMessage msg, {
+        bool Function(List<mesh.FromRadio>)? isComplete,
+        Duration timeout = _defaultResponseTimeout,
+      }) async {
+        final base = this.base;
+        final to = _wrapAdmin(msg);
+
+        await http.put(
+          base.resolve('/api/v1/toradio'),
+          headers: {'Content-Type': 'application/x-protobuf'},
+          body: to.writeToBuffer(),
+        );
+
+        final responses = <mesh.FromRadio>[];
+        var ackSeen = false;
+        var userSatisfied = false;
+        final deadline = DateTime.now().add(timeout);
+
+        while (true) {
+          if (DateTime.now().isAfter(deadline)) {
+            if (!ackSeen) {
+              throw TimeoutException('Timeout waiting for radio acknowledgement');
+            }
+            throw TimeoutException('Timeout waiting for radio response');
+          }
+
+          final resp = await http.get(base.resolve('/api/v1/fromradio'));
+          if (resp.statusCode != 200 || resp.bodyBytes.isEmpty) {
+            await Future.delayed(_pollDelay);
+            continue;
+          }
+
+          final frame = mesh.FromRadio.fromBuffer(resp.bodyBytes);
+          responses.add(frame);
+
+          if (!ackSeen && _isAckOrResponse(frame)) {
+            ackSeen = true;
+          }
+
+          userSatisfied = isComplete?.call(responses) ?? true;
+
+          if (ackSeen && userSatisfied) {
+            final postDeadline = DateTime.now().add(_postResponseWindow);
+
+            while (DateTime.now().isBefore(postDeadline)) {
+              if (DateTime.now().isAfter(deadline)) break;
+
+              final extraResp = await http.get(base.resolve('/api/v1/fromradio'));
+              if (extraResp.statusCode != 200 || extraResp.bodyBytes.isEmpty) {
+                await Future.delayed(_pollDelay);
+                continue;
+              }
+              final extraFrame = mesh.FromRadio.fromBuffer(extraResp.bodyBytes);
+              responses.add(extraFrame);
+            }
+
+            return responses;
+          }
+        }
   }
 
   Future<NodeConfig?> readConfig() async {
     final cfgOut = NodeConfig();
 
-    final base = this.base;
+    void applyFrame(mesh.FromRadio fr) {
+      if (fr.hasNodeInfo() && fr.nodeInfo.hasUser()) {
+        final u = fr.nodeInfo.user;
+        if (u.hasLongName()) cfgOut.longName = u.longName;
+        if (u.hasShortName()) cfgOut.shortName = u.shortName;
+      }
 
-    Future<void> send(admin.AdminMessage msg) async {
-      final to = _wrapAdmin(msg);
-      await http.put(
-        base.resolve('/api/v1/toradio'),
-        headers: {'Content-Type': 'application/x-protobuf'},
-        body: to.writeToBuffer(),
-      );
-      while (true) {
-        final resp = await http.get(base.resolve('/api/v1/fromradio'));
-        if (resp.statusCode != 200) break;
-        final bytes = resp.bodyBytes;
-        if (bytes.isEmpty) break;
-        final fr = mesh.FromRadio.fromBuffer(bytes);
-
-        // User ahora llega dentro de NodeInfo
-        if (fr.hasNodeInfo() && fr.nodeInfo.hasUser()) {
-          final u = fr.nodeInfo.user;
-          if (u.hasLongName()) cfgOut.longName = u.longName;
-          if (u.hasShortName()) cfgOut.shortName = u.shortName;
+      if (fr.hasChannel()) {
+        final c = fr.channel;
+        if (c.hasIndex()) cfgOut.channelIndex = c.index;
+        if (c.hasSettings() && c.settings.hasPsk()) {
+          cfgOut.key = Uint8List.fromList(c.settings.psk);
         }
+      }
 
-        if (fr.hasChannel()) {
-          final c = fr.channel;
-          if (c.hasIndex()) cfgOut.channelIndex = c.index;
-          if (c.hasSettings() && c.settings.hasPsk()) {
-            cfgOut.key = Uint8List.fromList(c.settings.psk);
-          }
-        }
 
-        if (fr.hasModuleConfig() && fr.moduleConfig.hasSerial()) {
-          final s = fr.moduleConfig.serial;
-          cfgOut.setSerialModeFromString(
-            /*(s.mode == mod.ModuleConfig_SerialConfig_Serial_Mode.CALTOPO)
-                ? 'WPL'
-                : 'TLL',
-            */
-            _serialModeEnumToString(s.mode),
-          );
-          if (s.hasBaud()) cfgOut.baudRate = s.baud;
-        }
+      if (fr.hasModuleConfig() && fr.moduleConfig.hasSerial()) {
+        final s = fr.moduleConfig.serial;
+        cfgOut.setSerialModeFromString(
+          _serialModeEnumToString(s.mode),
+        );
+        if (s.hasBaud()) cfgOut.baudRate = s.baud;
+      }
 
-        if (fr.hasConfig() && fr.config.hasLora()) {
-          cfgOut.setFrequencyRegionFromString(_regionEnumToString(fr.config.lora.region));
-        }
+      if (fr.hasConfig() && fr.config.hasLora()) {
+        cfgOut.setFrequencyRegionFromString(
+          _regionEnumToString(fr.config.lora.region),
+        );
       }
     }
 
-    // Peticiones de lectura
-    await send(admin.AdminMessage()
-      ..getConfigRequest = admin.AdminMessage_ConfigType.DEVICE_CONFIG);
-    await send(admin.AdminMessage()
-      ..getConfigRequest = admin.AdminMessage_ConfigType.NETWORK_CONFIG);
-    await send(admin.AdminMessage()
-      ..getModuleConfigRequest = admin.AdminMessage_ModuleConfigType.SERIAL_CONFIG);
-    await send(admin.AdminMessage()
-      ..getConfigRequest = admin.AdminMessage_ConfigType.LORA_CONFIG);
+    Future<void> request(
+        admin.AdminMessage msg,
+        bool Function(mesh.FromRadio) matcher,
+        ) async {
+      try {
+        final frames = await _sendAndReceive(
+          msg,
+          isComplete: (responses) => responses.any(matcher),
+        );
+        for (final frame in frames) {
+          applyFrame(frame);
+        }
+      } on TimeoutException {
+        // Ignoramos para continuar intentando leer el resto de la config
+      }
+    }
+
+    await request(
+      admin.AdminMessage()
+        ..getConfigRequest = admin.AdminMessage_ConfigType.DEVICE_CONFIG,
+          (fr) => fr.hasConfig() && fr.config.hasDevice(),
+    );
+    await request(
+      admin.AdminMessage()
+        ..getConfigRequest = admin.AdminMessage_ConfigType.NETWORK_CONFIG,
+          (fr) => fr.hasChannel(),
+    );
+    await request(
+      admin.AdminMessage()
+        ..getModuleConfigRequest =
+            admin.AdminMessage_ModuleConfigType.SERIAL_CONFIG,
+          (fr) => fr.hasModuleConfig() && fr.moduleConfig.hasSerial(),
+    );
+    await request(
+      admin.AdminMessage()
+        ..getConfigRequest = admin.AdminMessage_ConfigType.LORA_CONFIG,
+          (fr) => fr.hasConfig() && fr.config.hasLora(),
+    );
 
     return cfgOut;
   }
 
   Future<void> writeConfig(NodeConfig cfgIn) async {
-    final base = this.base;
-
-    Future<void> send(admin.AdminMessage msg) async {
-      final to = _wrapAdmin(msg);
-      await http.put(
-        base.resolve('/api/v1/toradio'),
-        headers: {'Content-Type': 'application/x-protobuf'},
-        body: to.writeToBuffer(),
-      );
-    }
 
     // ✅ Nombres del nodo: usar setUser con mesh.User (no DeviceConfig)
     final userMsg = mesh.User()
       ..shortName = cfgIn.shortName
       ..longName = cfgIn.longName;
-    await send(admin.AdminMessage()..setOwner = userMsg);
+    await _sendAndReceive(admin.AdminMessage()..setOwner = userMsg);
 
     // Canal (igual que antes)
     final settings = ch.ChannelSettings()
@@ -137,7 +213,7 @@ class TcpHttpService {
       ..index = cfgIn.channelIndex
       ..role = ch.Channel_Role.PRIMARY
       ..settings = settings;
-    await send(admin.AdminMessage()..setChannel = channel);
+    await _sendAndReceive(admin.AdminMessage()..setChannel = channel);
 
     // Serial (igual que antes)
     final serialCfg = mod.ModuleConfig_SerialConfig()
@@ -145,13 +221,13 @@ class TcpHttpService {
       ..baud = cfgIn.baudRate
       ..mode = _serialModeFromString(cfgIn.serialModeAsString);
     final moduleCfg = mod.ModuleConfig()..serial = serialCfg;
-    await send(admin.AdminMessage()..setModuleConfig = moduleCfg);
+    await _sendAndReceive(admin.AdminMessage()..setModuleConfig = moduleCfg);
 
     // LoRa (igual que antes, vía setConfig->Config.lora)
     final lora = cfg.Config_LoRaConfig()
       ..region = _regionFromString(cfgIn.frequencyRegionAsString);
     final configMsg = cfg.Config()..lora = lora;
-    await send(admin.AdminMessage()..setConfig = configMsg);
+    await _sendAndReceive(admin.AdminMessage()..setConfig = configMsg);
   }
 
   // ------- helpers -------
