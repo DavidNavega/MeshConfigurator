@@ -98,7 +98,8 @@ class ConfigProvider extends ChangeNotifier {
     try {
       final connected = await _usbService.connect();
       if (!connected) {
-        status = 'No se pudo conectar por USB';
+        status =
+            _usbService.lastErrorMessage ?? 'No se pudo conectar por USB';
         await _disconnectInterface(interface);
         return;
       }

@@ -1,4 +1,4 @@
-package com.example.meshtastic_configurator
+package com.example.buoys_configurator
 
 import io.flutter.embedding.android.FlutterActivity
 

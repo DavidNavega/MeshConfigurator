@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:flutter/services.dart';
 import 'package:usb_serial/usb_serial.dart';
 
 import '../models/node_config.dart';
@@ -17,16 +18,121 @@ class UsbService {
   StreamSubscription<Uint8List>? _sub;
   FrameAccumulator? _frameAccumulator;
   StreamController<mesh.FromRadio>? _frameController;
+  String? _lastErrorMessage;
 
   static const Duration _defaultResponseTimeout = Duration(seconds: 5);
   static const Duration _postResponseWindow = Duration(milliseconds: 200);
+  static const Duration _permissionRequestTimeout = Duration(seconds: 30);
+
+  String? get lastErrorMessage => _lastErrorMessage;
+
+  Future<bool> _ensurePermission(UsbDevice device) async {
+    try {
+      final dynamic usbSerial = UsbSerial;
+      final dynamic bus = usbSerial.usbBus;
+      if (bus == null) {
+        return true;
+      }
+
+      final dynamic hasPermissionValue =
+      await Future.value(bus.hasPermission(device));
+      if (hasPermissionValue == true) {
+        return true;
+      }
+
+      final completer = Completer<bool>();
+      StreamSubscription? grantedSub;
+      StreamSubscription? deniedSub;
+
+      void resolve(bool granted, dynamic eventDevice) {
+        if (completer.isCompleted) return;
+        if (eventDevice is UsbDevice &&
+            eventDevice.deviceId == device.deviceId) {
+          completer.complete(granted);
+        }
+      }
+
+      try {
+        final dynamic grantedStreamDynamic = bus.onPermissionGranted;
+        final dynamic deniedStreamDynamic = bus.onPermissionDenied;
+
+        if (grantedStreamDynamic is Stream) {
+          grantedSub = (grantedStreamDynamic as Stream<dynamic>)
+              .listen((dynamic eventDevice) => resolve(true, eventDevice));
+        }
+        if (deniedStreamDynamic is Stream) {
+          deniedSub = (deniedStreamDynamic as Stream<dynamic>)
+              .listen((dynamic eventDevice) => resolve(false, eventDevice));
+        }
+
+        final dynamic requestValue =
+        await Future.value(bus.requestPermission(device));
+        if (requestValue == false && !completer.isCompleted) {
+          completer.complete(false);
+        }
+
+        if (!completer.isCompleted &&
+            grantedStreamDynamic is! Stream &&
+            deniedStreamDynamic is! Stream) {
+          completer.complete(requestValue == true);
+        }
+
+        final bool granted = await completer.future.timeout(
+          _permissionRequestTimeout,
+          onTimeout: () => false,
+        );
+        return granted;
+      } finally {
+        await grantedSub?.cancel();
+        await deniedSub?.cancel();
+      }
+    } on NoSuchMethodError {
+      return true;
+    } catch (error) {
+      print('[UsbService] Error solicitando permisos USB: $error');
+      return true;
+    }
+  }
 
   Future<bool> connect({int baud = 115200}) async {
+    _lastErrorMessage = null;
     final devices = await UsbSerial.listDevices();
-    if (devices.isEmpty) return false;
+    if (devices.isEmpty) {
+      _lastErrorMessage =
+      'No se encontraron dispositivos USB disponibles.';
+      return false;
+    }
     final dev = devices.first;
-    _port = await dev.create();
-    if (!await _port!.open()) return false;
+    if (!await _ensurePermission(dev)) {
+      _lastErrorMessage =
+      'Permiso USB denegado. Autoriza el acceso al dispositivo e inténtalo de nuevo.';
+      return false;
+    }
+    try {
+      _port = await dev.create();
+    } on PlatformException catch (error) {
+      final message = error.message ?? '';
+      if (message.contains('Failed to acquire USB permission') ||
+          error.code == 'UsbSerialPortAdapter') {
+        _lastErrorMessage =
+        'Permiso USB denegado. Autoriza el acceso al dispositivo e inténtalo de nuevo.';
+        return false;
+      }
+      _lastErrorMessage =
+      'No se pudo inicializar el dispositivo USB (${message.isEmpty ? error.code : message}).';
+      return false;
+    } catch (error) {
+      _lastErrorMessage = 'No se pudo inicializar el dispositivo USB ($error).';
+      return false;
+    }
+    if (_port == null) {
+      _lastErrorMessage = 'No se pudo crear el puerto USB.';
+      return false;
+    }
+    if (!await _port!.open()) {
+      _lastErrorMessage = 'No se pudo abrir el puerto USB.';
+      return false;
+    }
     await _port!.setDTR(true);
     await _port!.setRTS(true);
     await _port!.setPortParameters(baud, 8, 1, UsbPort.PARITY_NONE);
@@ -35,6 +141,8 @@ class UsbService {
 
     final input = _port!.inputStream;
     if (input == null) {
+      _lastErrorMessage =
+      'No se pudo acceder al flujo de datos del dispositivo USB.';
       await disconnect();
       return false;
     }
