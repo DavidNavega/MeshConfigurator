@@ -301,7 +301,23 @@ class BluetoothService {
       if (toCharacteristic == null) {
         throw StateError('Radio write characteristic not available');
       }
+      try {
 
+        await toCharacteristic.write(
+          toRadioMsg.writeToBuffer(),
+          withoutResponse: false,
+        );
+      } on FlutterBluePlusException catch (err) {
+        final message = err.description?.toLowerCase() ?? '';
+        if (message.contains('write not permitted')) {
+          await toCharacteristic.write(
+            toRadioMsg.writeToBuffer(),
+            withoutResponse: true,
+          );
+        } else {
+          rethrow;
+        }
+      }
       await _writeToRadio(toCharacteristic, toRadioMsg.writeToBuffer());
       var ackSeen = false;
       var userSatisfied = false;
