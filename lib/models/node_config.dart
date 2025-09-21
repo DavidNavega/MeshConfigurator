@@ -32,14 +32,52 @@ class NodeConfig {
   // Baudrate converters
   // -------------------
   void setBaudFromString(String b) {
-    switch (b) {
+    switch (b.trim()) {
+      case '110':
+        baudRate = pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_110;
+        break;
+      case '300':
+        baudRate = pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_300;
+        break;
+      case '600':
+        baudRate = pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_600;
+        break;
+      case '1200':
+        baudRate = pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_1200;
+        break;
+      case '2400':
+        baudRate = pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_2400;
+        break;
+      case '4800':
+        baudRate = pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_4800;
+        break;
+      case '9600':
+        baudRate = pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_9600;
+        break;
+      case '19200':
+        baudRate = pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_19200;
+        break;
+      case '38400':
+        baudRate = pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_38400;
+        break;
+      case '57600':
+        baudRate = pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_57600;
+        break;
       case '115200':
         baudRate = pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_115200;
+        break;
+      case '230400':
+        baudRate = pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_230400;
+        break;
+      case '460800':
+        baudRate = pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_460800;
+        break;
+      case '576000':
+        baudRate = pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_576000;
         break;
       case '921600':
         baudRate = pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_921600;
         break;
-      case '9600':
       default:
         baudRate = pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_9600;
     }
@@ -47,11 +85,37 @@ class NodeConfig {
 
   String get baudAsString {
     switch (baudRate) {
+      case pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_110:
+        return '110';
+      case pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_300:
+        return '300';
+      case pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_600:
+        return '600';
+      case pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_1200:
+        return '1200';
+      case pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_2400:
+        return '2400';
+      case pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_4800:
+        return '4800';
+      case pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_9600:
+        return '9600';
+      case pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_19200:
+        return '19200';
+      case pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_38400:
+        return '38400';
+      case pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_57600:
+        return '57600';
       case pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_115200:
         return '115200';
+      case pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_230400:
+        return '230400';
+      case pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_460800:
+        return '460800';
+      case pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_576000:
+        return '576000';
       case pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_921600:
         return '921600';
-      case pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_9600:
+      case pb.ModuleConfig_SerialConfig_Serial_Baud.BAUD_DEFAULT:
       default:
         return '9600';
     }

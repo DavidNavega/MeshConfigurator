@@ -409,42 +409,26 @@ class BluetoothService {
 
     var primaryChannelCaptured = false;
 
-
-    void _applyFrameToConfig(NodeConfig out, mesh.FromRadio fr) {
-      if (fr.hasConfig()) {
-        final conf = fr.config;
-
-        // Device (tu build no trae .owner, así que lo quitamos)
-        if (conf.hasDevice()) {
-          final dev = conf.device;
-          // se puede leer otros campos si tu proto lo define
+    void _applyAdminToConfig(admin.AdminMessage message) {
+      if (message.hasGetOwnerResponse()) {
+        final user = message.getOwnerResponse;
+        if (user.hasShortName()) {
+          cfgOut.shortName = user.shortName;
         }
-
-        if (conf.hasLora()) {
-          final l = conf.lora;
-          if (l.hasRegion()) {
-            out.setFrequencyRegionFromString(_regionEnumToString(l.region));
-          }
+        if (user.hasLongName()) {
+          cfgOut.longName = user.longName;
         }
       }
 
-      if (fr.hasModuleConfig() && fr.moduleConfig.hasSerial()) {
-        final s = fr.moduleConfig.serial;
-        if (s.hasMode()) {
-          out.setSerialModeFromString(_serialModeEnumToString(s.mode));
-        }
-        if (s.hasBaud()) {
-          out.baudRate = s.baud;
-        }
-      }
-
-      if (fr.hasChannel()) {
-        final c = fr.channel;
-        final isPrimary = c.role == ch.Channel_Role.PRIMARY;
+      if (message.hasGetChannelResponse()) {
+        final channel = message.getChannelResponse;
+        final isPrimary = channel.role == ch.Channel_Role.PRIMARY;
         if (isPrimary || !primaryChannelCaptured) {
-          if (c.hasIndex()) out.channelIndex = c.index;
-          if (c.hasSettings() && c.settings.hasPsk()) {
-            out.key = Uint8List.fromList(c.settings.psk);
+          if (channel.hasIndex()) {
+            cfgOut.channelIndex = channel.index;
+          }
+          if (channel.hasSettings() && channel.settings.hasPsk()) {
+            cfgOut.key = Uint8List.fromList(channel.settings.psk);
           }
         }
         if (isPrimary) {
@@ -452,44 +436,59 @@ class BluetoothService {
         }
       }
 
-      if (fr.hasNodeInfo()) {
-        try {
-          final ni = fr.nodeInfo;
-          if (ni.hasUser()) {
-            final u = ni.user;
-            if (u.hasShortName()) out.shortName = u.shortName;
-            if (u.hasLongName()) out.longName = u.longName;
-          }
-        } catch (_) {}
+      if (message.hasGetModuleConfigResponse() &&
+          message.getModuleConfigResponse.hasSerial()) {
+        final serial = message.getModuleConfigResponse.serial;
+        if (serial.hasMode()) {
+          cfgOut.serialOutputMode = serial.mode;
+        }
+        if (serial.hasBaud()) {
+          cfgOut.baudRate = serial.baud;
+        }
+      }
+
+      if (message.hasGetConfigResponse() &&
+          message.getConfigResponse.hasLora() &&
+          message.getConfigResponse.lora.hasRegion()) {
+        cfgOut.frequencyRegion = message.getConfigResponse.lora.region;
       }
     }
 
     Future<void> _requestAndApply(admin.AdminMessage msg,
-        bool Function(mesh.FromRadio) matcher) async {
+        bool Function(admin.AdminMessage) matcher) async {
       try {
         final frames = await _sendAndReceive(
           _wrapAdminToToRadio(msg),
-          isComplete: (responses) => responses.any(matcher),
+          isComplete: (responses) => responses.any((fr) {
+            final adminMsg = _decodeAdminMessage(fr);
+            return adminMsg != null && matcher(adminMsg);
+          }),
           timeout: _defaultResponseTimeout,
         );
         for (final f in frames) {
-          _applyFrameToConfig(cfgOut, f);
+          final adminMsg = _decodeAdminMessage(f);
+          if (adminMsg != null) {
+            _applyAdminToConfig(adminMsg);
+          }
         }
       } on TimeoutException {}
     }
 
     try {
       await _requestAndApply(
-        admin.AdminMessage()
-          ..getConfigRequest = admin.AdminMessage_ConfigType.LORA_CONFIG,
-            (fr) => fr.hasConfig() && fr.config.hasLora(),
+        admin.AdminMessage()..getOwnerRequest = true,
+            (msg) => msg.hasGetOwnerResponse(),
       );
 
       await _requestAndApply(
         admin.AdminMessage()
-          ..getConfigRequest = admin.AdminMessage_ConfigType.DEVICE_CONFIG,
-            (fr) => fr.hasConfig() && fr.config.hasDevice(),
+          ..getConfigRequest = admin.AdminMessage_ConfigType.LORA_CONFIG,
+            (msg) =>
+        msg.hasGetConfigResponse() &&
+            msg.getConfigResponse.hasLora() &&
+            msg.getConfigResponse.lora.hasRegion(),
       );
+
       final indicesToQuery = <int>{cfgOut.channelIndex};
       for (var i = 0; i < 8; i++) {
         indicesToQuery.add(i);
@@ -497,7 +496,7 @@ class BluetoothService {
       for (final index in indicesToQuery) {
         await _requestAndApply(
           admin.AdminMessage()..getChannelRequest = index,
-              (fr) => fr.hasChannel(),
+              (msg) => msg.hasGetChannelResponse(),
         );
         if (primaryChannelCaptured) break;
       }
@@ -505,7 +504,9 @@ class BluetoothService {
         admin.AdminMessage()
           ..getModuleConfigRequest =
               admin.AdminMessage_ModuleConfigType.SERIAL_CONFIG,
-            (fr) => fr.hasModuleConfig() && fr.moduleConfig.hasSerial(),
+            (msg) =>
+        msg.hasGetModuleConfigResponse() &&
+            msg.getModuleConfigResponse.hasSerial(),
       );
     } catch (_) {
       return null;
@@ -557,22 +558,23 @@ class BluetoothService {
   }
 
   // ------- helpers enum <-> string -------
-  String _serialModeEnumToString(
-      mod.ModuleConfig_SerialConfig_Serial_Mode m) {
-    switch (m) {
-      case mod.ModuleConfig_SerialConfig_Serial_Mode.PROTO:
-        return 'PROTO';
-      case mod.ModuleConfig_SerialConfig_Serial_Mode.TEXTMSG:
-        return 'TEXTMSG';
-      case mod.ModuleConfig_SerialConfig_Serial_Mode.NMEA:
-        return 'TLL';
-      case mod.ModuleConfig_SerialConfig_Serial_Mode.CALTOPO:
-        return 'WPL';
-      default:
-        return 'DEFAULT';
+  admin.AdminMessage? _decodeAdminMessage(mesh.FromRadio frame) {
+    if (!frame.hasPacket()) return null;
+    final packet = frame.packet;
+    if (!packet.hasDecoded()) return null;
+    final decoded = packet.decoded;
+    if (!decoded.hasPayload()) return null;
+    if (decoded.portnum != port.PortNum.ADMIN_APP) return null;
+    final payload = decoded.payload;
+    if (payload.isEmpty) return null;
+    try {
+      return admin.AdminMessage.fromBuffer(payload);
+    } catch (_) {
+      return null;
     }
   }
 
+  // ------- helpers enum <-> string -------
   mod.ModuleConfig_SerialConfig_Serial_Mode _serialModeFromString(String s) {
     switch (s.toUpperCase()) {
       case 'PROTO':
@@ -587,18 +589,6 @@ class BluetoothService {
         return mod.ModuleConfig_SerialConfig_Serial_Mode.CALTOPO;
       default:
         return mod.ModuleConfig_SerialConfig_Serial_Mode.DEFAULT;
-    }
-  }
-
-  String _regionEnumToString(cfg.Config_LoRaConfig_RegionCode r) {
-    switch (r) {
-      case cfg.Config_LoRaConfig_RegionCode.EU_433:
-        return '433';
-      case cfg.Config_LoRaConfig_RegionCode.US:
-        return '915';
-      case cfg.Config_LoRaConfig_RegionCode.EU_868:
-      default:
-        return '868';
     }
   }
 

@@ -88,33 +88,52 @@ class UsbService {
 
     var primaryChannelCaptured = false;
 
-    void _consumeFrame(mesh.FromRadio fr) {
-      if (fr.hasNodeInfo() && fr.nodeInfo.hasUser()) {
-        final u = fr.nodeInfo.user;
-        if (u.hasLongName()) cfgOut.longName = u.longName;
-        if (u.hasShortName()) cfgOut.shortName = u.shortName;
+    void _applyAdmin(admin.AdminMessage message) {
+      if (message.hasGetOwnerResponse()) {
+        final user = message.getOwnerResponse;
+        if (user.hasLongName()) {
+          cfgOut.longName = user.longName;
+        }
+        if (user.hasShortName()) {
+          cfgOut.shortName = user.shortName;
+        }
       }
-      if (fr.hasChannel()) {
-        final c = fr.channel;
-        final isPrimary = c.role == ch.Channel_Role.PRIMARY;
+      if (message.hasGetChannelResponse()) {
+        final channel = message.getChannelResponse;
+        final isPrimary = channel.role == ch.Channel_Role.PRIMARY;
         if (isPrimary || !primaryChannelCaptured) {
-          if (c.hasIndex()) cfgOut.channelIndex = c.index;
-          if (c.hasSettings() && c.settings.hasPsk()) {
-            cfgOut.key = Uint8List.fromList(c.settings.psk);
+          if (channel.hasIndex()) {
+            cfgOut.channelIndex = channel.index;
+          }
+          if (channel.hasSettings() && channel.settings.hasPsk()) {
+            cfgOut.key = Uint8List.fromList(channel.settings.psk);
           }
         }
         if (isPrimary) {
           primaryChannelCaptured = true;
         }
       }
-      if (fr.hasModuleConfig() && fr.moduleConfig.hasSerial()) {
-        final s = fr.moduleConfig.serial;
-        cfgOut.setSerialModeFromString(_serialModeEnumToString(s.mode));
-        if (s.hasBaud()) cfgOut.baudRate = s.baud;
+      if (message.hasGetModuleConfigResponse() &&
+          message.getModuleConfigResponse.hasSerial()) {
+        final serial = message.getModuleConfigResponse.serial;
+        if (serial.hasMode()) {
+          cfgOut.serialOutputMode = serial.mode;
+        }
+        if (serial.hasBaud()) {
+          cfgOut.baudRate = serial.baud;
+        }
       }
-      if (fr.hasConfig() && fr.config.hasLora()) {
-        cfgOut.setFrequencyRegionFromString(
-            _regionEnumToString(fr.config.lora.region));
+      if (message.hasGetConfigResponse() &&
+          message.getConfigResponse.hasLora() &&
+          message.getConfigResponse.lora.hasRegion()) {
+        cfgOut.frequencyRegion = message.getConfigResponse.lora.region;
+      }
+    }
+
+    void _consumeFrame(mesh.FromRadio fr) {
+      final adminMsg = _decodeAdminMessage(fr);
+      if (adminMsg != null) {
+        _applyAdmin(adminMsg);
       }
     }
 
@@ -122,15 +141,20 @@ class UsbService {
 
     Future<void> request(
         admin.AdminMessage msg,
-        bool Function(mesh.FromRadio) matcher,
+        bool Function(admin.AdminMessage) matcher,
         ) async {
       await _sendAdminAndWait(msg, matcher: matcher);
     }
     try {
       await request(
+        admin.AdminMessage()..getOwnerRequest = true,
+            (msg) => msg.hasGetOwnerResponse(),
+      );
+      await request(
         admin.AdminMessage()
           ..getConfigRequest = admin.AdminMessage_ConfigType.DEVICE_CONFIG,
-            (fr) => fr.hasNodeInfo() && fr.nodeInfo.hasUser(),
+            (msg) =>
+        msg.hasGetConfigResponse() && msg.getConfigResponse.hasDevice(),
       );
       final indicesToQuery = <int>{cfgOut.channelIndex};
       for (var i = 0; i < 8; i++) {
@@ -139,7 +163,7 @@ class UsbService {
       for (final index in indicesToQuery) {
         await request(
           admin.AdminMessage()..getChannelRequest = index,
-              (fr) => fr.hasChannel(),
+              (msg) => msg.hasGetChannelResponse(),
         );
         if (primaryChannelCaptured) break;
       }
@@ -147,12 +171,17 @@ class UsbService {
         admin.AdminMessage()
           ..getModuleConfigRequest =
               admin.AdminMessage_ModuleConfigType.SERIAL_CONFIG,
-            (fr) => fr.hasModuleConfig() && fr.moduleConfig.hasSerial(),
+            (msg) =>
+        msg.hasGetModuleConfigResponse() &&
+            msg.getModuleConfigResponse.hasSerial(),
       );
       await request(
         admin.AdminMessage()
           ..getConfigRequest = admin.AdminMessage_ConfigType.LORA_CONFIG,
-            (fr) => fr.hasConfig() && fr.config.hasLora(),
+            (msg) =>
+        msg.hasGetConfigResponse() &&
+            msg.getConfigResponse.hasLora() &&
+            msg.getConfigResponse.lora.hasRegion(),
       );
     } finally {
       await subscription.cancel();
@@ -204,7 +233,7 @@ class UsbService {
 
   Future<mesh.FromRadio?> _sendAdminAndWait(
       admin.AdminMessage msg, {
-        required bool Function(mesh.FromRadio) matcher,
+        required bool Function(admin.AdminMessage) matcher,
         Duration timeout = const Duration(seconds: 2),
       }) {
     return _sendToRadioAndWait(
@@ -216,7 +245,7 @@ class UsbService {
 
   Future<mesh.FromRadio?> _sendToRadioAndWait(
       mesh.ToRadio to, {
-        required bool Function(mesh.FromRadio) matcher,
+        required bool Function(admin.AdminMessage) matcher,
         Duration timeout = const Duration(seconds: 2),
       }) async {
     final port = _port;
@@ -229,7 +258,9 @@ class UsbService {
     late StreamSubscription<mesh.FromRadio> sub;
     sub = controller.stream.listen((frame) {
       if (!allowMatch) return;
-      if (!completer.isCompleted && matcher(frame)) {
+      final adminMsg = _decodeAdminMessage(frame);
+      if (adminMsg == null) return;
+      if (!completer.isCompleted && matcher(adminMsg)) {
         completer.complete(frame);
         cancelFuture ??= sub.cancel();
       }
@@ -248,18 +279,6 @@ class UsbService {
   }
 
   // ------- helpers -------
-  String _regionEnumToString(cfg.Config_LoRaConfig_RegionCode r) {
-    switch (r) {
-      case cfg.Config_LoRaConfig_RegionCode.EU_433:
-        return '433';
-      case cfg.Config_LoRaConfig_RegionCode.US:
-        return '915';
-      case cfg.Config_LoRaConfig_RegionCode.EU_868:
-      default:
-        return '868';
-    }
-  }
-
   cfg.Config_LoRaConfig_RegionCode _regionFromString(String s) {
     switch (s) {
       case '433':
@@ -272,23 +291,7 @@ class UsbService {
     }
   }
 
-  String _serialModeEnumToString(
-      mod.ModuleConfig_SerialConfig_Serial_Mode mode) {
-    switch (mode) {
-      case mod.ModuleConfig_SerialConfig_Serial_Mode.PROTO:
-        return 'PROTO';
-      case mod.ModuleConfig_SerialConfig_Serial_Mode.TEXTMSG:
-        return 'TEXTMSG';
-      case mod.ModuleConfig_SerialConfig_Serial_Mode.CALTOPO:
-        return 'WPL';
-      case mod.ModuleConfig_SerialConfig_Serial_Mode.NMEA:
-        return 'TLL';
-      default:
-        return 'DEFAULT';
-    }
-  }
-
-  mod.ModuleConfig_SerialConfig_Serial_Mode _serialModeFromString(String s) {
+ mod.ModuleConfig_SerialConfig_Serial_Mode _serialModeFromString(String s) {
     switch (s.toUpperCase()) {
       case 'PROTO':
         return mod.ModuleConfig_SerialConfig_Serial_Mode.PROTO;
@@ -298,6 +301,21 @@ class UsbService {
         return mod.ModuleConfig_SerialConfig_Serial_Mode.CALTOPO;
       default:
         return mod.ModuleConfig_SerialConfig_Serial_Mode.DEFAULT;
+    }
+  }
+  admin.AdminMessage? _decodeAdminMessage(mesh.FromRadio frame) {
+    if (!frame.hasPacket()) return null;
+    final packet = frame.packet;
+    if (!packet.hasDecoded()) return null;
+    final decoded = packet.decoded;
+    if (!decoded.hasPayload()) return null;
+    if (decoded.portnum != port.PortNum.ADMIN_APP) return null;
+    final payload = decoded.payload;
+    if (payload.isEmpty) return null;
+    try {
+      return admin.AdminMessage.fromBuffer(payload);
+    } catch (_) {
+      return null;
     }
   }
 }

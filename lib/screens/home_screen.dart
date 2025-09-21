@@ -79,6 +79,25 @@ class _HomeScreenState extends State<HomeScreen> {
           helperStyle: const TextStyle(color: Colors.white60),
         );
 
+    const baudOptions = <String>[
+      '110',
+      '300',
+      '600',
+      '1200',
+      '2400',
+      '4800',
+      '9600',
+      '19200',
+      '38400',
+      '57600',
+      '115200',
+      '230400',
+      '460800',
+      '576000',
+      '921600',
+    ];
+    const dropdownTextStyle = TextStyle(color: Colors.red);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.red,
@@ -297,23 +316,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
                         value: p.baudDisplay,
-                        items: const [
-                          DropdownMenuItem(
-                              value: '4800',
-                              child: Text('4800',
-                                  style:
-                                  TextStyle(color: Colors.red))),
-                          DropdownMenuItem(
-                              value: '9600',
-                              child: Text('9600',
-                                  style:
-                                  TextStyle(color: Colors.red))),
-                          DropdownMenuItem(
-                              value: '38400',
-                              child: Text('38400',
-                                  style:
-                                  TextStyle(color: Colors.red))),
-                        ],
+                        items: baudOptions
+                            .map(
+                              (value) => DropdownMenuItem(
+                            value: value,
+                            child: Text(value,
+                                style: dropdownTextStyle),
+                          ),
+                        )
+                            .toList(),
                         onChanged: (v) =>
                             context.read<ConfigProvider>().setBaud(v ?? '9600'),
                         decoration: deco('Baudrate salida serie'),
