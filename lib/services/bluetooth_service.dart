@@ -415,7 +415,11 @@ class BluetoothService {
 
     await for (final results in FlutterBluePlus.scanResults) {
       for (final r in results) {
-        final name = r.device.platformName.toUpperCase();
+        final platformName = r.device.platformName;
+        if (platformName.isEmpty) {
+          continue;
+        }
+        final name = platformName.toUpperCase();
         if (name.contains('MESHTASTIC') ||
             name.contains('TBEAM') ||
             name.contains('HELTEC') ||
