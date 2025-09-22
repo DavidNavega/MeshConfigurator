@@ -24,7 +24,7 @@ class UsbService {
   bool _nodeNumConfirmed = false; // Si _myNodeNum ha sido confirmado
 
   // Timeouts estándar
-  static const Duration _defaultResponseTimeout = Duration(seconds: 5);
+  static const Duration _defaultResponseTimeout = Duration(seconds: 15);
   static const Duration _postResponseWindow = Duration(milliseconds: 200); // Ventana para capturar respuestas adicionales
   // static const Duration _permissionRequestTimeout = Duration(seconds: 30); // Ya no se usa _ensurePermission
 
