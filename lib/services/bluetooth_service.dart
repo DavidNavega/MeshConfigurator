@@ -631,39 +631,73 @@ class BluetoothService {
     }
     print('[BluetoothService] Permisos Bluetooth concedidos.');
 
-    print('[BluetoothService] Iniciando escaneo BLE (nueva lógica)...');
-    fbp.BluetoothDevice? foundDevice; // MODIFICADO
-    final scanCompleter = Completer<fbp.BluetoothDevice?>(); // MODIFICADO
-    StreamSubscription<List<fbp.ScanResult>>? scanSubscription; // MODIFICADO
+    print('[BluetoothService] Iniciando escaneo BLE (lógica mejorada)...'); // MODIFICADO
+    fbp.BluetoothDevice? foundDevice; 
+    final scanCompleter = Completer<fbp.BluetoothDevice?>(); 
+    StreamSubscription<List<fbp.ScanResult>>? scanSubscription; 
     Timer? scanTimeoutTimer;
 
     try {
-      if (fbp.FlutterBluePlus.isScanningNow) { // MODIFICADO
+      if (fbp.FlutterBluePlus.isScanningNow) { 
         print('[BluetoothService] Escaneo previo en curso, deteniéndolo...');
-        await fbp.FlutterBluePlus.stopScan(); // MODIFICADO
+        await fbp.FlutterBluePlus.stopScan(); 
         print('[BluetoothService] Escaneo previo detenido.');
       }
 
-      scanSubscription = fbp.FlutterBluePlus.scanResults.listen((results) { // MODIFICADO
+      // ***** INICIO DE SECCIÓN MODIFICADA PARA ESCANEO *****
+      scanSubscription = fbp.FlutterBluePlus.scanResults.listen((results) {
+        // NUEVO LOG DE DEPURACIÓN
+        print('[BluetoothService] Scan results callback fired. Completer isCompleted: ${scanCompleter.isCompleted}. Results count: ${results.length}');
+
         if (scanCompleter.isCompleted) return;
-        print('[BluetoothService] Lote de resultados de escaneo recibido (cantidad: ${results.length}).');
+        // print('[BluetoothService] Lote de resultados de escaneo recibido (cantidad: ${results.length}).'); // Verboso si hay muchos dispositivos
+
         for (final r in results) {
-          final deviceName = r.device.platformName;
-          if (deviceName.isNotEmpty) {
-            print('[BluetoothService] Dispositivo encontrado: "$deviceName" (${r.device.remoteId})');
-            final upperDeviceName = deviceName.toUpperCase();
-            // Comprobación de nombres mejorada
-            if (upperDeviceName.startsWith('MESHTASTIC') || // Incluye Meshtastic_XXXX
+          String advertisedName = r.advertisementData.advName;
+          if (advertisedName.isEmpty) {
+            advertisedName = r.advertisementData.localName;
+          }
+          // Usar platformName como último recurso para la lógica de coincidencia de nombres,
+          // pero priorizar advertisedName/localName para la identificación y el log.
+          String nameForMatching = advertisedName.isNotEmpty ? advertisedName : r.device.platformName;
+          String displayNameForLog = advertisedName.isNotEmpty ? advertisedName : (r.device.platformName.isNotEmpty ? r.device.platformName : r.device.remoteId.toString());
+
+
+          final remoteId = r.device.remoteId;
+          final rssi = r.rssi;
+          final serviceUuids = r.advertisementData.serviceUuids;
+          // Asumiendo que MeshUuids.service es del tipo fbp.Guid. Si fuera String, la comparación necesitaría .toString() y toLowerCase()
+          bool hasMeshtasticServiceUuid = serviceUuids.any((uuid) => uuid == MeshUuids.service);
+
+          print('[BluetoothService] Dispositivo visto: ID: $remoteId, RSSI: $rssi, NameForLog: "$displayNameForLog", AdvName: "${r.advertisementData.advName}", LocalName: "${r.advertisementData.localName}", PlatformName: "${r.device.platformName}", HasMeshtasticServiceUUID: $hasMeshtasticServiceUuid, All ServiceUUIDs: $serviceUuids');
+
+          bool isCompatible = false;
+
+          // 1. Comprobar por UUID de servicio Meshtastic
+          if (hasMeshtasticServiceUuid) {
+            print('[BluetoothService] Compatible por UUID: "$displayNameForLog" ($remoteId)');
+            isCompatible = true;
+          }
+
+          // 2. Comprobar por nombre si no se encontró por UUID y el nombre para matching no está vacío
+          if (!isCompatible && nameForMatching.isNotEmpty) {
+            final upperDeviceName = nameForMatching.toUpperCase();
+            if (upperDeviceName.startsWith('MESHTASTIC') || // Cubre Meshtastic_XXXX
                 upperDeviceName.contains('TBEAM') ||
                 upperDeviceName.contains('HELTEC') ||
                 upperDeviceName.contains('LORA') ||
                 upperDeviceName.contains('XIAO')) {
-              print('[BluetoothService] ¡Dispositivo Meshtastic compatible encontrado!: "$deviceName"');
-              if (!scanCompleter.isCompleted) {
-                scanCompleter.complete(r.device);
-              }
-              break; // Salir del bucle for interno
+              print('[BluetoothService] Compatible por Nombre: "$displayNameForLog" ($remoteId)');
+              isCompatible = true;
             }
+          }
+
+          if (isCompatible) {
+            print('[BluetoothService] ¡Dispositivo Meshtastic compatible SELECCIONADO!: "$displayNameForLog" ($remoteId)');
+            if (!scanCompleter.isCompleted) {
+              scanCompleter.complete(r.device);
+            }
+            break; // Salir del bucle for interno una vez que se encuentra un dispositivo compatible
           }
         }
       }, onError: (e, s) {
@@ -672,19 +706,16 @@ class BluetoothService {
           scanCompleter.completeError(e, s);
         }
       });
+      // ***** FIN DE SECCIÓN MODIFICADA PARA ESCANEO *****
 
-      print('[BluetoothService] Llamando a fbp.FlutterBluePlus.startScan() con timeout de ${_scanTimeoutDuration.inSeconds}s...'); // MODIFICADO
-      // Iniciar escaneo - el future de startScan se puede ignorar o manejar de forma no bloqueante aquí
-      // ya que la lógica principal está en el listener y el completer.
-      // fbp.FlutterBluePlus.startScan terminará por sí mismo después de _scanTimeoutDuration.
-      unawaited(fbp.FlutterBluePlus.startScan(timeout: _scanTimeoutDuration)); // MODIFICADO
-      print('[BluetoothService] fbp.FlutterBluePlus.startScan() invocado (no bloqueante).'); // MODIFICADO
+      print('[BluetoothService] Llamando a fbp.FlutterBluePlus.startScan() con timeout de ${_scanTimeoutDuration.inSeconds}s...');
+      unawaited(fbp.FlutterBluePlus.startScan(timeout: _scanTimeoutDuration));
+      print('[BluetoothService] fbp.FlutterBluePlus.startScan() invocado (no bloqueante).');
       
-      // Configurar un temporizador por si el stream no completa y el escaneo termina
-      scanTimeoutTimer = Timer(_scanTimeoutDuration + const Duration(seconds: 1), () { // Un poco más que el timeout de startScan
+      scanTimeoutTimer = Timer(_scanTimeoutDuration + const Duration(seconds: 1), () { 
           if (!scanCompleter.isCompleted) {
               print('[BluetoothService] Timeout general del escaneo alcanzado por el Timer. No se encontró dispositivo compatible.');
-              scanCompleter.complete(null); // Completa con null si el temporizador expira
+              scanCompleter.complete(null); 
           }
       });
 
@@ -694,28 +725,36 @@ class BluetoothService {
     } catch (e, s) {
       print('[BluetoothService] EXCEPCIÓN durante la nueva lógica de escaneo: $e. Stack: $s');
       _lastErrorMessage = 'Error durante el escaneo BLE: ${e.toString()}';
-      // El finally se encargará de limpiar
     } finally {
       print('[BluetoothService] Bloque finally de la nueva lógica de escaneo.');
       scanTimeoutTimer?.cancel();
-      await scanSubscription?.cancel();
-      if (fbp.FlutterBluePlus.isScanningNow) { // MODIFICADO
+      // ***** INICIO DE SECCIÓN MODIFICADA EN FINALLY *****
+      if (fbp.FlutterBluePlus.isScanningNow) { 
         print('[BluetoothService] El escaneo sigue activo en finally, deteniéndolo...');
-        await fbp.FlutterBluePlus.stopScan(); // MODIFICADO
+        await fbp.FlutterBluePlus.stopScan(); 
         print('[BluetoothService] Escaneo detenido en finally.');
       } else {
-        print('[BluetoothService] El escaneo ya no estaba activo al llegar a finally.');
+        print('[BluetoothService] El escaneo ya no estaba activo al llegar a finally (o FlutterBluePlus.stopScan() ya se completó).');
       }
+      await scanSubscription?.cancel();
+      print('[BluetoothService] Suscripción a scanResults cancelada.');
+       // ***** FIN DE SECCIÓN MODIFICADA EN FINALLY *****
     }
 
     if (foundDevice == null) {
-      print('[BluetoothService] No se encontró ningún dispositivo Meshtastic compatible.');
-      if (_lastErrorMessage == null) {
-        _lastErrorMessage = 'No se encontró dispositivo Meshtastic. Asegúrate que está encendido y visible.';
+      // ***** INICIO DE SECCIÓN MODIFICADA TRAS ESCANEO *****
+      print('[BluetoothService] No se encontró ningún dispositivo Meshtastic compatible tras el escaneo mejorado.');
+      if (_lastErrorMessage == null) { 
+        _lastErrorMessage = 'No se encontró dispositivo Meshtastic. Asegúrate que está encendido, visible y cerca.';
       }
+      // ***** FIN DE SECCIÓN MODIFICADA TRAS ESCANEO *****
       return false;
     }
-    print('[BluetoothService] Dispositivo compatible asignado: ${foundDevice.platformName}.');
+    // ***** INICIO DE SECCIÓN MODIFICADA ASIGNACIÓN Dispositivo *****
+    String displayName = foundDevice.platformName;
+    // Usar platformName si está disponible, si no, usar el ID del dispositivo como fallback para el log.
+    print('[BluetoothService] Dispositivo compatible asignado: "${displayName.isNotEmpty ? displayName : foundDevice.remoteId.toString()}" (ID: ${foundDevice.remoteId}).');
+    // ***** FIN DE SECCIÓN MODIFICADA ASIGNACIÓN Dispositivo *****
     _dev = foundDevice;
     
     // --- Resto de la lógica de conexión y descubrimiento de servicios ---
@@ -740,7 +779,7 @@ class BluetoothService {
     }
 
     print('[BluetoothService] Descubriendo servicios...');
-    List<fbp.BluetoothService>? services; // MODIFICADO
+    List<fbp.BluetoothService>? services; 
     try {
       services = await _dev!.discoverServices();
       print('[BluetoothService] Servicios descubiertos (${services.length}).');
@@ -817,12 +856,26 @@ class BluetoothService {
     await _disposeRadioStreams();
     print('[BluetoothService] Streams de radio eliminados.');
 
+    // ***** INICIO DE SECCIÓN MODIFICADA EN DISCONNECT *****
     try {
-      await _dev?.disconnect();
-      print('[BluetoothService] Dispositivo desconectado.');
+      // Asegurarse de que _dev no es null y está conectado antes de intentar desconectar.
+      // fbp.BluetoothDevice.isConnected utiliza una llamada nativa que puede ser lenta o fallar si el dispositivo ya no existe.
+      // Una comprobación de nulidad para _dev es un primer paso seguro.
+      if (_dev != null) {
+        // Idealmente, se consultaría un estado de conexión mantenido localmente si `_dev!.isConnected` es problemático.
+        // Por ahora, asumimos que si _dev no es null, es válido intentar la desconexión.
+        // La propia llamada a disconnect de flutter_blue_plus debería manejar si ya no está conectado.
+        print('[BluetoothService] Intentando desconectar dispositivo...');
+        await _dev!.disconnect();
+        print('[BluetoothService] Dispositivo desconectado de la instancia.');
+      } else {
+        print('[BluetoothService] El dispositivo ya era nulo, no se requiere desconexión.');
+      }
     } catch (e) {
-      print('[BluetoothService] Error desconectando dispositivo: $e');
+      print('[BluetoothService] Error durante la desconexión del dispositivo: $e');
+      // No relanzar, ya que estamos limpiando.
     }
+    // ***** FIN DE SECCIÓN MODIFICADA EN DISCONNECT *****
 
     _dev = null;
     _toRadio = null;
