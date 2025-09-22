@@ -709,7 +709,7 @@ class BluetoothService {
       // ***** FIN DE SECCIÓN MODIFICADA PARA ESCANEO *****
 
       print('[BluetoothService] Llamando a fbp.FlutterBluePlus.startScan() con timeout de ${_scanTimeoutDuration.inSeconds}s...');
-      unawaited(fbp.FlutterBluePlus.startScan(timeout: _scanTimeoutDuration));
+      unawaited(fbp.FlutterBluePlus.startScan(timeout: _scanTimeoutDuration, androidScanMode: fbp.AndroidScanMode.lowLatency, withServices: [MeshUuids.service])); // MODIFICADO
       print('[BluetoothService] fbp.FlutterBluePlus.startScan() invocado (no bloqueante).');
       
       scanTimeoutTimer = Timer(_scanTimeoutDuration + const Duration(seconds: 1), () { 
