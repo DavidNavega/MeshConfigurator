@@ -97,6 +97,10 @@ class _HomeScreenState extends State<HomeScreen> {
       '921600',
     ];
     const dropdownTextStyle = TextStyle(color: Colors.red);
+    final channelOptions = List<int>.generate(8, (i) => i + 1);
+    if (!channelOptions.contains(p.cfg.channelIndex)) {
+      channelOptions.insert(0, p.cfg.channelIndex);
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -257,16 +261,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 8),
                       DropdownButtonFormField<int>(
                         value: p.cfg.channelIndex,
-                        items: List.generate(
-                            8,
-                                (i) => DropdownMenuItem(
+                        items: channelOptions
+                            .map((i) => DropdownMenuItem(
                                 value: i,
                                 child: Text('Canal $i',
                                     style: const TextStyle(
-                                        color: Colors.red)))),
+                                        color: Colors.red))))
+                            .toList(),
                         onChanged: (v) => context
                             .read<ConfigProvider>()
-                            .setChannelIndex(v ?? 0),
+                            .setChannelIndex(v ?? p.cfg.channelIndex),
                         decoration: deco('Canal (índice)'),
                         dropdownColor: Colors.white,
                       ),
@@ -278,7 +282,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           'Llave (PSK)',
                           errorText: p.keyError,
                           helper:
-                          'Vacío, 16 o 32 bytes en hex o Base64.',
+                          'Vacío, 1, 16 o 32 bytes en hex o Base64.',
                         ),
                         onChanged: (v) =>
                             context.read<ConfigProvider>().setKeyText(v),

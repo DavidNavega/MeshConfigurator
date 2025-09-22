@@ -36,6 +36,7 @@ class ConfigProvider extends ChangeNotifier {
 
   late String _keyText;
   String? _keyError;
+  int? _nodeNum;
 
   // ✅ Getters para la UI
   String get keyDisplay => _keyText;
@@ -46,6 +47,7 @@ class ConfigProvider extends ChangeNotifier {
     }
     return NodeConfig.isValidKeyLength(parsed) ? null : "Clave inválida";
   }
+  int? get nodeNum => _nodeNum;
   String get serialModeDisplay => cfg.serialModeAsString;
   String get baudDisplay => cfg.baudAsString;
   String get regionDisplay => cfg.frequencyRegionAsString;
@@ -167,14 +169,16 @@ class ConfigProvider extends ChangeNotifier {
   }
 
   void setKeyText(String text) {
-    _keyText = text;
     final parsed = NodeConfig.parseKeyText(text);
     if (parsed == null) {
+      _keyText = text;
       _keyError = 'Formato de clave inválido';
     } else if (!NodeConfig.isValidKeyLength(parsed)) {
-      _keyError = 'Clave inválida (usa 0, 16 o 32 bytes)';
+      _keyText = text;
+      _keyError = 'Clave inválida (usa 0, 1, 16 o 32 bytes)';
     } else {
       cfg.key = Uint8List.fromList(parsed);
+      _keyText = NodeConfig.keyToDisplay(cfg.key);
       _keyError = null;
     }
     notifyListeners();
@@ -251,6 +255,7 @@ class ConfigProvider extends ChangeNotifier {
         case ActiveInterface.none:
           break;
       }
+      _updateNodeNumFromService(interface);
       status = 'Configuración enviada (${_interfaceLabel(interface)})';
     } catch (error) {
       status =
@@ -280,6 +285,7 @@ class ConfigProvider extends ChangeNotifier {
     if (newCfg == null) {
       throw StateError('No se pudo obtener la configuración del dispositivo');
     }
+    _updateNodeNumFromService(interface);
     return newCfg;
   }
 
@@ -318,6 +324,33 @@ class ConfigProvider extends ChangeNotifier {
     if (_activeInterface == interface) {
       _activeInterface = ActiveInterface.none;
     }
+  }
+
+  void _updateNodeNumFromService(ActiveInterface interface) {
+    final nodeNum = _nodeNumFor(interface);
+    if (nodeNum != null) {
+      _synchronizeNodeNum(nodeNum);
+    }
+  }
+
+  int? _nodeNumFor(ActiveInterface interface) {
+    switch (interface) {
+      case ActiveInterface.bluetooth:
+        return _bluetoothService.myNodeNum;
+      case ActiveInterface.usb:
+        return _usbService.myNodeNum;
+      case ActiveInterface.tcp:
+        return _tcpService.myNodeNum;
+      case ActiveInterface.none:
+        return _nodeNum;
+    }
+  }
+
+  void _synchronizeNodeNum(int nodeNum) {
+    _nodeNum = nodeNum;
+    _bluetoothService.myNodeNum = nodeNum;
+    _usbService.myNodeNum = nodeNum;
+    _tcpService.myNodeNum = nodeNum;
   }
 
   String _interfaceLabel(ActiveInterface interface) {

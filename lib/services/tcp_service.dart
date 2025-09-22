@@ -13,6 +13,8 @@ import 'package:Buoys_configurator/proto/meshtastic/portnums.pbenum.dart' as por
 
 class TcpHttpService {
   Uri? _base;
+  int? _myNodeNum;
+  bool _nodeNumConfirmed = false;
 
   static const Duration _defaultResponseTimeout = Duration(seconds: 5);
   static const Duration _pollDelay = Duration(milliseconds: 200);
@@ -36,14 +38,71 @@ class TcpHttpService {
 
   void updateBaseUrl(String baseUrl) {
     _base = Uri.parse(baseUrl);
+    _nodeNumConfirmed = false;
   }
 
   void clearBaseUrl() {
     _base = null;
+    _nodeNumConfirmed = false;
+  }
+
+  int? get myNodeNum => _myNodeNum;
+  set myNodeNum(int? value) {
+    _myNodeNum = value;
+    _nodeNumConfirmed = false;
+  }
+
+  void _captureMyNodeNum(mesh.FromRadio frame) {
+    if (frame.hasMyInfo() && frame.myInfo.hasMyNodeNum()) {
+      _myNodeNum = frame.myInfo.myNodeNum;
+      _nodeNumConfirmed = true;
+    }
+  }
+
+  Future<void> _ensureMyNodeNum() async {
+    if (_nodeNumConfirmed && _myNodeNum != null) return;
+    final base = _base;
+    if (base == null) {
+      throw StateError('Base URL not configured');
+    }
+
+    final toRadio = mesh.ToRadio()
+      ..wantConfigId = DateTime.now().millisecondsSinceEpoch & 0xFFFFFFFF;
+
+    await http.put(
+      base.resolve('/api/v1/toradio'),
+      headers: {'Content-Type': 'application/x-protobuf'},
+      body: toRadio.writeToBuffer(),
+    );
+
+    final deadline = DateTime.now().add(_defaultResponseTimeout);
+    while (DateTime.now().isBefore(deadline)) {
+      final resp = await http.get(base.resolve('/api/v1/fromradio'));
+      if (resp.statusCode == 200 && resp.bodyBytes.isNotEmpty) {
+        final frame = mesh.FromRadio.fromBuffer(resp.bodyBytes);
+        _captureMyNodeNum(frame);
+        if (_myNodeNum != null) {
+          _nodeNumConfirmed = true;
+          break;
+        }
+      } else {
+        await Future.delayed(_pollDelay);
+      }
+    }
+
+    if (_myNodeNum == null) {
+      throw TimeoutException('No se recibió MyNodeInfo del radio');
+    }
+    _nodeNumConfirmed = true;
   }
 
   // Empaqueta un AdminMessage como Data ADMIN_APP dentro de ToRadio.packet
   mesh.ToRadio _wrapAdmin(admin.AdminMessage msg) {
+    final nodeNum = _myNodeNum;
+    if (nodeNum == null) {
+      throw StateError(
+          'NodeNum no inicializado; solicita MyNodeInfo antes de enviar comandos');
+    }
     final data = mesh.Data()
       ..portnum = port.PortNum.ADMIN_APP
       ..payload = msg.writeToBuffer()
@@ -51,6 +110,8 @@ class TcpHttpService {
 
     return mesh.ToRadio()
       ..packet = (mesh.MeshPacket()
+        ..to = nodeNum
+        ..priority = mesh.MeshPacket_Priority.RELIABLE
         ..wantAck = true
         ..decoded = data);
   }
@@ -94,6 +155,7 @@ class TcpHttpService {
 
           final frame = mesh.FromRadio.fromBuffer(resp.bodyBytes);
           responses.add(frame);
+          _captureMyNodeNum(frame);
 
           if (!ackSeen && _isAckOrResponse(frame)) {
             ackSeen = true;
@@ -114,6 +176,7 @@ class TcpHttpService {
               }
               final extraFrame = mesh.FromRadio.fromBuffer(extraResp.bodyBytes);
               responses.add(extraFrame);
+              _captureMyNodeNum(extraFrame);
             }
 
             return responses;
@@ -122,6 +185,7 @@ class TcpHttpService {
   }
 
   Future<NodeConfig?> readConfig() async {
+    await _ensureMyNodeNum();
     final cfgOut = NodeConfig();
 
     var primaryChannelCaptured = false;
@@ -143,8 +207,7 @@ class TcpHttpService {
         final isPrimary = channel.role == ch.Channel_Role.PRIMARY;
         if (isPrimary || !primaryChannelCaptured) {
           if (channel.hasIndex()) {
-            final rawIndex = channel.index;
-            cfgOut.channelIndex = rawIndex > 0 ? rawIndex - 1 : rawIndex;
+            cfgOut.channelIndex = channel.index;
           }
           if (channel.hasSettings() && channel.settings.hasPsk()) {
             cfgOut.key = Uint8List.fromList(channel.settings.psk);
@@ -225,13 +288,16 @@ class TcpHttpService {
       msg.hasGetConfigResponse() && msg.getConfigResponse.hasDevice(),
     );
     receivedAnyResponse = receivedAnyResponse || deviceConfigReceived;
-    final indicesToQuery = <int>{cfgOut.channelIndex};
-    for (var i = 0; i < 8; i++) {
+    final indicesToQuery = <int>{};
+    if (cfgOut.channelIndex > 0) {
+      indicesToQuery.add(cfgOut.channelIndex);
+    }
+    for (var i = 1; i <= 8; i++) {
       indicesToQuery.add(i);
     }
     for (final index in indicesToQuery) {
       final channelReceived = await request(
-        admin.AdminMessage()..getChannelRequest = index + 1,
+        admin.AdminMessage()..getChannelRequest = index,
             (msg) => msg.hasGetChannelResponse(),
       );
       receivedAnyResponse = receivedAnyResponse || channelReceived;
@@ -265,6 +331,7 @@ class TcpHttpService {
   }
 
   Future<void> writeConfig(NodeConfig cfgIn) async {
+    await _ensureMyNodeNum();
 
     // ✅ Nombres del nodo: usar setUser con mesh.User (no DeviceConfig)
     final userMsg = mesh.User()
