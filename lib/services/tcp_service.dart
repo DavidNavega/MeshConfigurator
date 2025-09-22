@@ -10,11 +10,13 @@ import 'package:Buoys_configurator/proto/meshtastic/channel.pb.dart' as ch;
 import 'package:Buoys_configurator/proto/meshtastic/module_config.pb.dart' as mod;
 import 'package:Buoys_configurator/proto/meshtastic/config.pb.dart' as cfg;
 import 'package:Buoys_configurator/proto/meshtastic/portnums.pbenum.dart' as port;
+import 'package:Buoys_configurator/services/routing_error_utils.dart';
 
 class TcpHttpService {
   Uri? _base;
   int? _myNodeNum;
   bool _nodeNumConfirmed = false;
+  Uint8List _sessionPasskey = Uint8List(0);
 
   static const Duration _defaultResponseTimeout = Duration(seconds: 5);
   static const Duration _pollDelay = Duration(milliseconds: 200);
@@ -39,17 +41,22 @@ class TcpHttpService {
   void updateBaseUrl(String baseUrl) {
     _base = Uri.parse(baseUrl);
     _nodeNumConfirmed = false;
+    _sessionPasskey = Uint8List(0);
   }
 
   void clearBaseUrl() {
     _base = null;
     _nodeNumConfirmed = false;
+    _sessionPasskey = Uint8List(0);
   }
 
   int? get myNodeNum => _myNodeNum;
   set myNodeNum(int? value) {
     _myNodeNum = value;
     _nodeNumConfirmed = false;
+    if (value == null) {
+      _sessionPasskey = Uint8List(0);
+    }
   }
 
   void _captureMyNodeNum(mesh.FromRadio frame) {
@@ -57,6 +64,18 @@ class TcpHttpService {
       _myNodeNum = frame.myInfo.myNodeNum;
       _nodeNumConfirmed = true;
     }
+  }
+
+  void _captureSessionPasskey(admin.AdminMessage message) {
+    if (message.sessionPasskey.isNotEmpty) {
+      _sessionPasskey = Uint8List.fromList(message.sessionPasskey);
+    }
+  }
+
+  void _injectSessionPasskey(admin.AdminMessage msg) {
+    if (_sessionPasskey.isEmpty) return;
+    if (msg.sessionPasskey.isNotEmpty) return;
+    msg.sessionPasskey = Uint8List.fromList(_sessionPasskey);
   }
 
   Future<void> _ensureMyNodeNum() async {
@@ -103,6 +122,7 @@ class TcpHttpService {
       throw StateError(
           'NodeNum no inicializado; solicita MyNodeInfo antes de enviar comandos');
     }
+    _injectSessionPasskey(msg);
     final data = mesh.Data()
       ..portnum = port.PortNum.ADMIN_APP
       ..payload = msg.writeToBuffer()
@@ -137,6 +157,7 @@ class TcpHttpService {
         final responses = <mesh.FromRadio>[];
         var ackSeen = false;
         var userSatisfied = false;
+        final userComplete = isComplete;
         final deadline = DateTime.now().add(timeout);
 
         while (true) {
@@ -156,12 +177,13 @@ class TcpHttpService {
           final frame = mesh.FromRadio.fromBuffer(resp.bodyBytes);
           responses.add(frame);
           _captureMyNodeNum(frame);
+          throwIfRoutingError(frame);
 
           if (!ackSeen && _isAckOrResponse(frame)) {
             ackSeen = true;
           }
 
-          userSatisfied = isComplete?.call(responses) ?? true;
+          userSatisfied = userComplete?.call(responses) ?? true;
 
           if (ackSeen && userSatisfied) {
             final postDeadline = DateTime.now().add(_postResponseWindow);
@@ -177,6 +199,7 @@ class TcpHttpService {
               final extraFrame = mesh.FromRadio.fromBuffer(extraResp.bodyBytes);
               responses.add(extraFrame);
               _captureMyNodeNum(extraFrame);
+              throwIfRoutingError(extraFrame);
             }
 
             return responses;
@@ -192,6 +215,7 @@ class TcpHttpService {
     var primaryChannelLogged = false;
 
     void applyAdmin(admin.AdminMessage message) {
+      _captureSessionPasskey(message);
       if (message.hasGetOwnerResponse()) {
         final user = message.getOwnerResponse;
         if (user.hasLongName()) {
@@ -403,7 +427,9 @@ class TcpHttpService {
     final payload = decoded.payload;
     if (payload.isEmpty) return null;
     try {
-      return admin.AdminMessage.fromBuffer(payload);
+      final message = admin.AdminMessage.fromBuffer(payload);
+      _captureSessionPasskey(message);
+      return message;
     } catch (_) {
       return null;
     }

@@ -7,12 +7,14 @@ import '../models/node_config.dart';
 import 'stream_framing.dart';
 
 // Importaciones de Protobuf
+import 'package:Buoys_configurator/exceptions/routing_error_exception.dart';
 import 'package:Buoys_configurator/proto/meshtastic/mesh.pb.dart' as mesh;
 import 'package:Buoys_configurator/proto/meshtastic/admin.pb.dart' as admin;
 import 'package:Buoys_configurator/proto/meshtastic/channel.pb.dart' as ch;
 import 'package:Buoys_configurator/proto/meshtastic/module_config.pb.dart' as mod;
 import 'package:Buoys_configurator/proto/meshtastic/config.pb.dart' as cfg;
 import 'package:Buoys_configurator/proto/meshtastic/portnums.pbenum.dart' as port;
+import 'package:Buoys_configurator/services/routing_error_utils.dart';
 
 class UsbService {
   UsbPort? _port;
@@ -22,6 +24,7 @@ class UsbService {
   String? _lastErrorMessage; // Último mensaje de error para la UI
   int? _myNodeNum; // NodeNum de este dispositivo, obtenido del radio
   bool _nodeNumConfirmed = false; // Si _myNodeNum ha sido confirmado
+  Uint8List _sessionPasskey = Uint8List(0);
 
   // Timeouts estándar
   static const Duration _defaultResponseTimeout = Duration(seconds: 15);
@@ -32,6 +35,9 @@ class UsbService {
   set myNodeNum(int? value) {
     _myNodeNum = value;
     _nodeNumConfirmed = false; // Resetear confirmación si se cambia externamente
+    if (value == null) {
+      _sessionPasskey = Uint8List(0);
+    }
   }
 
   String? get lastErrorMessage => _lastErrorMessage;
@@ -39,6 +45,7 @@ class UsbService {
   // Intenta conectar a un dispositivo Meshtastic vía USB.
   Future<bool> connect({int baud = 115200}) async {
     _lastErrorMessage = null;
+    _sessionPasskey = Uint8List(0);
     print('[UsbService] Iniciando conexión USB...');
     List<UsbDevice> devices;
     try {
@@ -204,6 +211,7 @@ class UsbService {
     
     _myNodeNum = null;
     _nodeNumConfirmed = false;
+    _sessionPasskey = Uint8List(0);
     print('[UsbService] Desconexión USB completada. Estado limpiado.');
   }
 
@@ -218,6 +226,18 @@ class UsbService {
       }
       _nodeNumConfirmed = true;
     }
+  }
+
+  void _captureSessionPasskey(admin.AdminMessage message) {
+    if (message.sessionPasskey.isNotEmpty) {
+      _sessionPasskey = Uint8List.fromList(message.sessionPasskey);
+    }
+  }
+
+  void _injectSessionPasskey(admin.AdminMessage msg) {
+    if (_sessionPasskey.isEmpty) return;
+    if (msg.sessionPasskey.isNotEmpty) return;
+    msg.sessionPasskey = Uint8List.fromList(_sessionPasskey);
   }
 
   Future<void> _ensureMyNodeNum() async {
@@ -276,10 +296,11 @@ class UsbService {
       print('[UsbService] CRÍTICO: _wrapAdmin llamado pero _myNodeNum es nulo. El paquete no será dirigido correctamente.');
       throw StateError('_myNodeNum no inicializado. Llama a _ensureMyNodeNum antes de enviar comandos administrativos.');
     }
+    _injectSessionPasskey(adminMsg);
     final data = mesh.Data()
       ..portnum = port.PortNum.ADMIN_APP
       ..payload = adminMsg.writeToBuffer()
-      ..wantResponse = true; 
+      ..wantResponse = true;
 
     final packetId = DateTime.now().millisecondsSinceEpoch & 0xFFFFFFFF;
 
@@ -314,6 +335,7 @@ class UsbService {
     var primaryChannelCaptured = false; 
 
     void _applyAdmin(admin.AdminMessage message) {
+      _captureSessionPasskey(message);
       if (message.hasGetOwnerResponse()) {
         final user = message.getOwnerResponse;
         if (user.hasLongName()) cfgOut.longName = user.longName;
@@ -364,7 +386,11 @@ class UsbService {
         return false; 
       } catch (e,s) {
         print('[UsbService] readConfig: Error en request para $description: $e. Stack: $s');
-        _lastErrorMessage = 'Error solicitando $description: ${e.toString()}';
+        if (e is RoutingErrorException) {
+          _lastErrorMessage = e.message;
+        } else {
+          _lastErrorMessage = 'Error solicitando $description: ${e.toString()}';
+        }
         return false;
       }
     }
@@ -456,7 +482,12 @@ class UsbService {
 
     } catch (e,s) {
       print('[UsbService] Error durante writeConfig: $e. Stack: $s');
-      _lastErrorMessage = 'Error al escribir configuración: ${e.toString()}';
+      if (e is RoutingErrorException) {
+        _lastErrorMessage = e.message;
+      } else {
+        _lastErrorMessage = 'Error al escribir configuración: ${e.toString()}';
+      }
+      rethrow;
     }
   }
 
@@ -514,15 +545,33 @@ class UsbService {
     late StreamSubscription<mesh.FromRadio> sub;
 
     sub = controller.stream.listen((frame) {
-      if (!commandSent || completer.isCompleted) return; 
+      if (!commandSent || completer.isCompleted) return;
+
+      try {
+        throwIfRoutingError(frame);
+      } on RoutingErrorException catch (error) {
+        _lastErrorMessage = error.message;
+        if (!completer.isCompleted) {
+          completer.completeError(error);
+        }
+        cancelSubFuture ??= sub.cancel();
+        return;
+      } catch (error, stackTrace) {
+        print("[UsbService] _sendToRadioAndWait ('${description ?? "N/A"}') recibió frame inválido: $error. Stack: $stackTrace");
+        if (!completer.isCompleted) {
+          completer.completeError(error);
+        }
+        cancelSubFuture ??= sub.cancel();
+        return;
+      }
       
       final adminMsg = _decodeAdminMessage(frame);
-      if (adminMsg == null) return; 
+      if (adminMsg == null) return;
       
       if (matcher(adminMsg)) {
         print("[UsbService] _sendToRadioAndWait ('${description ?? "N/A"}'): ¡Respuesta coincidente encontrada!");
         if (!completer.isCompleted) completer.complete();
-        cancelSubFuture ??= sub.cancel(); 
+        cancelSubFuture ??= sub.cancel();
       }
     });
 
@@ -548,13 +597,15 @@ class UsbService {
     final packet = frame.packet;
     if (!packet.hasDecoded()) return null;
     final decoded = packet.decoded;
-    if (decoded.portnum != port.PortNum.ADMIN_APP) return null; 
+    if (decoded.portnum != port.PortNum.ADMIN_APP) return null;
     if (!decoded.hasPayload()) return null;
     
     final payload = decoded.payload;
     if (payload.isEmpty) return null;
     try {
-      return admin.AdminMessage.fromBuffer(payload);
+      final message = admin.AdminMessage.fromBuffer(payload);
+      _captureSessionPasskey(message);
+      return message;
     } catch (e,s) {
       print('[UsbService] Error al deserializar AdminMessage desde payload: $e. Payload (hex): ${payload.map((b) => b.toRadixString(16).padLeft(2, '0')).join('')}. Stack: $s');
       return null;

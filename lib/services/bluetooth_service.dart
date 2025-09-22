@@ -12,12 +12,14 @@ import '../models/node_config.dart';
 import 'ble_uuids.dart';
 
 // Protobuf 2.6.1
+import 'package:Buoys_configurator/exceptions/routing_error_exception.dart';
 import 'package:Buoys_configurator/proto/meshtastic/mesh.pb.dart' as mesh;
 import 'package:Buoys_configurator/proto/meshtastic/admin.pb.dart' as admin;
 import 'package:Buoys_configurator/proto/meshtastic/channel.pb.dart' as ch;
 import 'package:Buoys_configurator/proto/meshtastic/module_config.pb.dart' as mod;
 import 'package:Buoys_configurator/proto/meshtastic/config.pb.dart' as cfg;
 import 'package:Buoys_configurator/proto/meshtastic/portnums.pbenum.dart' as port;
+import 'package:Buoys_configurator/services/routing_error_utils.dart';
 
 class BluetoothService {
   BluetoothDevice? _dev;
@@ -35,6 +37,7 @@ class BluetoothService {
   int _lastFromNum = 0;
   int? _myNodeNum;
   bool _nodeNumConfirmed = false;
+  Uint8List _sessionPasskey = Uint8List(0);
 
   String? _lastErrorMessage; // Para mensajes de error a la UI
 
@@ -423,6 +426,7 @@ class BluetoothService {
       // Es crucial tener myNodeNum para dirigir el paquete.
       throw StateError('_myNodeNum no inicializado. Llama a _ensureMyNodeNum antes de enviar comandos administrativos.');
     }
+    _injectSessionPasskey(msg);
     final data = mesh.Data()
       ..portnum = port.PortNum.ADMIN_APP
       ..payload = msg.writeToBuffer()
@@ -468,19 +472,33 @@ class BluetoothService {
 
       var ackSeen = false;
       var userSatisfied = false;
+      final userComplete = isComplete;
+      var inspectedCount = 0;
+
 
       try {
         // print('[BluetoothService] _sendAndReceive: Comenzando a recolectar respuestas...'); // Verboso
-        return await _collectResponses(
-          isComplete: (responses) {
-            ackSeen = responses.any(_isAckOrResponseFrame); 
-            userSatisfied = isComplete?.call(responses) ?? true;
+        final responses = await _collectResponses(
+          isComplete: (frames) {
+            while (inspectedCount < frames.length) {
+              throwIfRoutingError(frames[inspectedCount]);
+              inspectedCount++;
+            }
+            ackSeen = frames.any(_isAckOrResponseFrame);
+            userSatisfied = userComplete?.call(frames) ?? true;
             // if(ackSeen) print('[BluetoothService] _sendAndReceive: ACK recibido.'); // Verboso
             // if(userSatisfied) print('[BluetoothService] _sendAndReceive: Condición de usuario satisfecha.'); // Verboso
             return ackSeen && userSatisfied;
           },
           timeout: timeout,
         );
+
+        while (inspectedCount < responses.length) {
+          throwIfRoutingError(responses[inspectedCount]);
+          inspectedCount++;
+        }
+
+        return responses;
       } on TimeoutException catch (e) {
         final packetIdForLog = toRadioMsg.hasPacket() ? toRadioMsg.packet.id : "N/A";
         if (!ackSeen) {
@@ -489,6 +507,8 @@ class BluetoothService {
         }
         print('[BluetoothService] _sendAndReceive: Timeout (${timeout.inSeconds}s) esperando respuesta completa del radio para el paquete ToRadio con ID $packetIdForLog (ACK fue recibido).');
         throw TimeoutException('Timeout esperando respuesta completa del radio (ACK recibido): ${e.message}');
+      } on RoutingErrorException {
+        rethrow;
       } catch (e, s) {
         print('[BluetoothService] _sendAndReceive: Error durante _collectResponses: $e. Stack: $s');
         throw StateError('Error inesperado durante la recolección de respuestas: ${e.toString()}');
@@ -561,9 +581,22 @@ class BluetoothService {
     return message.contains('write not permitted');
   }
 
+  void _captureSessionPasskey(admin.AdminMessage message) {
+    if (message.sessionPasskey.isNotEmpty) {
+      _sessionPasskey = Uint8List.fromList(message.sessionPasskey);
+    }
+  }
+
+  void _injectSessionPasskey(admin.AdminMessage msg) {
+    if (_sessionPasskey.isEmpty) return;
+    if (msg.sessionPasskey.isNotEmpty) return;
+    msg.sessionPasskey = Uint8List.fromList(_sessionPasskey);
+  }
+
   // -------- conexión ----------
   Future<bool> connectAndInit() async {
     _lastErrorMessage = null; // Limpiar mensaje de error anterior al inicio
+    _sessionPasskey = Uint8List(0);
     print('[BluetoothService] Iniciando connectAndInit...');
 
     // 1. Verificar estado del adaptador Bluetooth
@@ -683,6 +716,7 @@ class BluetoothService {
     _lastFromNum = 0;
     _myNodeNum = null;
     _nodeNumConfirmed = false;
+    _sessionPasskey = Uint8List(0);
   }
 
   // -------- lectura de configuración ----------
@@ -712,6 +746,7 @@ class BluetoothService {
     void _applyAdminToConfig(admin.AdminMessage message) {
       // Descomentar si se necesita un log detallado de cada tipo de mensaje procesado:
       // print('[BluetoothService] readConfig._applyAdminToConfig: Procesando ${message.info_.messageName}');
+      _captureSessionPasskey(message);
 
       if (message.hasGetOwnerResponse()) {
         final user = message.getOwnerResponse;
@@ -963,7 +998,9 @@ class BluetoothService {
     final payload = decoded.payload;
     if (payload.isEmpty) return null;
     try {
-      return admin.AdminMessage.fromBuffer(payload);
+      final message = admin.AdminMessage.fromBuffer(payload);
+      _captureSessionPasskey(message);
+      return message;
     } catch (e,s) { // Añadir stack trace al log de error
       print('[BluetoothService] Error al deserializar AdminMessage desde payload: $e. Stack: $s');
       return null;
