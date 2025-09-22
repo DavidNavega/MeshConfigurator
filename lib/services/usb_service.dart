@@ -382,8 +382,8 @@ class UsbService {
       }
       
       for (final index in indicesToQuery) {
-        if (primaryChannelCaptured && index != 0 && index != cfgOut.channelIndex) continue; 
-        final channelReceived = await request(admin.AdminMessage()..getChannelRequest = index, (m) => m.hasGetChannelResponse() && m.getChannelResponse.index == index, "Channel $index");
+        if (primaryChannelCaptured && index != 0 && index != cfgOut.channelIndex) continue;
+        final channelReceived = await request(admin.AdminMessage()..getChannelRequest = index + 1, (m) => m.hasGetChannelResponse() && m.getChannelResponse.index == index, "Channel $index");
         receivedAnyResponse = receivedAnyResponse || channelReceived;
         if (primaryChannelCaptured && cfgOut.channelIndex == index) break; 
       }

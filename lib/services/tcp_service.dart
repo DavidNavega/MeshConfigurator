@@ -289,16 +289,16 @@ class TcpHttpService {
     );
     receivedAnyResponse = receivedAnyResponse || deviceConfigReceived;
     final indicesToQuery = <int>{};
-    if (cfgOut.channelIndex > 0) {
+    if (cfgOut.channelIndex >= 0) {
       indicesToQuery.add(cfgOut.channelIndex);
     }
-    for (var i = 1; i <= 8; i++) {
+    for (var i = 0; i < 8; i++) {
       indicesToQuery.add(i);
     }
     for (final index in indicesToQuery) {
       final channelReceived = await request(
-        admin.AdminMessage()..getChannelRequest = index,
-            (msg) => msg.hasGetChannelResponse(),
+        admin.AdminMessage()..getChannelRequest = index + 1,
+            (msg) => msg.hasGetChannelResponse() && msg.getChannelResponse.index == index,
       );
       receivedAnyResponse = receivedAnyResponse || channelReceived;
       if (primaryChannelCaptured) break;

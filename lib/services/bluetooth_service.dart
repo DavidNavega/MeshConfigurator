@@ -832,9 +832,9 @@ class BluetoothService {
     }
 
     for (final index in indicesToQuery) {
-      if (primaryChannelCaptured) break; 
+      if (primaryChannelCaptured) break;
       final channelReceived = await _requestAndApply(
-        admin.AdminMessage()..getChannelRequest = index,
+        admin.AdminMessage()..getChannelRequest = index + 1,
         (msg) => msg.hasGetChannelResponse() && msg.getChannelResponse.index == index,
         'canal con índice $index',
       );
@@ -844,8 +844,8 @@ class BluetoothService {
     if (!primaryChannelCaptured && cfgOut.key.isEmpty) {
         print('[BluetoothService] readConfig: No se capturó canal primario, intentando consulta explícita por canal 0.');
         final channelZeroReceived = await _requestAndApply(
-          admin.AdminMessage()..getChannelRequest = 0, 
-          (msg) => msg.hasGetChannelResponse(), 
+          admin.AdminMessage()..getChannelRequest = 0 + 1,
+              (msg) => msg.hasGetChannelResponse() && msg.getChannelResponse.index == 0,
           'canal con índice 0 (intento adicional)',
         );
         if (channelZeroReceived) receivedAnyResponse = true;
