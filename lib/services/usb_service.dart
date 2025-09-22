@@ -26,7 +26,7 @@ class UsbService {
   // Timeouts estándar
   static const Duration _defaultResponseTimeout = Duration(seconds: 5);
   static const Duration _postResponseWindow = Duration(milliseconds: 200); // Ventana para capturar respuestas adicionales
-  static const Duration _permissionRequestTimeout = Duration(seconds: 30); // Timeout para la solicitud de permiso USB
+  // static const Duration _permissionRequestTimeout = Duration(seconds: 30); // Ya no se usa _ensurePermission
 
   int? get myNodeNum => _myNodeNum;
   set myNodeNum(int? value) {
@@ -35,97 +35,6 @@ class UsbService {
   }
 
   String? get lastErrorMessage => _lastErrorMessage;
-
-  // Asegura que se tienen los permisos para acceder al dispositivo USB.
-  Future<bool> _ensurePermission(UsbDevice device) async {
-    print('[UsbService] Verificando permiso para dispositivo: ${device.productName ?? device.deviceName}');
-    try {
-      final dynamic usbSerial = UsbSerial; // Acceso dinámico por si la API no es estática
-      final dynamic bus = usbSerial.usbBus;
-      
-      if (bus == null) {
-        print('[UsbService] usbBus es nulo. Esto puede indicar un problema con el plugin usb_serial o no ser necesario en esta plataforma.');
-        // En algunas plataformas, o si el plugin no está completamente inicializado, bus puede ser null.
-        // Asumir true aquí es optimista. Podría ser más seguro devolver false.
-        // Por ahora, se mantiene el comportamiento de devolver true si no hay 'bus' para verificar.
-        return true; 
-      }
-
-      final dynamic hasPermissionValue = await Future.value(bus.hasPermission(device));
-      if (hasPermissionValue == true) {
-        print('[UsbService] Permiso USB ya concedido para ${device.productName ?? device.deviceName}.');
-        return true;
-      }
-
-      print('[UsbService] Solicitando permiso USB para ${device.productName ?? device.deviceName}...');
-      final completer = Completer<bool>();
-      StreamSubscription? grantedSub;
-      StreamSubscription? deniedSub;
-
-      void resolve(bool granted, dynamic eventDevice) {
-        if (completer.isCompleted) return;
-        // Comprobar si el evento corresponde al dispositivo solicitado
-        if (eventDevice is UsbDevice && eventDevice.deviceId == device.deviceId) {
-          print('[UsbService] Evento de permiso USB recibido: ${granted ? "CONCEDIDO" : "DENEGADO"} para ${eventDevice.productName ?? eventDevice.deviceName}');
-          completer.complete(granted);
-        } else if (eventDevice == null && !granted) { 
-          // Algunos plugins/plataformas podrían enviar null en denegación
-          print('[UsbService] Evento de permiso USB DENEGADO (dispositivo nulo en evento) para ${device.productName ?? device.deviceName}');
-          completer.complete(false);
-        }
-      }
-
-      try {
-        final dynamic grantedStreamDynamic = bus.onPermissionGranted;
-        final dynamic deniedStreamDynamic = bus.onPermissionDenied;
-
-        if (grantedStreamDynamic is Stream) {
-          grantedSub = (grantedStreamDynamic as Stream<dynamic>).listen((dynamic dev) => resolve(true, dev));
-        }
-        if (deniedStreamDynamic is Stream) {
-          deniedSub = (deniedStreamDynamic as Stream<dynamic>).listen((dynamic dev) => resolve(false, dev));
-        }
-
-        final dynamic requestValue = await Future.value(bus.requestPermission(device));
-        if (requestValue == false && !completer.isCompleted) {
-          print('[UsbService] Solicitud de permiso USB retornó false directamente.');
-          completer.complete(false);
-        }
-        
-        // Fallback si los streams no están disponibles o no se disparan
-        if (!completer.isCompleted && grantedStreamDynamic is! Stream && deniedStreamDynamic is! Stream) {
-          print('[UsbService] Streams de eventos de permiso no disponibles. Usando valor de retorno de requestPermission: $requestValue');
-          completer.complete(requestValue == true);
-        }
-
-        final bool granted = await completer.future.timeout(
-          _permissionRequestTimeout,
-          onTimeout: () {
-            print('[UsbService] Timeout esperando respuesta de permiso USB.');
-            return false; // Asumir denegado en timeout
-          },
-        );
-
-        if (!granted) {
-          _lastErrorMessage = 'Permiso USB denegado o timeout para ${device.productName ?? device.deviceName}.';
-          print('[UsbService] $_lastErrorMessage');
-        }
-        return granted;
-
-      } finally {
-        await grantedSub?.cancel();
-        await deniedSub?.cancel();
-      }
-    } on NoSuchMethodError catch (e, s) {
-      print('[UsbService] Error de método no encontrado en _ensurePermission (NoSuchMethodError). Esto puede indicar un problema con la integración del plugin usb_serial. Error: $e, Stack: $s');
-      _lastErrorMessage = 'Error de plugin USB (NoSuchMethodError): ${e.toString()}';
-      return false; // Error crítico, no se puede proceder.
-    } catch (error, stackTrace) {
-      print('[UsbService] Error inesperado solicitando permisos USB: $error. Stack: $stackTrace');
-      _lastErrorMessage = 'Error inesperado de permisos USB: ${error.toString()}';
-      return false; // Error crítico, no se puede proceder.
-    }
-  }
 
   // Intenta conectar a un dispositivo Meshtastic vía USB.
   Future<bool> connect({int baud = 115200}) async {
@@ -148,7 +57,6 @@ class UsbService {
     
     print('[UsbService] Dispositivos USB encontrados: ${devices.map((d) => "${d.productName ?? d.deviceName} (VID:${d.vid}, PID:${d.pid})").join(", ")}');
     
-    // Intenta encontrar un dispositivo Meshtastic o compatible. (Lógica de selección simple)
     final dev = devices.firstWhere((d) {
         final lowerProductName = (d.productName ?? '').toLowerCase();
         final lowerMfgName = (d.manufacturerName ?? '').toLowerCase();
@@ -164,23 +72,24 @@ class UsbService {
 
     print('[UsbService] Intentando conectar con: ${dev.productName ?? dev.deviceName} (Fabricante: ${dev.manufacturerName ?? "N/A"}, ID Dispositivo: ${dev.deviceId}, VID: ${dev.vid}, PID: ${dev.pid})');
     
-    if (!await _ensurePermission(dev)) {
-      // _lastErrorMessage ya debería estar fijado por _ensurePermission
-      if (_lastErrorMessage == null) _lastErrorMessage = 'Permiso USB denegado para ${dev.productName ?? dev.deviceName}.';
-      print('[UsbService] Conexión fallida debido a permisos: $_lastErrorMessage');
-      return false;
-    }
-    
+    // La lógica de _ensurePermission se elimina. La gestión de permisos ahora se basa en:
+    // 1. Configuración de AndroidManifest.xml y device_filter.xml para que el SO solicite permisos.
+    // 2. El éxito o fracaso de dev.create() y _port.open() para determinar si se puede acceder.
+
     try {
       _port = await dev.create();
     } on PlatformException catch (error) {
       final message = error.message ?? '';
-      if (message.contains('Failed to acquire USB permission') || error.code == 'UsbSerialPortAdapter') {
-        _lastErrorMessage = 'Permiso USB denegado (PlatformException) para ${dev.productName ?? dev.deviceName}. Asegúrate de que la app tiene permiso en los ajustes del sistema.';
+      // Comprobar mensajes comunes de error de permiso, aunque pueden variar según la implementación nativa del plugin.
+      if (message.toLowerCase().contains('permission') || 
+          message.toLowerCase().contains('denied') || 
+          error.code == 'UsbSerialPortAdapter' || // Código de error visto en algunos casos de problemas de puerto/permiso
+          message.contains('Failed to acquire USB permission')) { // Mensaje específico mencionado antes
+        _lastErrorMessage = 'Permiso USB denegado o fallo al adquirir el dispositivo (${dev.productName ?? dev.deviceName}). Verifica los permisos del sistema.';
       } else {
-        _lastErrorMessage = 'No se pudo inicializar el dispositivo USB (${dev.productName ?? dev.deviceName}): ${message.isEmpty ? error.code : message}.';
+        _lastErrorMessage = 'No se pudo crear el puerto para el dispositivo USB (${dev.productName ?? dev.deviceName}): ${message.isEmpty ? error.code : message}.';
       }
-      print('[UsbService] $_lastErrorMessage. Error original: $error');
+      print('[UsbService] Error al crear puerto USB (PlatformException): $_lastErrorMessage. Error original: $error');
       return false;
     } catch (error, stackTrace) {
       _lastErrorMessage = 'Error inesperado al crear puerto USB para ${dev.productName ?? dev.deviceName}: ${error.toString()}.';
@@ -189,7 +98,7 @@ class UsbService {
     }
 
     if (_port == null) {
-      _lastErrorMessage = 'No se pudo crear el puerto USB para ${dev.productName ?? dev.deviceName} (retornó nulo).';
+      _lastErrorMessage = 'No se pudo crear el puerto USB para ${dev.productName ?? dev.deviceName} (dev.create() retornó nulo).';
       print('[UsbService] $_lastErrorMessage');
       return false;
     }
@@ -206,7 +115,8 @@ class UsbService {
     }
 
     if (!portOpened) {
-      _lastErrorMessage = 'No se pudo abrir el puerto USB para ${dev.productName ?? dev.deviceName} (open() retornó false).';
+      // _port.open() devolviendo false a menudo indica que el permiso no fue concedido por el SO, o el dispositivo no está listo.
+      _lastErrorMessage = 'No se pudo abrir el puerto USB para ${dev.productName ?? dev.deviceName} (open() retornó false). Esto puede deberse a permisos denegados.';
       print('[UsbService] $_lastErrorMessage');
       await disconnect(); // Intentar limpiar
       return false;
@@ -237,7 +147,6 @@ class UsbService {
 
     print('[UsbService] Escuchando datos del puerto USB...');
     _sub = input.listen((Uint8List chunk) {
-      // print('[UsbService] Chunk USB recibido (bytes): ${chunk.length}'); // Log muy verboso
       final accumulator = _frameAccumulator;
       final controller = _frameController;
       if (accumulator == null || controller == null || controller.isClosed) {
@@ -246,7 +155,6 @@ class UsbService {
       for (final payload in accumulator.addChunk(chunk)) {
         try {
           final frame = mesh.FromRadio.fromBuffer(payload);
-          // print('[UsbService] Frame USB decodificado: ${frame.info_.messageName}'); // Log verboso, actualizado para no usar whichPayload
           _captureMyNodeNum(frame);
           if (!controller.isClosed) controller.add(frame);
         } catch (e, s) {
@@ -256,13 +164,10 @@ class UsbService {
     }, onError: (error, stackTrace) {
         print('[UsbService] Error en el stream de entrada USB: $error. Stack: $stackTrace');
         _lastErrorMessage = 'Error en el stream de datos USB: ${error.toString()}';
-        // Considerar una desconexión automática aquí o un reintento.
         disconnect(); 
     }, onDone: () {
         print('[UsbService] Stream de entrada USB cerrado (onDone).');
-        // Esto puede indicar que el dispositivo se desconectó.
-        // Asegurarse de que el estado refleje la desconexión.
-        if (_port != null) { // Si no fue por una llamada a disconnect() explícita
+        if (_port != null) { 
              _lastErrorMessage = 'Dispositivo USB desconectado o stream finalizado.';
              disconnect();
         }
@@ -283,7 +188,7 @@ class UsbService {
        print('[UsbService] FrameController cerrado.');
     }
     _frameController = null;
-    _frameAccumulator = null; // Limpiar acumulador
+    _frameAccumulator = null; 
     
     if (_port != null) {
       try {
@@ -302,7 +207,6 @@ class UsbService {
     print('[UsbService] Desconexión USB completada. Estado limpiado.');
   }
 
-  // Captura y actualiza _myNodeNum si está presente en el frame.
   void _captureMyNodeNum(mesh.FromRadio frame) {
     if (frame.hasMyInfo() && frame.myInfo.hasMyNodeNum()) {
       final newNum = frame.myInfo.myNodeNum;
@@ -310,14 +214,12 @@ class UsbService {
            print('[UsbService] MyNodeNum capturado/actualizado: ${_myNodeNum} -> $newNum');
            _myNodeNum = newNum;
       } else if (!_nodeNumConfirmed) {
-          // Si es el mismo número pero no estaba confirmado, loguearlo la primera vez.
           print('[UsbService] MyNodeNum re-confirmado: $newNum');
       }
       _nodeNumConfirmed = true;
     }
   }
 
-  // Asegura que _myNodeNum ha sido obtenido del dispositivo.
   Future<void> _ensureMyNodeNum() async {
     if (_nodeNumConfirmed && _myNodeNum != null) return;
     print('[UsbService] Asegurando MyNodeNum (estado actual: confirmado=$_nodeNumConfirmed, num=$_myNodeNum)...');
@@ -329,7 +231,6 @@ class UsbService {
       throw StateError('Puerto USB no disponible o stream de FromRadio cerrado.');
     }
 
-    // Futuro que se completa cuando se recibe un MyInfo con myNodeNum
     final infoFuture = controller.stream
         .where((frame) => frame.hasMyInfo() && frame.myInfo.hasMyNodeNum())
         .map((frame) => frame.myInfo.myNodeNum)
@@ -339,9 +240,8 @@ class UsbService {
             throw TimeoutException('Timeout esperando MyNodeInfo del radio (stream).');
         });
 
-    // Mensaje para solicitar MyInfo (el dispositivo debería enviarlo al conectar o al recibir wantConfigId)
     final toRadio = mesh.ToRadio()
-      ..wantConfigId = DateTime.now().millisecondsSinceEpoch & 0xFFFFFFFF; // ID aleatorio
+      ..wantConfigId = DateTime.now().millisecondsSinceEpoch & 0xFFFFFFFF; 
     
     print('[UsbService] Enviando solicitud de MyInfo (wantConfigId: ${toRadio.wantConfigId}) para obtener NodeNum.');
     try {
@@ -352,12 +252,11 @@ class UsbService {
     }
     
     try {
-      final nodeNum = await infoFuture; // Espera a que el futuro del stream se complete
+      final nodeNum = await infoFuture; 
       _myNodeNum = nodeNum;
       _nodeNumConfirmed = true;
       print('[UsbService] MyNodeNum asegurado y confirmado: $_myNodeNum');
     } on TimeoutException catch(e) {
-      // El timeout ya fue logueado por la lambda onTimeout del stream.
       print('[UsbService] _ensureMyNodeNum falló por TimeoutException: ${e.message}');
       throw TimeoutException('No se recibió MyNodeInfo del radio (timeout global en _ensureMyNodeNum).');
     } catch (e, s) {
@@ -371,33 +270,29 @@ class UsbService {
     }
   }
 
-  // Envuelve un AdminMessage en un ToRadio.packet.
   mesh.ToRadio _wrapAdmin(admin.AdminMessage adminMsg) {
     final nodeNum = _myNodeNum;
     if (nodeNum == null) {
       print('[UsbService] CRÍTICO: _wrapAdmin llamado pero _myNodeNum es nulo. El paquete no será dirigido correctamente.');
-      // Lanzar excepción es lo correcto para evitar enviar paquetes malformados.
       throw StateError('_myNodeNum no inicializado. Llama a _ensureMyNodeNum antes de enviar comandos administrativos.');
     }
     final data = mesh.Data()
       ..portnum = port.PortNum.ADMIN_APP
       ..payload = adminMsg.writeToBuffer()
-      ..wantResponse = true; // Generalmente queremos respuesta para mensajes admin
+      ..wantResponse = true; 
 
     final packetId = DateTime.now().millisecondsSinceEpoch & 0xFFFFFFFF;
-    // print('[UsbService] _wrapAdmin: Creando paquete para NodeNum $nodeNum con ID $packetId para ${adminMsg.info_.messageName}'); // Verboso
 
     return mesh.ToRadio()
       ..packet = (mesh.MeshPacket()
-        ..to = nodeNum // Dirigido a nuestro nodo
-        ..from = 0 // Usar 0 (Broadcast addr) o un ID específico de app si se desea diferenciar. Firmware suele ignorarlo para AdminApp.
-        ..id = packetId // ID de paquete único
-        ..priority = mesh.MeshPacket_Priority.RELIABLE // Queremos que los comandos admin lleguen
-        ..wantAck = true // Solicitar ACK del radio
+        ..to = nodeNum 
+        ..from = 0 
+        ..id = packetId 
+        ..priority = mesh.MeshPacket_Priority.RELIABLE 
+        ..wantAck = true 
         ..decoded = data);
   }
 
-  // Lee la configuración del nodo.
   Future<NodeConfig?> readConfig() async {
     if (_port == null || _frameController == null) {
       print('[UsbService] readConfig abortado: puerto o frameController nulos.');
@@ -406,7 +301,7 @@ class UsbService {
     }
     
     try {
-      await _ensureMyNodeNum(); // Asegura que tenemos el NodeNum antes de proceder
+      await _ensureMyNodeNum(); 
     } catch (e, s) {
       print('[UsbService] readConfig falló en _ensureMyNodeNum: $e. Stack: $s');
       _lastErrorMessage = 'Error al obtener NodeNum para leer config: ${e.toString()}';
@@ -414,14 +309,11 @@ class UsbService {
     }
     
     print('[UsbService] Iniciando lectura de configuración del nodo $_myNodeNum...');
-    final cfgOut = NodeConfig(); // Objeto para almacenar la configuración leída
+    final cfgOut = NodeConfig(); 
 
     var primaryChannelCaptured = false; 
-    // var primaryChannelLogged = false; // No parece usarse, comentado para evitar warnings.
 
-    // Aplica los datos de un AdminMessage a cfgOut
     void _applyAdmin(admin.AdminMessage message) {
-      // print('[UsbService] readConfig._applyAdmin: Procesando ${message.info_.messageName}'); // Verboso
       if (message.hasGetOwnerResponse()) {
         final user = message.getOwnerResponse;
         if (user.hasLongName()) cfgOut.longName = user.longName;
@@ -430,7 +322,7 @@ class UsbService {
       if (message.hasGetChannelResponse()) {
         final channel = message.getChannelResponse;
         final isPrimary = channel.role == ch.Channel_Role.PRIMARY;
-        if (isPrimary || !primaryChannelCaptured) { // Tomar el primer canal o el primario
+        if (isPrimary || !primaryChannelCaptured) { 
           if (channel.hasIndex()) cfgOut.channelIndex = channel.index;
           if (channel.hasSettings() && channel.settings.hasPsk()) {
             cfgOut.key = Uint8List.fromList(channel.settings.psk);
@@ -438,10 +330,7 @@ class UsbService {
         }
         if (isPrimary) {
           primaryChannelCaptured = true;
-          // if (!primaryChannelLogged) { // No parece usarse
-          // primaryChannelLogged = true;
           print('[UsbService] readConfig: Canal PRIMARIO ${cfgOut.channelIndex} capturado con PSK (longitud: ${cfgOut.key.length} bytes).');
-          // }
         }
       }
       if (message.hasGetModuleConfigResponse() && message.getModuleConfigResponse.hasSerial()) {
@@ -454,7 +343,6 @@ class UsbService {
       }
     }
 
-    // Consume frames del stream y aplica los AdminMessage
     void _consumeFrame(mesh.FromRadio fr) {
       final adminMsg = _decodeAdminMessage(fr);
       if (adminMsg != null) {
@@ -465,7 +353,6 @@ class UsbService {
     final subscription = _frameController!.stream.listen(_consumeFrame);
     var receivedAnyResponse = false;
     
-    // Función helper para solicitar un tipo de configuración y esperar la respuesta correspondiente
     Future<bool> request(admin.AdminMessage msgToSend, bool Function(admin.AdminMessage) matcher, String description) async {
       print('[UsbService] readConfig: Solicitando $description...');
       try {
@@ -474,7 +361,7 @@ class UsbService {
         return true;
       } on TimeoutException {
         print('[UsbService] readConfig: Timeout esperando respuesta para $description.');
-        return false; // No es un error fatal para toda la lectura, solo para esta parte.
+        return false; 
       } catch (e,s) {
         print('[UsbService] readConfig: Error en request para $description: $e. Stack: $s');
         _lastErrorMessage = 'Error solicitando $description: ${e.toString()}';
@@ -483,15 +370,12 @@ class UsbService {
     }
 
     try {
-      // Solicitar todas las partes de la configuración
       final ownerReceived = await request(admin.AdminMessage()..getOwnerRequest = true, (m) => m.hasGetOwnerResponse(), "OwnerInfo");
       receivedAnyResponse = receivedAnyResponse || ownerReceived;
 
-      // DEVICE_CONFIG (aunque no lo usemos directamente en cfgOut, puede ser necesario para el firmware)
       final deviceCfgReceived = await request(admin.AdminMessage()..getConfigRequest = admin.AdminMessage_ConfigType.DEVICE_CONFIG, (m) => m.hasGetConfigResponse() && m.getConfigResponse.hasDevice(), "DeviceConfig");
       receivedAnyResponse = receivedAnyResponse || deviceCfgReceived;
       
-      // Canales: intentar con el canal 0 (por defecto) y luego el índice actual si existe y es válido.
       final indicesToQuery = <int>{0}; 
       if (cfgOut.channelIndex > 0 && cfgOut.channelIndex <= 8) { 
            indicesToQuery.add(cfgOut.channelIndex);
@@ -510,24 +394,21 @@ class UsbService {
       final loraReceived = await request(admin.AdminMessage()..getConfigRequest = admin.AdminMessage_ConfigType.LORA_CONFIG, (m) => m.hasGetConfigResponse() && m.getConfigResponse.hasLora() && m.getConfigResponse.lora.hasRegion(), "LoRaConfig");
       receivedAnyResponse = receivedAnyResponse || loraReceived;
 
-      if (!receivedAnyResponse && ownerReceived) { // Si solo obtuvimos owner, puede ser un nodo no completamente configurado.
+      if (!receivedAnyResponse && ownerReceived) { 
          print('[UsbService] readConfig: Solo se recibió OwnerInfo. El nodo podría no estar completamente configurado.');
       } else if (!receivedAnyResponse) {
         print('[UsbService] readConfig: No se recibió ninguna respuesta de configuración válida de las solicitudes principales.');
         _lastErrorMessage = 'No se recibió respuesta de configuración del nodo.';
-        // No lanzar excepción aquí, devolver cfgOut parcialmente poblado o vacío.
-        // La UI deberá manejar un NodeConfig incompleto.
       }
     } finally {
-      await subscription.cancel(); // Muy importante cancelar la suscripción general.
+      await subscription.cancel(); 
       print('[UsbService] readConfig: Suscripción de _consumeFrame cancelada.');
     }
     
-    print('[UsbService] Lectura de configuración completada. Config leída: ${cfgOut.toString()}'); // Añadir un método toStringRepresentation a NodeConfig
+    print('[UsbService] Lectura de configuración completada.'); 
     return cfgOut;
   }
 
-  // Escribe la configuración al nodo.
   Future<void> writeConfig(NodeConfig cfgIn) async {
     if (_port == null) {
       print('[UsbService] writeConfig abortado: puerto USB nulo.');
@@ -545,15 +426,13 @@ class UsbService {
     print('[UsbService] Iniciando escritura de configuración para el nodo $_myNodeNum...');
 
     try {
-      // Nombres del nodo
       final userMsg = mesh.User()
         ..shortName = cfgIn.shortName
         ..longName = cfgIn.longName;
       await _sendAdmin(admin.AdminMessage()..setOwner = userMsg, description: "SetOwner (Nombres)");
 
-      // Canal (solo primario)
       final settings = ch.ChannelSettings()
-        ..name = "CH${cfgIn.channelIndex}" // Nombre descriptivo
+        ..name = "CH${cfgIn.channelIndex}" 
         ..psk = cfgIn.key;
       final channel = ch.Channel()
         ..index = cfgIn.channelIndex
@@ -561,34 +440,26 @@ class UsbService {
         ..settings = settings;
       await _sendAdmin(admin.AdminMessage()..setChannel = channel, description: "SetChannel (Índice ${cfgIn.channelIndex})");
 
-      // Configuración Serial
       final serialCfg = mod.ModuleConfig_SerialConfig()
-        ..enabled = true // Asumimos habilitado si se configura
+        ..enabled = true 
         ..baud = cfgIn.baudRate
         ..mode = _serialModeFromString(cfgIn.serialModeAsString);
       final moduleCfg = mod.ModuleConfig()..serial = serialCfg;
       await _sendAdmin(admin.AdminMessage()..setModuleConfig = moduleCfg, description: "SetModuleConfig (Serial)");
 
-      // Configuración LoRa (Región)
       final lora = cfg.Config_LoRaConfig()
         ..region = _regionFromString(cfgIn.frequencyRegionAsString);
       final configMsg = cfg.Config()..lora = lora;
       await _sendAdmin(admin.AdminMessage()..setConfig = configMsg, description: "SetConfig (LoRa)");
       
       print('[UsbService] Escritura de configuración: todos los comandos enviados al nodo $_myNodeNum.');
-      // Considerar un "commit" o "reboot" si el firmware lo soporta/requiere tras cambios.
-      // await _sendAdmin(admin.AdminMessage()..commitEditSettings = true, description: "CommitEditSettings");
-      // await _sendAdmin(admin.AdminMessage()..rebootSeconds = 5, description: "RebootNode");
-
 
     } catch (e,s) {
       print('[UsbService] Error durante writeConfig: $e. Stack: $s');
       _lastErrorMessage = 'Error al escribir configuración: ${e.toString()}';
-      // No relanzar para permitir que la UI maneje el error.
     }
   }
 
-  // Envía un AdminMessage (sin esperar respuesta específica más allá del ACK implícito de _wrapAdmin).
   Future<void> _sendAdmin(admin.AdminMessage msg, {String? description}) async {
     final port = _port;
     if (port == null) {
@@ -606,14 +477,13 @@ class UsbService {
     }
   }
 
-  // Envía un AdminMessage y espera una respuesta específica que cumpla con el `matcher`.
   Future<void> _sendAdminAndWait({
     required admin.AdminMessage msg,
     required bool Function(admin.AdminMessage) matcher,
-    required Duration timeout, // Hacer timeout explícito
+    required Duration timeout, 
     String? description,
   }) {
-    final toRadioMsg = _wrapAdmin(msg); // _wrapAdmin ya valida _myNodeNum
+    final toRadioMsg = _wrapAdmin(msg); 
     final type = description ?? msg.info_.messageName;
     print("[UsbService] Enviando AdminMessage ('$type') y esperando respuesta... (NodeNum: ${_myNodeNum}, PacketID: ${toRadioMsg.packet.id})");
     return _sendToRadioAndWait(
@@ -624,12 +494,11 @@ class UsbService {
     );
   }
 
-  // Lógica genérica para enviar un ToRadio y esperar una respuesta específica vía AdminMessage.
   Future<void> _sendToRadioAndWait({
     required mesh.ToRadio to,
     required bool Function(admin.AdminMessage) matcher,
     required Duration timeout,
-    String? description, // Para logging
+    String? description, 
   }) async {
     final port = _port;
     final controller = _frameController;
@@ -641,51 +510,44 @@ class UsbService {
 
     final completer = Completer<void>();
     var commandSent = false; 
-    Future<void>? cancelSubFuture; // Para cancelar la suscripción
+    Future<void>? cancelSubFuture; 
     late StreamSubscription<mesh.FromRadio> sub;
 
     sub = controller.stream.listen((frame) {
-      if (!commandSent || completer.isCompleted) return; // No procesar hasta enviar o si ya completó
+      if (!commandSent || completer.isCompleted) return; 
       
       final adminMsg = _decodeAdminMessage(frame);
-      if (adminMsg == null) return; // No es un AdminMessage válido
+      if (adminMsg == null) return; 
       
-      // print("[UsbService] _sendToRadioAndWait ('${description ?? "N/A"}'): AdminMessage recibido en stream: ${adminMsg.info_.messageName}"); // Verboso
       if (matcher(adminMsg)) {
         print("[UsbService] _sendToRadioAndWait ('${description ?? "N/A"}'): ¡Respuesta coincidente encontrada!");
         if (!completer.isCompleted) completer.complete();
-        cancelSubFuture ??= sub.cancel(); // Cancelar lo antes posible
+        cancelSubFuture ??= sub.cancel(); 
       }
     });
 
     try {
-      // Primero enviar el comando
       await port.write(StreamFraming.frame(to.writeToBuffer()));
-      commandSent = true; // Marcar que el comando fue enviado
+      commandSent = true; 
       print("[UsbService] _sendToRadioAndWait ('${description ?? "N/A"}'): Comando enviado. Esperando respuesta por ${timeout.inMilliseconds}ms.");
       
-      // Esperar a que el completer se complete o timeout
       await completer.future.timeout(timeout);
     } on TimeoutException {
       print("[UsbService] _sendToRadioAndWait ('${description ?? "N/A"}'): Timeout esperando respuesta específica.");
-      if (!completer.isCompleted) { // Si el timeout vino del await en completer.future
+      if (!completer.isCompleted) { 
           _lastErrorMessage = "Timeout esperando respuesta para '${description ?? "comando"}'.";
       }
       throw TimeoutException("Timeout esperando respuesta específica para '${description ?? "comando"}'.");
     } finally {
-      // Asegurarse de que la suscripción se cancele, incluso si hubo otros errores.
       await (cancelSubFuture ?? sub.cancel());
-      // print("[UsbService] _sendToRadioAndWait ('${description ?? "N/A"}'): Suscripción de escucha cancelada."); // Verboso
     }
   }
 
-  // Decodifica un FromRadio a AdminMessage si es aplicable.
   admin.AdminMessage? _decodeAdminMessage(mesh.FromRadio frame) {
     if (!frame.hasPacket()) return null;
     final packet = frame.packet;
     if (!packet.hasDecoded()) return null;
     final decoded = packet.decoded;
-    // Solo nos interesan los paquetes ADMIN_APP
     if (decoded.portnum != port.PortNum.ADMIN_APP) return null; 
     if (!decoded.hasPayload()) return null;
     
@@ -699,7 +561,6 @@ class UsbService {
     }
   }
   
-  // ------- Funciones Helper para Enums <-> String (Mantenidas según tu preferencia) -------
   cfg.Config_LoRaConfig_RegionCode _regionFromString(String s) {
     switch (s) {
       case '433':
@@ -707,7 +568,7 @@ class UsbService {
       case '915':
         return cfg.Config_LoRaConfig_RegionCode.US;
       case '868':
-      default: // Por defecto EU_868 si no coincide
+      default:
         return cfg.Config_LoRaConfig_RegionCode.EU_868;
     }
   }
@@ -716,27 +577,18 @@ class UsbService {
     switch (s.toUpperCase()) {
       case 'PROTO':
         return mod.ModuleConfig_SerialConfig_Serial_Mode.PROTO;
-      case 'TEXTMSG': // Añadido para que sea una opción válida
+      case 'TEXTMSG': 
         return mod.ModuleConfig_SerialConfig_Serial_Mode.TEXTMSG;
-      case 'TLL': // Mapeo personalizado: TLL en UI -> NMEA para el firmware
+      case 'TLL': 
         return mod.ModuleConfig_SerialConfig_Serial_Mode.NMEA;
-      case 'NMEA': // Directo si se usa NMEA en UI
+      case 'NMEA': 
         return mod.ModuleConfig_SerialConfig_Serial_Mode.NMEA;
-      case 'WPL': // Mapeo personalizado: WPL en UI -> CALTOPO para el firmware
+      case 'WPL': 
         return mod.ModuleConfig_SerialConfig_Serial_Mode.CALTOPO;
-      case 'CALTOPO': // Directo si se usa CALTOPO en UI
+      case 'CALTOPO': 
         return mod.ModuleConfig_SerialConfig_Serial_Mode.CALTOPO;
       default:
         return mod.ModuleConfig_SerialConfig_Serial_Mode.DEFAULT;
     }
   }
 }
-
-// Considera añadir esto a tu NodeConfig para facilitar el logging:
-/*
-extension NodeConfigToString on NodeConfig {
-  String toStringRepresentation() {
-    return 'NodeConfig(shortName: $shortName, longName: $longName, channelIndex: $channelIndex, keyLength: ${key.length}, serialMode: $serialModeAsString, baudRate: $baudRate, freqRegion: $frequencyRegionAsString)';
-  }
-}
-*/

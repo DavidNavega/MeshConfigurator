@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:io' show Platform; // Importación añadida
 import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:device_info_plus/device_info_plus.dart'; // Importación añadida
 
 import '../models/node_config.dart';
 import 'ble_uuids.dart';
@@ -34,6 +36,8 @@ class BluetoothService {
   int? _myNodeNum;
   bool _nodeNumConfirmed = false;
 
+  String? _lastErrorMessage; // Para mensajes de error a la UI
+
   static const Duration _defaultResponseTimeout = Duration(seconds: 5);
   static const Duration _postResponseWindow = Duration(milliseconds: 200);
 
@@ -42,16 +46,57 @@ class BluetoothService {
     _myNodeNum = value;
     _nodeNumConfirmed = false;
   }
-
+  String? get lastErrorMessage => _lastErrorMessage; // Getter para el mensaje de error
 
   // -------- permisos ----------
   Future<bool> _ensurePermissions() async {
-    final statuses = await [
-      Permission.bluetoothScan,
-      Permission.bluetoothConnect,
-      Permission.locationWhenInUse,
-    ].request();
-    return statuses.values.every((s) => s.isGranted);
+    _lastErrorMessage = null; // Limpiar mensaje de error anterior
+    if (Platform.isAndroid) {
+      DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      List<Permission> permissionsToRequest = [];
+
+      if (androidInfo.version.sdkInt >= 31) { // Android 12 (API 31) y superior
+        permissionsToRequest.addAll([
+          Permission.bluetoothScan,
+          Permission.bluetoothConnect,
+        ]);
+      } else { // Android 11 (API 30) e inferior
+        permissionsToRequest.add(Permission.locationWhenInUse);
+      }
+
+      if (permissionsToRequest.isEmpty) {
+        print('[BluetoothService] No se requieren permisos de tiempo de ejecución específicos para esta versión de Android.');
+        return true;
+      }
+
+      print('[BluetoothService] Solicitando permisos: $permissionsToRequest');
+      Map<Permission, PermissionStatus> statuses = await permissionsToRequest.request();
+
+      bool allGranted = true;
+      statuses.forEach((permission, status) {
+        if (!status.isGranted) {
+          allGranted = false;
+          String permissionName = permission.toString().split('.').last;
+          print('[BluetoothService] Permiso denegado: $permissionName ($status)');
+          _lastErrorMessage = 'Permiso $permissionName denegado. Es necesario para la funcionalidad Bluetooth.';
+          
+          if (status.isPermanentlyDenied) {
+            _lastErrorMessage = 'Permiso $permissionName denegado permanentemente. Por favor, actívalo en los ajustes de la aplicación.';
+            // Aquí podrías llamar a openAppSettings(); si quieres guiar al usuario.
+          }
+        } else {
+          print('[BluetoothService] Permiso concedido: ${permission.toString().split('.').last}');
+        }
+      });
+
+      if (!allGranted) {
+          print('[BluetoothService] No se concedieron todos los permisos Bluetooth requeridos.');
+      }
+      return allGranted;
+    }
+    print('[BluetoothService] Asumiendo que los permisos se manejan de otra forma para plataformas no Android o no se requiere solicitud en tiempo de ejecución.');
+    return true;
   }
 
   // -------- streams ----------
@@ -518,11 +563,52 @@ class BluetoothService {
 
   // -------- conexión ----------
   Future<bool> connectAndInit() async {
-    if (!await _ensurePermissions()) return false;
+    _lastErrorMessage = null; // Limpiar mensaje de error anterior al inicio
+    print('[BluetoothService] Iniciando connectAndInit...');
 
+    // 1. Verificar estado del adaptador Bluetooth
+    var adapterState = await FlutterBluePlus.adapterState.first;
+    if (adapterState != BluetoothAdapterState.on) {
+      print('[BluetoothService] El adaptador Bluetooth está ${adapterState.name}.');
+      _lastErrorMessage = 'El Bluetooth está ${adapterState.name}. Por favor, enciéndelo.';
+      
+      if (Platform.isAndroid) {
+        try {
+          print('[BluetoothService] Solicitando encender Bluetooth...');
+          await FlutterBluePlus.turnOn();
+          // Esperar un momento para que el estado del adaptador se actualice
+          await Future.delayed(const Duration(milliseconds: 500)); 
+          adapterState = await FlutterBluePlus.adapterState.first;
+          if (adapterState != BluetoothAdapterState.on) {
+             print('[BluetoothService] Bluetooth sigue apagado después de la solicitud.');
+             return false;
+          }
+          print('[BluetoothService] Bluetooth ahora está encendido después de la solicitud.');
+        } catch (e) {
+          print('[BluetoothService] No se pudo solicitar encender Bluetooth (o no es soportado): $e');
+          return false;
+        }
+      } else {
+        return false; 
+      }
+    }
+    print('[BluetoothService] El adaptador Bluetooth está encendido.');
+
+    // 2. Asegurar permisos
+    if (!await _ensurePermissions()) {
+      print('[BluetoothService] Permisos Bluetooth no concedidos.');
+      // _lastErrorMessage debería haber sido establecido por _ensurePermissions
+      return false;
+    }
+    print('[BluetoothService] Permisos Bluetooth concedidos.');
+
+    // 3. Iniciar escaneo (el resto de tu lógica existente continúa aquí)
+    print('[BluetoothService] Iniciando escaneo BLE...');
+    // await FlutterBluePlus.stopScan(); // Considera detener cualquier escaneo previo
     await FlutterBluePlus.startScan(timeout: const Duration(seconds: 8));
     BluetoothDevice? found;
 
+    // El resto del método connectAndInit continúa aquí...
     await for (final results in FlutterBluePlus.scanResults) {
       for (final r in results) {
         final platformName = r.device.platformName;
