@@ -4,7 +4,7 @@ import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fbp; // MODIFICADO
 import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart'; // Importación añadida
 
@@ -22,10 +22,10 @@ import 'package:Buoys_configurator/proto/meshtastic/portnums.pbenum.dart' as por
 import 'package:Buoys_configurator/services/routing_error_utils.dart';
 
 class BluetoothService {
-  BluetoothDevice? _dev;
-  BluetoothCharacteristic? _toRadio;
-  BluetoothCharacteristic? _fromRadio;
-  BluetoothCharacteristic? _fromNum;
+  fbp.BluetoothDevice? _dev; // MODIFICADO
+  fbp.BluetoothCharacteristic? _toRadio; // MODIFICADO
+  fbp.BluetoothCharacteristic? _fromRadio; // MODIFICADO
+  fbp.BluetoothCharacteristic? _fromNum; // MODIFICADO
 
   StreamController<mesh.FromRadio>? _fromRadioController;
   StreamSubscription<List<int>>? _fromRadioSubscription;
@@ -43,6 +43,7 @@ class BluetoothService {
 
   static const Duration _defaultResponseTimeout = Duration(seconds: 5);
   static const Duration _postResponseWindow = Duration(milliseconds: 200);
+  static const Duration _scanTimeoutDuration = Duration(seconds: 10); // Timeout para el escaneo BLE
 
   int? get myNodeNum => _myNodeNum;
   set myNodeNum(int? value) {
@@ -517,7 +518,7 @@ class BluetoothService {
   }
 
   Future<void> _writeToRadio(
-      BluetoothCharacteristic characteristic, List<int> payload) async {
+      fbp.BluetoothCharacteristic characteristic, List<int> payload) async { // MODIFICADO
     final supportsWriteWithoutResponse =
         characteristic.properties.writeWithoutResponse;
     final supportsWriteWithResponse = characteristic.properties.write;
@@ -534,7 +535,7 @@ class BluetoothService {
       throw StateError('Characteristic does not support write operations');
     }
 
-    FlutterBluePlusException? lastWriteNotPermitted;
+    fbp.FlutterBluePlusException? lastWriteNotPermitted; // MODIFICADO
     for (final withoutResponse in attempts) {
       try {
         await characteristic.write(
@@ -542,7 +543,7 @@ class BluetoothService {
           withoutResponse: withoutResponse,
         );
         return;
-      } on FlutterBluePlusException catch (err) {
+      } on fbp.FlutterBluePlusException catch (err) { // MODIFICADO
         if (_isWriteNotPermittedError(err)) {
           lastWriteNotPermitted = err;
           continue;
@@ -560,7 +561,7 @@ class BluetoothService {
           withoutResponse: true,
         );
         return;
-      } on FlutterBluePlusException catch (err) {
+      } on fbp.FlutterBluePlusException catch (err) { // MODIFICADO
         if (_isWriteNotPermittedError(err)) {
           lastWriteNotPermitted = err;
         } else {
@@ -576,7 +577,7 @@ class BluetoothService {
     throw StateError('Failed to write to characteristic');
   }
 
-  bool _isWriteNotPermittedError(FlutterBluePlusException err) {
+  bool _isWriteNotPermittedError(fbp.FlutterBluePlusException err) { // MODIFICADO
     final message = err.description?.toLowerCase() ?? '';
     return message.contains('write not permitted');
   }
@@ -595,26 +596,23 @@ class BluetoothService {
 
   // -------- conexión ----------
   Future<bool> connectAndInit() async {
-    _lastErrorMessage = null; // Limpiar mensaje de error anterior al inicio
+    _lastErrorMessage = null;
     _sessionPasskey = Uint8List(0);
     print('[BluetoothService] Iniciando connectAndInit...');
 
-    // 1. Verificar estado del adaptador Bluetooth
-    var adapterState = await FlutterBluePlus.adapterState.first;
-    if (adapterState != BluetoothAdapterState.on) {
+    var adapterState = await fbp.FlutterBluePlus.adapterState.first; // MODIFICADO
+    if (adapterState != fbp.BluetoothAdapterState.on) { // MODIFICADO
       print('[BluetoothService] El adaptador Bluetooth está ${adapterState.name}.');
       _lastErrorMessage = 'El Bluetooth está ${adapterState.name}. Por favor, enciéndelo.';
-      
       if (Platform.isAndroid) {
         try {
           print('[BluetoothService] Solicitando encender Bluetooth...');
-          await FlutterBluePlus.turnOn();
-          // Esperar un momento para que el estado del adaptador se actualice
-          await Future.delayed(const Duration(milliseconds: 500)); 
-          adapterState = await FlutterBluePlus.adapterState.first;
-          if (adapterState != BluetoothAdapterState.on) {
-             print('[BluetoothService] Bluetooth sigue apagado después de la solicitud.');
-             return false;
+          await fbp.FlutterBluePlus.turnOn(); // MODIFICADO
+          await Future.delayed(const Duration(milliseconds: 500));
+          adapterState = await fbp.FlutterBluePlus.adapterState.first; // MODIFICADO
+          if (adapterState != fbp.BluetoothAdapterState.on) { // MODIFICADO
+            print('[BluetoothService] Bluetooth sigue apagado después de la solicitud.');
+            return false;
           }
           print('[BluetoothService] Bluetooth ahora está encendido después de la solicitud.');
         } catch (e) {
@@ -622,92 +620,209 @@ class BluetoothService {
           return false;
         }
       } else {
-        return false; 
+        return false;
       }
     }
     print('[BluetoothService] El adaptador Bluetooth está encendido.');
 
-    // 2. Asegurar permisos
     if (!await _ensurePermissions()) {
       print('[BluetoothService] Permisos Bluetooth no concedidos.');
-      // _lastErrorMessage debería haber sido establecido por _ensurePermissions
       return false;
     }
     print('[BluetoothService] Permisos Bluetooth concedidos.');
 
-    // 3. Iniciar escaneo (el resto de tu lógica existente continúa aquí)
-    print('[BluetoothService] Iniciando escaneo BLE...');
-    // await FlutterBluePlus.stopScan(); // Considera detener cualquier escaneo previo
-    await FlutterBluePlus.startScan(timeout: const Duration(seconds: 8));
-    BluetoothDevice? found;
+    print('[BluetoothService] Iniciando escaneo BLE (nueva lógica)...');
+    fbp.BluetoothDevice? foundDevice; // MODIFICADO
+    final scanCompleter = Completer<fbp.BluetoothDevice?>(); // MODIFICADO
+    StreamSubscription<List<fbp.ScanResult>>? scanSubscription; // MODIFICADO
+    Timer? scanTimeoutTimer;
 
-    // El resto del método connectAndInit continúa aquí...
-    await for (final results in FlutterBluePlus.scanResults) {
-      for (final r in results) {
-        final platformName = r.device.platformName;
-        if (platformName.isEmpty) {
-          continue;
-        }
-        final name = platformName.toUpperCase();
-        if (name.contains('MESHTASTIC') ||
-            name.contains('TBEAM') ||
-            name.contains('HELTEC') ||
-            name.contains('XIAO')) {
-          found = r.device;
-          break;
-        }
+    try {
+      if (fbp.FlutterBluePlus.isScanningNow) { // MODIFICADO
+        print('[BluetoothService] Escaneo previo en curso, deteniéndolo...');
+        await fbp.FlutterBluePlus.stopScan(); // MODIFICADO
+        print('[BluetoothService] Escaneo previo detenido.');
       }
-      if (found != null) break;
+
+      scanSubscription = fbp.FlutterBluePlus.scanResults.listen((results) { // MODIFICADO
+        if (scanCompleter.isCompleted) return;
+        print('[BluetoothService] Lote de resultados de escaneo recibido (cantidad: ${results.length}).');
+        for (final r in results) {
+          final deviceName = r.device.platformName;
+          if (deviceName.isNotEmpty) {
+            print('[BluetoothService] Dispositivo encontrado: "$deviceName" (${r.device.remoteId})');
+            final upperDeviceName = deviceName.toUpperCase();
+            // Comprobación de nombres mejorada
+            if (upperDeviceName.startsWith('MESHTASTIC') || // Incluye Meshtastic_XXXX
+                upperDeviceName.contains('TBEAM') ||
+                upperDeviceName.contains('HELTEC') ||
+                upperDeviceName.contains('LORA') ||
+                upperDeviceName.contains('XIAO')) {
+              print('[BluetoothService] ¡Dispositivo Meshtastic compatible encontrado!: "$deviceName"');
+              if (!scanCompleter.isCompleted) {
+                scanCompleter.complete(r.device);
+              }
+              break; // Salir del bucle for interno
+            }
+          }
+        }
+      }, onError: (e, s) {
+        print('[BluetoothService] Error en el stream de scanResults: $e. Stack: $s');
+        if (!scanCompleter.isCompleted) {
+          scanCompleter.completeError(e, s);
+        }
+      });
+
+      print('[BluetoothService] Llamando a fbp.FlutterBluePlus.startScan() con timeout de ${_scanTimeoutDuration.inSeconds}s...'); // MODIFICADO
+      // Iniciar escaneo - el future de startScan se puede ignorar o manejar de forma no bloqueante aquí
+      // ya que la lógica principal está en el listener y el completer.
+      // fbp.FlutterBluePlus.startScan terminará por sí mismo después de _scanTimeoutDuration.
+      unawaited(fbp.FlutterBluePlus.startScan(timeout: _scanTimeoutDuration)); // MODIFICADO
+      print('[BluetoothService] fbp.FlutterBluePlus.startScan() invocado (no bloqueante).'); // MODIFICADO
+      
+      // Configurar un temporizador por si el stream no completa y el escaneo termina
+      scanTimeoutTimer = Timer(_scanTimeoutDuration + const Duration(seconds: 1), () { // Un poco más que el timeout de startScan
+          if (!scanCompleter.isCompleted) {
+              print('[BluetoothService] Timeout general del escaneo alcanzado por el Timer. No se encontró dispositivo compatible.');
+              scanCompleter.complete(null); // Completa con null si el temporizador expira
+          }
+      });
+
+      print('[BluetoothService] Esperando resultado del escaneo (scanCompleter.future)...');
+      foundDevice = await scanCompleter.future;
+
+    } catch (e, s) {
+      print('[BluetoothService] EXCEPCIÓN durante la nueva lógica de escaneo: $e. Stack: $s');
+      _lastErrorMessage = 'Error durante el escaneo BLE: ${e.toString()}';
+      // El finally se encargará de limpiar
+    } finally {
+      print('[BluetoothService] Bloque finally de la nueva lógica de escaneo.');
+      scanTimeoutTimer?.cancel();
+      await scanSubscription?.cancel();
+      if (fbp.FlutterBluePlus.isScanningNow) { // MODIFICADO
+        print('[BluetoothService] El escaneo sigue activo en finally, deteniéndolo...');
+        await fbp.FlutterBluePlus.stopScan(); // MODIFICADO
+        print('[BluetoothService] Escaneo detenido en finally.');
+      } else {
+        print('[BluetoothService] El escaneo ya no estaba activo al llegar a finally.');
+      }
     }
-    await FlutterBluePlus.stopScan();
 
-    if (found == null) return false;
+    if (foundDevice == null) {
+      print('[BluetoothService] No se encontró ningún dispositivo Meshtastic compatible.');
+      if (_lastErrorMessage == null) {
+        _lastErrorMessage = 'No se encontró dispositivo Meshtastic. Asegúrate que está encendido y visible.';
+      }
+      return false;
+    }
+    print('[BluetoothService] Dispositivo compatible asignado: ${foundDevice.platformName}.');
+    _dev = foundDevice;
+    
+    // --- Resto de la lógica de conexión y descubrimiento de servicios ---
+    print('[BluetoothService] Intentando conectar a ${_dev!.remoteId}...');
+    try {
+      await _dev!.connect(autoConnect: false);
+      print('[BluetoothService] Conectado a ${_dev!.remoteId}.');
+    } catch (e,s) {
+      print('[BluetoothService] Error al conectar al dispositivo: $e. Stack: $s');
+      _lastErrorMessage = 'Error al conectar: ${e.toString()}';
+      await disconnect(); // Limpiar
+      return false;
+    }
 
-    _dev = found;
-    await _dev!.connect(autoConnect: false);
+    print('[BluetoothService] Solicitando MTU 512...');
     try {
       await _dev!.requestMtu(512);
-    } catch (_) {}
+      print('[BluetoothService] MTU solicitado.');
+    } catch (e,s) {
+      print('[BluetoothService] Error solicitando MTU: $e. Stack: $s');
+      // No es fatal, pero puede afectar el rendimiento
+    }
 
-    final services = await _dev!.discoverServices();
+    print('[BluetoothService] Descubriendo servicios...');
+    List<fbp.BluetoothService>? services; // MODIFICADO
+    try {
+      services = await _dev!.discoverServices();
+      print('[BluetoothService] Servicios descubiertos (${services.length}).');
+    } catch (e,s) {
+      print('[BluetoothService] Error descubriendo servicios: $e. Stack: $s');
+      _lastErrorMessage = 'Error descubriendo servicios: ${e.toString()}';
+      await disconnect();
+      return false;
+    }
+
     for (final s in services) {
       if (s.uuid == MeshUuids.service) {
+        print('[BluetoothService] Servicio Meshtastic encontrado: ${s.uuid}.');
         for (final c in s.characteristics) {
-          if (c.uuid == MeshUuids.toRadio) _toRadio = c;
-          if (c.uuid == MeshUuids.fromRadio) _fromRadio = c;
-          if (c.uuid == MeshUuids.fromNum) _fromNum = c;
+          if (c.uuid == MeshUuids.toRadio) {
+            _toRadio = c;
+            print('[BluetoothService] Característica ToRadio encontrada.');
+          }
+          if (c.uuid == MeshUuids.fromRadio) {
+            _fromRadio = c;
+            print('[BluetoothService] Característica FromRadio encontrada.');
+          }
+          if (c.uuid == MeshUuids.fromNum) {
+            _fromNum = c;
+            print('[BluetoothService] Característica FromNum encontrada.');
+          }
         }
       }
     }
 
     if (_toRadio == null || _fromRadio == null || _fromNum == null) {
-      try {
-        await _dev!.disconnect();
-      } catch (_) {}
+      print('[BluetoothService] No se encontraron todas las características Meshtastic requeridas.');
+      _lastErrorMessage = 'No se encontraron características BLE Meshtastic requeridas.';
+      await disconnect();
       return false;
     }
+    print('[BluetoothService] Todas las características Meshtastic encontradas.');
 
     _lastFromNum = 0;
+    print('[BluetoothService] Inicializando notificaciones FromRadio y FromNum...');
     await _initializeFromRadioNotifications();
     await _initializeFromNumNotifications();
-    await _ensureMyNodeNum();
+    print('[BluetoothService] Notificaciones inicializadas.');
 
+    try {
+      await _ensureMyNodeNum();
+      print('[BluetoothService] MyNodeNum asegurado: $_myNodeNum.');
+    } catch (e,s) {
+      print('[BluetoothService] Error crítico durante _ensureMyNodeNum después de la conexión: $e. Stack: $s');
+      _lastErrorMessage = 'Error obteniendo info del nodo: ${e.toString()}';
+      await disconnect();
+      return false;
+    }
+    
+    print('[BluetoothService] connectAndInit completado exitosamente.');
     return true;
   }
 
   Future<void> disconnect() async {
+    print('[BluetoothService] Iniciando desconexión...');
     try {
       await _fromRadio?.setNotifyValue(false);
-    } catch (_) {}
+      print('[BluetoothService] Notificaciones de FromRadio desactivadas.');
+    } catch (e) {
+      print('[BluetoothService] Error desactivando notificaciones FromRadio: $e');
+    }
     try {
       await _fromNum?.setNotifyValue(false);
-    } catch (_) {}
+      print('[BluetoothService] Notificaciones de FromNum desactivadas.');
+    } catch (e) {
+      print('[BluetoothService] Error desactivando notificaciones FromNum: $e');
+    }
 
     await _disposeRadioStreams();
+    print('[BluetoothService] Streams de radio eliminados.');
 
     try {
       await _dev?.disconnect();
-    } catch (_) {}
+      print('[BluetoothService] Dispositivo desconectado.');
+    } catch (e) {
+      print('[BluetoothService] Error desconectando dispositivo: $e');
+    }
 
     _dev = null;
     _toRadio = null;
@@ -717,13 +832,14 @@ class BluetoothService {
     _myNodeNum = null;
     _nodeNumConfirmed = false;
     _sessionPasskey = Uint8List(0);
+    print('[BluetoothService] Estado de BluetoothService limpiado.');
   }
 
   // -------- lectura de configuración ----------
   Future<NodeConfig?> readConfig() async {
     if (_toRadio == null || _fromRadioQueue == null) {
       print('[BluetoothService] readConfig abortado: características BLE no inicializadas (toRadio o fromRadioQueue nulos).');
-      // Considerar lanzar un error o devolver un Future.error si es más apropiado para el que llama.
+      _lastErrorMessage = 'Características BLE no disponibles para leer config.';
       return null;
     }
 
@@ -731,10 +847,8 @@ class BluetoothService {
       await _ensureMyNodeNum(); // Asegura que tenemos el NodeNum antes de proceder
     } catch (e, s) {
       print('[BluetoothService] readConfig falló en _ensureMyNodeNum: $e. Stack: $s');
-      // Aquí se podría establecer un _lastErrorMessage si se implementa en BluetoothService.
-      // Por ahora, solo relanzamos o devolvemos null, dependiendo de la severidad deseada.
-      // Devolver null es consistente con la signatura de la función.
-      throw StateError('Error al obtener NodeNum para leer config: ${e.toString()}');
+      _lastErrorMessage = 'Error al obtener NodeNum para leer config: ${e.toString()}';
+      throw StateError('Error al obtener NodeNum para leer config: ${e.toString()}'); // Relanzar para que la UI lo maneje
     }
     
     print('[BluetoothService] Iniciando lectura de configuración del nodo $_myNodeNum...');
@@ -744,29 +858,21 @@ class BluetoothService {
     var primaryChannelLogged = false; // Usado para loguear la captura del canal primario solo una vez
 
     void _applyAdminToConfig(admin.AdminMessage message) {
-      // Descomentar si se necesita un log detallado de cada tipo de mensaje procesado:
-      // print('[BluetoothService] readConfig._applyAdminToConfig: Procesando ${message.info_.messageName}');
       _captureSessionPasskey(message);
-
       if (message.hasGetOwnerResponse()) {
         final user = message.getOwnerResponse;
         if (user.hasLongName()) cfgOut.longName = user.longName;
         if (user.hasShortName()) cfgOut.shortName = user.shortName;
-        // print('[BluetoothService] readConfig._applyAdminToConfig: Owner info aplicada (LongName: ${cfgOut.longName}, ShortName: ${cfgOut.shortName})'); // Verboso
       }
-
       if (message.hasGetChannelResponse()) {
         final channel = message.getChannelResponse;
         final isPrimary = channel.role == ch.Channel_Role.PRIMARY;
-
         if (isPrimary || !primaryChannelCaptured) {
           if (channel.hasIndex()) cfgOut.channelIndex = channel.index;
           if (channel.hasSettings() && channel.settings.hasPsk()) {
             cfgOut.key = Uint8List.fromList(channel.settings.psk);
           }
-          // print('[BluetoothService] readConfig._applyAdminToConfig: Channel info (index: ${channel.index}, role: ${channel.role}) aplicada a cfgOut (ChannelIndex: ${cfgOut.channelIndex}, KeyLength: ${cfgOut.key.length})'); // Verboso
         }
-
         if (isPrimary) {
           primaryChannelCaptured = true;
           if (!primaryChannelLogged) {
@@ -775,19 +881,15 @@ class BluetoothService {
           }
         }
       }
-
       if (message.hasGetModuleConfigResponse() && message.getModuleConfigResponse.hasSerial()) {
         final serial = message.getModuleConfigResponse.serial;
         if (serial.hasMode()) cfgOut.serialOutputMode = serial.mode;
         if (serial.hasBaud()) cfgOut.baudRate = serial.baud;
-        // print('[BluetoothService] readConfig._applyAdminToConfig: SerialConfig aplicada (Mode: ${cfgOut.serialOutputMode}, Baud: ${cfgOut.baudRate})'); // Verboso
       }
-
       if (message.hasGetConfigResponse() && 
           message.getConfigResponse.hasLora() && 
           message.getConfigResponse.lora.hasRegion()) {
         cfgOut.frequencyRegion = message.getConfigResponse.lora.region;
-        // print('[BluetoothService] readConfig._applyAdminToConfig: LoRaConfig (Region: ${cfgOut.frequencyRegion}) aplicada.'); // Verboso
       }
     }
 
@@ -803,102 +905,65 @@ class BluetoothService {
           _wrapAdminToToRadio(msgToSend),
           isComplete: (responses) => responses.any((fr) {
             final adminMsg = _decodeAdminMessage(fr);
-            // print('[BluetoothService] readConfig._requestAndApply.isComplete: Verificando frame para $description. AdminMsg: ${adminMsg != null ? adminMsg.info_.messageName : "null"}'); // Verboso
             return adminMsg != null && matcher(adminMsg);
           }),
-          timeout: _defaultResponseTimeout, // Usar el timeout por defecto para cada solicitud
+          timeout: _defaultResponseTimeout, 
         );
         print('[BluetoothService] readConfig: Respuesta(s) recibida(s) para $description.');
       } on TimeoutException catch (e) {
         print('[BluetoothService] readConfig: Timeout (_defaultResponseTimeout) esperando $description. Error: ${e.message}');
-        return false; // Indica que la solicitud específica falló por timeout
+        _lastErrorMessage = 'Timeout esperando $description.';
+        return false; 
       } catch (e, s) {
         print('[BluetoothService] readConfig: Error durante _sendAndReceive para $description: $e. Stack: $s');
-        return false; // Indica que la solicitud específica falló por otro error
+        _lastErrorMessage = 'Error solicitando $description: ${e.toString()}';
+        return false; 
       }
 
       var matched = false;
       for (final f in frames) {
         final adminMsg = _decodeAdminMessage(f);
-        if (adminMsg == null) {
-          // print('[BluetoothService] readConfig._requestAndApply: Frame ignorado (no es AdminMessage) al procesar respuesta para $description.'); // Verboso
-          continue;
-        }
-        // print('[BluetoothService] readConfig._requestAndApply: Procesando AdminMessage ${adminMsg.info_.messageName} para $description.'); // Verboso
-        
+        if (adminMsg == null) continue;
         _applyAdminToConfig(adminMsg); 
-
-        if (matcher(adminMsg)) {
-          // print('[BluetoothService] readConfig._requestAndApply: Match encontrado para $description con ${adminMsg.info_.messageName}.'); // Verboso
-          matched = true;
-        }
+        if (matcher(adminMsg)) matched = true;
       }
-      if (!matched) {
-          print('[BluetoothService] readConfig: No se encontró un match específico para $description en las respuestas recibidas.');
-      }
+      if (!matched) print('[BluetoothService] readConfig: No se encontró un match específico para $description en las respuestas recibidas.');
       return matched; 
     }
 
     var receivedAnyResponse = false;
-
-    // Solicitar Owner Info
-    final ownerReceived = await _requestAndApply(
-      admin.AdminMessage()..getOwnerRequest = true,
-      (msg) => msg.hasGetOwnerResponse(),
-      'información del propietario (Owner Info)',
-    );
+    final ownerReceived = await _requestAndApply( admin.AdminMessage()..getOwnerRequest = true, (msg) => msg.hasGetOwnerResponse(), 'información del propietario (Owner Info)');
     if (ownerReceived) receivedAnyResponse = true;
 
-    // Solicitar LoRa Config (específicamente para la región)
-    final loraReceived = await _requestAndApply(
-      admin.AdminMessage()..getConfigRequest = admin.AdminMessage_ConfigType.LORA_CONFIG,
-      (msg) => msg.hasGetConfigResponse() && msg.getConfigResponse.hasLora() && msg.getConfigResponse.lora.hasRegion(),
-      'configuración LoRa (para región)',
-    );
+    final loraReceived = await _requestAndApply( admin.AdminMessage()..getConfigRequest = admin.AdminMessage_ConfigType.LORA_CONFIG, (msg) => msg.hasGetConfigResponse() && msg.getConfigResponse.hasLora() && msg.getConfigResponse.lora.hasRegion(), 'configuración LoRa (para región)');
     if (loraReceived) receivedAnyResponse = true;
 
-    // Solicitar Canales
     final indicesToQuery = <int>{};
-    if (cfgOut.channelIndex > 0 && cfgOut.channelIndex <= 8) { 
-      indicesToQuery.add(cfgOut.channelIndex);
-    }
-    if (!primaryChannelCaptured) {
-      indicesToQuery.addAll([0, 1, 2]); 
-    }
+    if (cfgOut.channelIndex > 0 && cfgOut.channelIndex <= 8) indicesToQuery.add(cfgOut.channelIndex);
+    if (!primaryChannelCaptured) indicesToQuery.addAll([0, 1, 2]); 
 
     for (final index in indicesToQuery) {
       if (primaryChannelCaptured) break;
-      final channelReceived = await _requestAndApply(
-        admin.AdminMessage()..getChannelRequest = index + 1,
-        (msg) => msg.hasGetChannelResponse() && msg.getChannelResponse.index == index,
-        'canal con índice $index',
-      );
+      final channelReceived = await _requestAndApply( admin.AdminMessage()..getChannelRequest = index + 1, (msg) => msg.hasGetChannelResponse() && msg.getChannelResponse.index == index, 'canal con índice $index');
       if (channelReceived) receivedAnyResponse = true;
     }
     
     if (!primaryChannelCaptured && cfgOut.key.isEmpty) {
         print('[BluetoothService] readConfig: No se capturó canal primario, intentando consulta explícita por canal 0.');
-        final channelZeroReceived = await _requestAndApply(
-          admin.AdminMessage()..getChannelRequest = 0 + 1,
-              (msg) => msg.hasGetChannelResponse() && msg.getChannelResponse.index == 0,
-          'canal con índice 0 (intento adicional)',
-        );
+        final channelZeroReceived = await _requestAndApply( admin.AdminMessage()..getChannelRequest = 0 + 1, (msg) => msg.hasGetChannelResponse() && msg.getChannelResponse.index == 0, 'canal con índice 0 (intento adicional)');
         if (channelZeroReceived) receivedAnyResponse = true;
     }
 
-    // Solicitar Serial Config
-    final serialReceived = await _requestAndApply(
-      admin.AdminMessage()..getModuleConfigRequest = admin.AdminMessage_ModuleConfigType.SERIAL_CONFIG,
-      (msg) => msg.hasGetModuleConfigResponse() && msg.getModuleConfigResponse.hasSerial(),
-      'configuración del módulo Serial',
-    );
+    final serialReceived = await _requestAndApply( admin.AdminMessage()..getModuleConfigRequest = admin.AdminMessage_ModuleConfigType.SERIAL_CONFIG, (msg) => msg.hasGetModuleConfigResponse() && msg.getModuleConfigResponse.hasSerial(), 'configuración del módulo Serial');
     if (serialReceived) receivedAnyResponse = true;
 
     if (!receivedAnyResponse && cfgOut.longName.isEmpty && cfgOut.key.isEmpty) {
       print('[BluetoothService] readConfig: No se recibió ninguna respuesta válida de configuración del dispositivo.');
+      _lastErrorMessage = 'No se recibió respuesta de configuración del nodo.';
       throw TimeoutException('No se recibió ninguna respuesta de configuración del dispositivo tras múltiples intentos.');
     } else if (!primaryChannelCaptured && cfgOut.key.isEmpty) {
       print('[BluetoothService] readConfig: Advertencia - No se pudo obtener la clave del canal (PSK) principal.');
+       _lastErrorMessage = 'Advertencia: No se pudo obtener PSK del canal.';
     }
 
     print('[BluetoothService] Lectura de configuración completada para el nodo $_myNodeNum. Config leída: ${cfgOut.toString()}');
@@ -909,12 +974,14 @@ class BluetoothService {
   Future<void> writeConfig(NodeConfig cfgIn) async {
     if (_toRadio == null || _fromRadioQueue == null) {
       print('[BluetoothService] writeConfig abortado: características BLE no inicializadas.');
+      _lastErrorMessage = 'Características BLE no disponibles para escribir config.';
       return;
     }
     try {
       await _ensureMyNodeNum();
     } catch (e, s) {
       print('[BluetoothService] writeConfig falló en _ensureMyNodeNum: $e. Stack: $s');
+      _lastErrorMessage = 'Error al obtener NodeNum para escribir config: ${e.toString()}';
       throw StateError('Error al obtener NodeNum para escribir config: ${e.toString()}');
     }
     
@@ -925,64 +992,41 @@ class BluetoothService {
       try {
         await _sendAndReceive(
           _wrapAdminToToRadio(msg),
-          // Para escrituras, a menudo solo nos importa el ACK, que _sendAndReceive ya maneja.
-          // No necesitamos un matcher específico a menos que esperemos una respuesta particular de un Set...
-          // Si el firmware devuelve una respuesta específica a un Set... la lógica de isComplete necesitaría cambiar.
-          // Por ahora, asumimos que el ACK es suficiente para confirmar que el comando fue recibido.
           timeout: _defaultResponseTimeout,
         );
         print("[BluetoothService] writeConfig: Comando enviado y ACK recibido para '$description'.");
       } on TimeoutException catch (e) {
         print("[BluetoothService] writeConfig: Timeout esperando ACK para '$description'. Error: ${e.message}");
+        _lastErrorMessage = "Timeout enviando '$description'";
         throw TimeoutException("Timeout al enviar '$description': ${e.toString()}");
       } catch (e,s) {
         print("[BluetoothService] writeConfig: Error enviando '$description': $e. Stack: $s");
+        _lastErrorMessage = "Error enviando '$description'";
         throw StateError("Error al enviar '$description': ${e.toString()}");
       }
     }
 
     try {
-      // Nombres del nodo
-      final userMsg = mesh.User()
-        ..shortName = cfgIn.shortName
-        ..longName = cfgIn.longName;
+      final userMsg = mesh.User()..shortName = cfgIn.shortName..longName = cfgIn.longName;
       await sendAdminCommand(admin.AdminMessage()..setOwner = userMsg, "SetOwner (Nombres)");
 
-      // Canal (solo primario)
-      final settings = ch.ChannelSettings()
-        ..name = "CH${cfgIn.channelIndex}" // Nombre descriptivo
-        ..psk = cfgIn.key;
-      final channel = ch.Channel()
-        ..index = cfgIn.channelIndex
-        ..role = ch.Channel_Role.PRIMARY 
-        ..settings = settings;
+      final settings = ch.ChannelSettings()..name = "CH${cfgIn.channelIndex}"..psk = cfgIn.key;
+      final channel = ch.Channel()..index = cfgIn.channelIndex..role = ch.Channel_Role.PRIMARY..settings = settings;
       await sendAdminCommand(admin.AdminMessage()..setChannel = channel, "SetChannel (Índice ${cfgIn.channelIndex})");
 
-      // Configuración Serial
-      final serialCfg = mod.ModuleConfig_SerialConfig()
-        ..enabled = true // Asumimos habilitado si se configura
-        ..baud = cfgIn.baudRate
-        ..mode = _serialModeFromString(cfgIn.serialModeAsString); // Usar la función helper de la clase
+      final serialCfg = mod.ModuleConfig_SerialConfig()..enabled = true..baud = cfgIn.baudRate..mode = _serialModeFromString(cfgIn.serialModeAsString);
       final moduleCfg = mod.ModuleConfig()..serial = serialCfg;
       await sendAdminCommand(admin.AdminMessage()..setModuleConfig = moduleCfg, "SetModuleConfig (Serial)");
 
-      // Configuración LoRa (Región)
-      final lora = cfg.Config_LoRaConfig()
-        ..region = _regionFromString(cfgIn.frequencyRegionAsString); // Usar la función helper de la clase
+      final lora = cfg.Config_LoRaConfig()..region = _regionFromString(cfgIn.frequencyRegionAsString);
       final configMsg = cfg.Config()..lora = lora;
       await sendAdminCommand(admin.AdminMessage()..setConfig = configMsg, "SetConfig (LoRa)");
       
       print('[BluetoothService] Escritura de configuración: todos los comandos enviados al nodo $_myNodeNum.');
-      // Considerar un "commit" o "reboot" si el firmware lo soporta/requiere tras cambios.
-      // await sendAdminCommand(admin.AdminMessage()..commitEditSettings = true, "CommitEditSettings");
-      // await sendAdminCommand(admin.AdminMessage()..rebootSeconds = 5, "RebootNode");
 
     } catch (e) {
-      // Los errores específicos ya se loguearon en sendAdminCommand
-      // Aquí simplemente relanzamos o manejamos un error general de la escritura.
       print('[BluetoothService] Error durante el proceso general de writeConfig: $e');
-      // No es necesario relanzar si queremos que la UI maneje el error (_lastErrorMessage style)
-      // pero para consistencia con readConfig y _ensureMyNodeNum, relanzar puede ser mejor.
+      if (_lastErrorMessage == null) _lastErrorMessage = 'Error general durante writeConfig';
       throw StateError('Error durante la escritura de la configuración: ${e.toString()}');
     }
   }
