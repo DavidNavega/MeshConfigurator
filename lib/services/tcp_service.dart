@@ -4,13 +4,13 @@ import 'package:http/http.dart' as http;
 
 import '../models/node_config.dart';
 
-import 'package:Buoys_configurator/proto/meshtastic/mesh.pb.dart' as mesh;
-import 'package:Buoys_configurator/proto/meshtastic/admin.pb.dart' as admin;
-import 'package:Buoys_configurator/proto/meshtastic/channel.pb.dart' as ch;
-import 'package:Buoys_configurator/proto/meshtastic/module_config.pb.dart' as mod;
-import 'package:Buoys_configurator/proto/meshtastic/config.pb.dart' as cfg;
-import 'package:Buoys_configurator/proto/meshtastic/portnums.pbenum.dart' as port;
-import 'package:Buoys_configurator/services/routing_error_utils.dart';
+import 'package:buoys_configurator/proto/meshtastic/mesh.pb.dart' as mesh;
+import 'package:buoys_configurator/proto/meshtastic/admin.pb.dart' as admin;
+import 'package:buoys_configurator/proto/meshtastic/channel.pb.dart' as ch;
+import 'package:buoys_configurator/proto/meshtastic/module_config.pb.dart' as mod;
+import 'package:buoys_configurator/proto/meshtastic/config.pb.dart' as cfg;
+import 'package:buoys_configurator/proto/meshtastic/portnums.pbenum.dart' as port;
+import 'package:buoys_configurator/services/routing_error_utils.dart';
 
 class TcpHttpService {
   Uri? _base;
@@ -435,3 +435,4 @@ class TcpHttpService {
     }
   }
 }
+

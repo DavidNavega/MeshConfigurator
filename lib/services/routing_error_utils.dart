@@ -1,6 +1,6 @@
-import 'package:Buoys_configurator/exceptions/routing_error_exception.dart';
-import 'package:Buoys_configurator/proto/meshtastic/mesh.pb.dart' as mesh;
-import 'package:Buoys_configurator/proto/meshtastic/portnums.pbenum.dart' as port;
+import 'package:buoys_configurator/exceptions/routing_error_exception.dart';
+import 'package:buoys_configurator/proto/meshtastic/mesh.pb.dart' as mesh;
+import 'package:buoys_configurator/proto/meshtastic/portnums.pbenum.dart' as port;
 
 RoutingErrorException? routingErrorFromFrame(mesh.FromRadio frame) {
   if (!frame.hasPacket()) return null;

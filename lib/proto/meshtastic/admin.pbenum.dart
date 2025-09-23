@@ -14,7 +14,7 @@ import 'dart:core' as $core;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 ///
-///  TODO: REPLACE
+///  Configuration categories available through admin config requests.
 class AdminMessage_ConfigType extends $pb.ProtobufEnum {
   static const AdminMessage_ConfigType DEVICE_CONFIG = AdminMessage_ConfigType._(0, _omitEnumNames ? '' : 'DEVICE_CONFIG');
   static const AdminMessage_ConfigType POSITION_CONFIG = AdminMessage_ConfigType._(1, _omitEnumNames ? '' : 'POSITION_CONFIG');
@@ -102,3 +102,5 @@ class AdminMessage_BackupLocation extends $pb.ProtobufEnum {
 
 
 const _omitEnumNames = $core.bool.fromEnvironment('protobuf.omit_enum_names');
+
+

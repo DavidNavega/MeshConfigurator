@@ -1,4 +1,4 @@
-import 'package:Buoys_configurator/proto/meshtastic/mesh.pb.dart' as mesh;
+import 'package:buoys_configurator/proto/meshtastic/mesh.pb.dart' as mesh;
 
 class RoutingErrorException implements Exception {
   RoutingErrorException(this.reason, {this.packetId});

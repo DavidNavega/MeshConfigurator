@@ -260,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<int>(
-                        value: p.cfg.channelIndex,
+                        initialValue: p.cfg.channelIndex,
                         items: channelOptions
                             .map((i) => DropdownMenuItem(
                                 value: i,
@@ -289,7 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        value: p.serialModeDisplay,
+                        initialValue: p.serialModeDisplay,
                         items: const [
                           DropdownMenuItem(
                               value: 'DEFAULT',
@@ -319,7 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        value: p.baudDisplay,
+                        initialValue: p.baudDisplay,
                         items: baudOptions
                             .map(
                               (value) => DropdownMenuItem(
@@ -336,7 +336,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        value: p.regionDisplay,
+                        initialValue: p.regionDisplay,
                         items: const [
                           DropdownMenuItem(
                               value: '433',

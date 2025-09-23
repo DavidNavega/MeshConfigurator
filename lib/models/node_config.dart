@@ -1,6 +1,6 @@
 import 'dart:typed_data';
-import 'package:protobuf/protobuf.dart' as $pb;
-import '../proto/meshtastic/mesh.pb.dart' as pb;
+// import 'package:protobuf/protobuf.dart' as $pb;
+// import '../proto/meshtastic/mesh.pb.dart' as pb;
 import '../proto/meshtastic/module_config.pbenum.dart' as pb;
 import '../proto/meshtastic/config.pbenum.dart' as pb;
 
