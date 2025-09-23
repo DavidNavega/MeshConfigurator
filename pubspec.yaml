@@ -1,4 +1,4 @@
-name: buoys_configurator
+﻿name: buoys_configurator
 description: App Flutter para configurar Boyas Navega (BLE / TCP / USB) con Protobuf.
 publish_to: 'none'
 version: 1.2.0+3
@@ -16,7 +16,10 @@ dependencies:
   usb_serial: ^0.5.2
   http: ^1.2.2
   permission_handler: ^12.0.1
+  logging: ^1.2.0
+  async: ^2.11.0
   protobuf: ^3.1.0 # <- NO subir a 4.x.x de momento
+  fixnum: ^1.1.0
 
 dev_dependencies:
   protoc_plugin: ^21.1.2
