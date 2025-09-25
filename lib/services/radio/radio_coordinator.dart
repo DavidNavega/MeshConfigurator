@@ -264,7 +264,6 @@ class RadioCoordinator {
   Future<void> _startConfigSession() async {
     final to = mesh.ToRadio()..wantConfigId = _nextNonce();
     await _sendToRadio(to);
-    _startHeartbeats();
   }
 
   void _startHeartbeats() {

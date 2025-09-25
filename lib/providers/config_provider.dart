@@ -42,15 +42,17 @@ class ConfigProvider extends ChangeNotifier {
   String get baudDisplay => cfg.baudAsString;
   String get regionDisplay => cfg.frequencyRegionAsString;
 
-  bool get hasTcpFixed => _fixedTcpUrl != null;
+  bool get hasFixedTcpEndpoint => _fixedTcpUrl != null;
+  @Deprecated('Usa hasFixedTcpEndpoint')
+  bool get hasTcpFixed => hasFixedTcpEndpoint;
   String? get fixedTcpUrl => _fixedTcpUrl;
 
-  Future<void> connectBle() => _connect(RadioInterfaceType.bluetooth);
-  Future<void> connectUsb() => _connect(RadioInterfaceType.usb);
+  Future<void> connectBle() => _connectInterface(RadioInterfaceType.bluetooth);
+  Future<void> connectUsb() => _connectInterface(RadioInterfaceType.usb);
 
   Future<void> connectTcp(String baseUrl) async {
     if (busy) return;
-    late final _TcpEndpoint endpoint;
+    final _TcpEndpoint endpoint;
     try {
       endpoint = _parseTcpEndpoint(baseUrl);
     } catch (e) {
@@ -58,7 +60,7 @@ class ConfigProvider extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    await _connect(
+    await _connectInterface(
       RadioInterfaceType.tcp,
       host: endpoint.host,
       port: endpoint.port,
@@ -177,7 +179,8 @@ class ConfigProvider extends ChangeNotifier {
     super.dispose();
   }
 
-  Future<void> _connect(RadioInterfaceType target, {String? host, int? port}) async {
+  Future<void> _connectInterface(RadioInterfaceType target,
+      {String? host, int? port}) async {
     if (busy) return;
 
     _connectingNewInterface = true;

@@ -148,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 backgroundColor: Colors.red,
                                 foregroundColor: Colors.white),
                           ),
-                          if (p.hasTcpFixed)
+                          if (p.hasFixedTcpEndpoint)
                             ElevatedButton.icon(
                               onPressed: p.busy ? null : () async {
                                 await p.connectTcp(p.fixedTcpUrl ?? '');

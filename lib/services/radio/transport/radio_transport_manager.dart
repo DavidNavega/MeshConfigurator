@@ -10,6 +10,10 @@ import 'usb_transport.dart';
 
 enum RadioInterfaceType { none, bluetooth, usb, tcp }
 
+// Compatibilidad temporal con código previo que referenciaba ActiveInterface.
+@Deprecated('Usa RadioInterfaceType en su lugar')
+typedef ActiveInterface = RadioInterfaceType;
+
 enum RadioConnectionState { idle, connecting, connected, reconnecting, disconnected }
 
 class RadioTransportStatus {
