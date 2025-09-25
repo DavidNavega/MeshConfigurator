@@ -8,7 +8,8 @@ import '../../stream_framing.dart';
 
 /// USB: el puerto entrega chunks arbitrarios; aquí usamos el FrameAccumulator
 /// para extraer frames completos de `FromRadio` y publicarlos en [inbound].
-/// Para enviar, RadioCoordinator ya pasa bytes enmarcados (StreamFraming.frame).
+/// Para enviar, este transporte se encarga de aplicar el framing
+/// `StreamFraming.frame` antes de escribir en el puerto serie.
 class UsbTransport implements RadioTransport {
   static final Logger _log = Logger('UsbTransport');
 
@@ -76,7 +77,8 @@ class UsbTransport implements RadioTransport {
   Future<void> send(Uint8List data) async {
     final p = _port;
     if (p == null) throw StateError('USB no conectado');
-    await p.write(data);
+    final framed = StreamFraming.frame(data);
+    await p.write(framed);
   }
 }
 

@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:typed_data';
+
 import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fbp;
 import 'package:logging/logging.dart';
 
-import 'radio_transport.dart';
 import '../../ble_uuids.dart';
+import 'radio_transport.dart';
 
 /// BLE: notifica `FromRadio` ya completo por la característica fromRadio.
 /// El envío se hace escribiendo en toRadio. No hay framing adicional en BLE.
@@ -13,9 +14,10 @@ class BluetoothTransport implements RadioTransport {
 
   fbp.BluetoothDevice? _dev;
   fbp.BluetoothCharacteristic? _toRadio;
-  StreamSubscription<List<int>>? _fromRadioSub;
+  StreamSubscription<Uint8List>? _fromRadioSub;
 
   final _inboundCtrl = StreamController<Uint8List>.broadcast();
+
   @override
   Stream<Uint8List> get inbound => _inboundCtrl.stream;
 
@@ -33,15 +35,20 @@ class BluetoothTransport implements RadioTransport {
     await Future.delayed(const Duration(seconds: 3));
     await fbp.FlutterBluePlus.stopScan();
 
-    // Toma cualquier dispositivo conectado o visto con el servicio
+    // Toma cualquier dispositivo conectado o visto recientemente
     final known = await fbp.FlutterBluePlus.connectedDevices;
-    fbp.BluetoothDevice? dev = known.firstWhere(
-          (_) => true,
-      orElse: () => null as fbp.BluetoothDevice,
-    );
-    dev ??= (await fbp.FlutterBluePlus.systemDevices)
-        .cast<fbp.BluetoothDevice?>()
-        .firstWhere((_) => true, orElse: () => null);
+    fbp.BluetoothDevice? dev;
+    if (known.isNotEmpty) {
+      dev = known.first;
+    } else {
+      final system = await fbp.FlutterBluePlus.systemDevices;
+      for (final candidate in system) {
+        if (candidate is fbp.BluetoothDevice) {
+          dev = candidate;
+          break;
+        }
+      }
+    }
 
     if (dev == null) return false;
     _dev = dev;
