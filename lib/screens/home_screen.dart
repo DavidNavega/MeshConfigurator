@@ -148,10 +148,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 backgroundColor: Colors.red,
                                 foregroundColor: Colors.white),
                           ),
-                          if (p.hasTcpFixed)
+                          if (p.hasFixedTcpEndpoint)
                             ElevatedButton.icon(
                               onPressed: p.busy ? null : () async {
-                                await p.connectTcp('http://192.168.1.4:4403');
+                                await p.connectTcp(p.fixedTcpUrl ?? '');
                               },
                               icon: const Icon(Icons.wifi),
                               label: const Text('TCP Fijo'),

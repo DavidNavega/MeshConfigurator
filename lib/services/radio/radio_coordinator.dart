@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:logging/logging.dart';
 
 import 'transport/radio_transport.dart';
-import '../stream_framing.dart';
 
 import '../../proto/meshtastic/mesh.pb.dart' as mesh;
 import '../../proto/meshtastic/admin.pb.dart' as admin;
@@ -22,6 +21,7 @@ class RadioCoordinator {
   static final Logger _log = Logger('RadioCoordinator');
 
   final RadioTransport _transport;
+  final void Function(Object? error)? _onTransportClosed;
 
   // stream de frames FromRadio ya decodificados (a partir de bytes entrantes)
   final _fromRadioCtrl = StreamController<mesh.FromRadio>.broadcast();
@@ -43,13 +43,25 @@ class RadioCoordinator {
   static const _tAck = Duration(seconds: 5);
   static const _heartbeatEvery = Duration(minutes: 5);
 
-  RadioCoordinator(this._transport);
+  RadioCoordinator(this._transport, {void Function(Object? error)? onTransportClosed})
+      : _onTransportClosed = onTransportClosed;
 
   int? get myNodeNum => _myNodeNum;
 
   Future<bool> connect() async {
-    final ok = await _transport.connect();
-    if (!ok) return false;
+    await _rxSub?.cancel();
+    _rxSub = null;
+    _clearSessionState();
+
+    try {
+      final ok = await _transport.connect();
+      if (!ok) {
+        return false;
+      }
+    } catch (e, st) {
+      _log.warning('Error conectando transporte', e, st);
+      return false;
+    }
 
     // Suscribe bytes entrantes -> FromRadio
     _rxSub = _transport.inbound.listen((bytes) {
@@ -62,13 +74,22 @@ class RadioCoordinator {
       }
     }, onError: (e, st) {
       _fromRadioCtrl.addError(e, st);
+      _handleTransportClosed(e);
     }, onDone: () {
-      _fromRadioCtrl.addError(StateError('Transport cerrado'));
+      final err = StateError('Transport cerrado');
+      _fromRadioCtrl.addError(err);
+      _handleTransportClosed(err);
     }, cancelOnError: true);
 
     // Handshake: want_config_id + esperar MyInfo
-    await _startConfigSession();
-    await _ensureMyNodeNum();
+    try {
+      await _startConfigSession();
+      await _ensureMyNodeNum();
+    } catch (e, st) {
+      _log.warning('Error durante handshake inicial', e, st);
+      await disconnect();
+      return false;
+    }
 
     _sessionReady = true;
     _startHeartbeats();
@@ -76,15 +97,14 @@ class RadioCoordinator {
   }
 
   Future<void> disconnect() async {
-    _sessionReady = false;
-    _heartbeatTimer?.cancel();
-    _heartbeatTimer = null;
+    _clearSessionState();
     await _rxSub?.cancel();
     _rxSub = null;
-    await _transport.disconnect();
-
-    _myNodeNum = null;
-    _sessionPasskey = Uint8List(0);
+    try {
+      await _transport.disconnect();
+    } catch (e, st) {
+      _log.fine('Error desconectando transporte: $e', e, st);
+    }
 
     // cerrar stream si quieres terminar ciclo de vida:
     // await _fromRadioCtrl.close();
@@ -244,7 +264,6 @@ class RadioCoordinator {
   Future<void> _startConfigSession() async {
     final to = mesh.ToRadio()..wantConfigId = _nextNonce();
     await _sendToRadio(to);
-    _startHeartbeats();
   }
 
   void _startHeartbeats() {
@@ -326,25 +345,8 @@ class RadioCoordinator {
   }
 
   Future<void> _sendToRadio(mesh.ToRadio to) async {
-    final bytes = to.writeToBuffer();
-    // IMPORTANTE:
-    // - BLE: ToRadio se envía tal cual, sin framing -> el transport BLE envía "bytes" directo.
-    // - USB/TCP: requiere framing SLIP/COBS -> aquí siempre enmarcamos; BLE ignora (pero BLE no debe enmarcar).
-    //
-    // Para resolver esto de forma uniforme: en los transports *no BLE*
-    // esperamos bytes ya enmarcados; en BLE esperamos bytes "puros".
-    //
-    // Solución simple:
-    //  - Si el transport es USB (o TCP), usamos StreamFraming.frame
-    //  - Si es BLE, enviamos bytes crudos.
-    //
-    // Detectamos por tipo:
-    if (_transport.runtimeType.toString().toLowerCase().contains('usb') ||
-        _transport.runtimeType.toString().toLowerCase().contains('tcp')) {
-      await _transport.send(StreamFraming.frame(bytes));
-    } else {
-      await _transport.send(Uint8List.fromList(bytes));
-    }
+    final bytes = Uint8List.fromList(to.writeToBuffer());
+    await _transport.send(bytes);
   }
 
   mesh.ToRadio _wrapAdmin(admin.AdminMessage msg) {
@@ -400,6 +402,34 @@ class RadioCoordinator {
     if (fr.hasMyInfo() && fr.myInfo.hasMyNodeNum()) {
       _myNodeNum = fr.myInfo.myNodeNum;
     }
+  }
+
+  void _handleTransportClosed(Object? error) {
+    _clearSessionState();
+    try {
+      _transport.disconnect().catchError((e, st) {
+        _log.fine('Error cerrando transporte tras desconexión: $e', e, st);
+      });
+    } catch (e, st) {
+      _log.fine('Error cerrando transporte tras desconexión: $e', e, st);
+    }
+    _onTransportClosed?.call(error);
+  }
+
+  void _clearSessionState() {
+    _sessionReady = false;
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
+
+    final pending = _pending;
+    _pending = null;
+    if (pending != null && !pending.isCompleted) {
+      pending.completeError(StateError('Sesión reiniciada'));
+    }
+
+    _myNodeNum = null;
+    _sessionPasskey = Uint8List(0);
+    _nonce = 0;
   }
 
   int _nextNonce() {

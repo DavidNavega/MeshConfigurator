@@ -3,13 +3,14 @@ import 'dart:typed_data';
 
 /// Contrato común para todos los transportes físicos (BLE, USB, TCP…).
 /// Deben:
-/// - exponer [inbound] con frames completos de `mesh.FromRadio` (bytes ya “delimitados”)
-/// - implementar connect/disconnect
-/// - implementar send(Uint8List framedToRadio) con bytes ya enmarcados (StreamFraming.frame)
-
+/// - exponer [inbound] con payloads `FromRadio` completos (sin cabecera de
+///   framing) como `Uint8List`.
+/// - implementar connect/disconnect.
+/// - implementar [send] recibiendo el `ToRadio` en bruto; si el medio requiere
+///   framing adicional (USB/TCP) se aplica dentro del propio transporte.
 abstract class RadioTransport {
-  Stream<List<int>> get inbound;
+  Stream<Uint8List> get inbound;
   Future<bool> connect();
   Future<void> disconnect();
-  Future<void> send(List<int> data);
+  Future<void> send(Uint8List data);
 }
