@@ -86,7 +86,7 @@ class BluetoothService {
 
       if (permissionsToRequest.isEmpty) {
         _log.info(
-            '[BluetoothService] No se requieren permisos de tiempo de ejecuciÃƒÆ’Ã‚Â³n especÃƒÆ’Ã‚Â­ficos para esta versiÃƒÆ’Ã‚Â³n de Android.');
+            '[BluetoothService] No se requieren permisos de tiempo de ejecucion especificos para esta version de Android.');
         return true;
       }
 
@@ -107,7 +107,7 @@ class BluetoothService {
 
           if (status.isPermanentlyDenied) {
             _lastErrorMessage =
-                'Permiso $permissionName denegado permanentemente. Por favor, actÃƒÆ’Ã‚Â­valo en los ajustes de la aplicaciÃƒÆ’Ã‚Â³n.';
+                'Permiso $permissionName denegado permanentemente. Por favor, activalo en los ajustes de la aplicacion.';
             // AquÃƒÆ’Ã‚Â­ podrÃƒÆ’Ã‚Â­as llamar a openAppSettings(); si quieres guiar al usuario.
           }
         } else {
@@ -1277,7 +1277,7 @@ class BluetoothService {
     }
 
     _log.info(
-        '[BluetoothService] Lectura de configuraciÃƒÆ’Ã‚Â³n completada para el nodo $_myNodeNum. Config leÃƒÆ’Ã‚Â­da: ${cfgOut.toString()}');
+        '[BluetoothService] Lectura de configuracion completada para el nodo $_myNodeNum. Config leÃƒÆ’Ã‚Â­da: ${cfgOut.toString()}');
     return cfgOut;
   }
 

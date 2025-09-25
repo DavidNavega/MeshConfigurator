@@ -1,161 +1,171 @@
-import 'dart:async';
-
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 
 import '../models/node_config.dart';
-import '../services/bluetooth_service.dart';
-import '../services/tcp_service.dart';
-import '../services/usb_service.dart';
+import '../services/radio/radio_coordinator.dart';
+import '../services/radio/transport/tcp_transport.dart';
 
 enum ActiveInterface { none, bluetooth, usb, tcp }
 
 class ConfigProvider extends ChangeNotifier {
+  final RadioCoordinator bleCoordinator;
+  final RadioCoordinator usbCoordinator;
+  RadioCoordinator? tcpCoordinator;
+
   ConfigProvider({
-    BluetoothService? bluetoothService,
-    UsbService? usbService,
-    TcpHttpService? tcpService,
-  })  : _bluetoothService = bluetoothService ?? BluetoothService(),
-        _usbService = usbService ?? UsbService(),
-        _tcpService = tcpService ?? TcpHttpService() {
+    required this.bleCoordinator,
+    required this.usbCoordinator,
+  }) {
     _keyText = NodeConfig.keyToDisplay(cfg.key);
     _keyError = cfg.keyError;
   }
 
-  final BluetoothService _bluetoothService;
-  final UsbService _usbService;
-  final TcpHttpService _tcpService;
+  ActiveInterface _active = ActiveInterface.none;
+  ActiveInterface get activeInterface => _active;
 
   NodeConfig cfg = NodeConfig();
   bool busy = false;
   String status = 'Desconectado';
 
-  ActiveInterface _activeInterface = ActiveInterface.none;
-  ActiveInterface get activeInterface => _activeInterface;
-  bool get isConnected => _activeInterface != ActiveInterface.none;
-
   late String _keyText;
   String? _keyError;
-  int? _nodeNum;
-
-  // ✅ Getters para la UI
   String get keyDisplay => _keyText;
-  String? get keyError {
-    final parsed = NodeConfig.parseKeyText(_keyText);
-    if (parsed == null) {
-      return "Clave inválida";
-    }
-    return NodeConfig.isValidKeyLength(parsed) ? null : "Clave inválida";
-  }
-  int? get nodeNum => _nodeNum;
+  String? get keyError => _keyError;
+
   String get serialModeDisplay => cfg.serialModeAsString;
   String get baudDisplay => cfg.baudAsString;
   String get regionDisplay => cfg.frequencyRegionAsString;
 
+  // ---------------- Conexiones ----------------
 
-  // ✅ Métodos de conexión
-  Future<void> connectBle() async {
+  Future<void> connectBle() => _connect(ActiveInterface.bluetooth);
+  Future<void> connectUsb() => _connect(ActiveInterface.usb);
+
+  Future<void> connectTcp(String baseUrl) async {
     if (busy) return;
-
     busy = true;
-    status = "Conectando por Bluetooth...";
+    status = 'Conectando TCP...';
     notifyListeners();
 
     await _disconnectActive();
-    const interface = ActiveInterface.bluetooth;
 
     try {
-      final connected = await _bluetoothService.connectAndInit();
-      if (!connected) {
-        status = 'No se pudo conectar por Bluetooth';
-        await _disconnectInterface(interface);
+      // parse host:port desde la URL
+      final uri = Uri.tryParse(baseUrl.trim());
+      final host = uri?.host.isNotEmpty == true ? uri!.host : baseUrl.trim();
+      final port = uri?.hasPort == true
+          ? uri!.port
+          : (uri?.scheme == 'https'
+          ? 443
+          : (uri?.scheme == 'http' ? 80 : 4403));
+
+      tcpCoordinator = RadioCoordinator(TcpTransport(host, port: port));
+
+      final ok = await tcpCoordinator!.connect();
+      if (!ok) {
+        status = 'No se pudo conectar TCP';
         return;
       }
-
-      _activeInterface = interface;
-      status = 'Conectado por Bluetooth. Leyendo configuración...';
+      _active = ActiveInterface.tcp;
+      status = 'Conectado TCP. Leyendo configuración...';
       notifyListeners();
 
-      final newCfg = await _readConfigFor(interface);
+      final newCfg = await tcpCoordinator!.readConfig();
       _applyConfig(newCfg);
-      status = 'Conectado por Bluetooth';
-    } catch (error) {
-      status = 'Error de Bluetooth: ${_errorDescription(error)}';
-      await _disconnectInterface(interface);
+
+      status = 'Conectado TCP';
+    } catch (e) {
+      status = 'Error conectando TCP: $e';
+      _active = ActiveInterface.none;
     } finally {
       busy = false;
       notifyListeners();
     }
   }
 
-  Future<void> connectUsb() async {
-    if (busy) return;
+  Future<void> disconnect() async => _disconnectActive();
 
-    busy = true;
-    status = "Conectando por USB...";
+  Future<void> _disconnectActive() async {
+    switch (_active) {
+      case ActiveInterface.bluetooth:
+        await bleCoordinator.disconnect();
+        break;
+      case ActiveInterface.usb:
+        await usbCoordinator.disconnect();
+        break;
+      case ActiveInterface.tcp:
+        await tcpCoordinator?.disconnect();
+        tcpCoordinator = null;
+        break;
+      case ActiveInterface.none:
+        break;
+    }
+    _active = ActiveInterface.none;
+    status = 'Desconectado';
     notifyListeners();
-    await _disconnectActive();
-    const interface = ActiveInterface.usb;
+  }
 
+  RadioCoordinator _coordinatorFor(ActiveInterface t) {
+    switch (t) {
+      case ActiveInterface.bluetooth:
+        return bleCoordinator;
+      case ActiveInterface.usb:
+        return usbCoordinator;
+      case ActiveInterface.tcp:
+        return tcpCoordinator!;
+      case ActiveInterface.none:
+        throw StateError('No hay transporte activo');
+    }
+  }
+
+  // ---------------- Lectura/Escritura ----------------
+
+  Future<void> readConfig() async {
+    if (_active == ActiveInterface.none || busy) return;
+    busy = true;
+    status = 'Leyendo configuración...';
+    notifyListeners();
     try {
-      final connected = await _usbService.connect();
-      if (!connected) {
-        status =
-            _usbService.lastErrorMessage ?? 'No se pudo conectar por USB';
-        await _disconnectInterface(interface);
-        return;
-      }
-
-      _activeInterface = interface;
-      status = 'Conectado por USB. Leyendo configuración...';
-      notifyListeners();
-
-      final newCfg = await _readConfigFor(interface);
-      _applyConfig(newCfg);
-      status = 'Conectado por USB';
-    } catch (error) {
-      status = 'Error de USB: ${_errorDescription(error)}';
-      await _disconnectInterface(interface);
+      final cfgNew = await _coordinatorFor(_active).readConfig();
+      _applyConfig(cfgNew);
+      status = 'Configuración leída';
+    } catch (e) {
+      status = 'Error leyendo configuración: $e';
     } finally {
       busy = false;
       notifyListeners();
     }
   }
 
-  Future<void> connectTcp(String url) async {
-    final trimmed = url.trim();
-    if (trimmed.isEmpty) {
-      status = 'Debes ingresar una URL válida';
+  Future<void> writeConfig() async {
+    if (_active == ActiveInterface.none || busy) return;
+
+    final parsed = NodeConfig.parseKeyText(_keyText);
+    if (parsed == null || !NodeConfig.isValidKeyLength(parsed)) {
+      _keyError = 'Clave inválida (usa 0, 1, 16 o 32 bytes)';
       notifyListeners();
       return;
     }
-    if (busy) return;
+    cfg.key = Uint8List.fromList(parsed);
+    _keyText = NodeConfig.keyToDisplay(cfg.key);
+    _keyError = null;
 
     busy = true;
-    status = "Conectando a $trimmed ...";
+    status = 'Enviando configuración...';
     notifyListeners();
-    await _disconnectActive();
-    const interface = ActiveInterface.tcp;
-
     try {
-      _tcpService.updateBaseUrl(trimmed);
-      _activeInterface = interface;
-
-      status = 'Conectado a $trimmed. Leyendo configuración...';
-      notifyListeners();
-
-      final newCfg = await _readConfigFor(interface);
-      _applyConfig(newCfg);
-      status = 'Conectado a $trimmed';
-    } catch (error) {
-      status = 'Error TCP/HTTP: ${_errorDescription(error)}';
-      await _disconnectInterface(interface);
+      await _coordinatorFor(_active).writeConfig(cfg);
+      status = 'Configuración enviada';
+    } catch (e) {
+      status = 'Error enviando configuración: $e';
     } finally {
       busy = false;
       notifyListeners();
     }
   }
 
-  // ---- Métodos de configuración ----
+  // ---------------- Setters para la UI ----------------
+
   void setNames(String shortName, String longName) {
     cfg.shortName = shortName;
     cfg.longName = longName;
@@ -168,16 +178,11 @@ class ConfigProvider extends ChangeNotifier {
   }
 
   void setKeyText(String text) {
+    _keyText = text;
     final parsed = NodeConfig.parseKeyText(text);
-    if (parsed == null) {
-      _keyText = text;
-      _keyError = 'Formato de clave inválido';
-    } else if (!NodeConfig.isValidKeyLength(parsed)) {
-      _keyText = text;
+    if (parsed == null || !NodeConfig.isValidKeyLength(parsed)) {
       _keyError = 'Clave inválida (usa 0, 1, 16 o 32 bytes)';
     } else {
-      cfg.key = Uint8List.fromList(parsed);
-      _keyText = NodeConfig.keyToDisplay(cfg.key);
       _keyError = null;
     }
     notifyListeners();
@@ -198,95 +203,7 @@ class ConfigProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> readConfig() async {
-    final interface = _activeInterface;
-    if (interface == ActiveInterface.none) {
-      status = 'No hay una conexión activa';
-      notifyListeners();
-      return;
-    }
-    if (busy) return;
-    busy = true;
-    status = "Leyendo configuración...";
-    notifyListeners();
-    try {
-      final newCfg = await _readConfigFor(interface);
-      _applyConfig(newCfg);
-      status = 'Configuración leída (${_interfaceLabel(interface)})';
-    } catch (error) {
-      status =
-      'Error al leer configuración: ${_errorDescription(error)}';
-      await _disconnectInterface(interface);
-    } finally {
-      busy = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> writeConfig() async {
-    final interface = _activeInterface;
-    if (interface == ActiveInterface.none) {
-      status = 'No hay una conexión activa';
-      notifyListeners();
-      return;
-    }
-    if (_keyError != null) {
-      status = _keyError ?? 'Clave inválida';
-      notifyListeners();
-      return;
-    }
-    if (busy) return;
-
-    busy = true;
-    status = "Enviando configuración...";
-    notifyListeners();
-    try {
-      switch (interface) {
-        case ActiveInterface.bluetooth:
-          await _bluetoothService.writeConfig(cfg);
-          break;
-        case ActiveInterface.usb:
-          await _usbService.writeConfig(cfg);
-          break;
-        case ActiveInterface.tcp:
-          await _tcpService.writeConfig(cfg);
-          break;
-        case ActiveInterface.none:
-          break;
-      }
-      _updateNodeNumFromService(interface);
-      status = 'Configuración enviada (${_interfaceLabel(interface)})';
-    } catch (error) {
-      status =
-      'Error al enviar configuración: ${_errorDescription(error)}';
-    } finally {
-      busy = false;
-      notifyListeners();
-    }
-  }
-
-  Future<NodeConfig> _readConfigFor(ActiveInterface interface) async {
-    NodeConfig? newCfg;
-    switch (interface) {
-      case ActiveInterface.bluetooth:
-        newCfg = await _bluetoothService.readConfig();
-        break;
-      case ActiveInterface.usb:
-        newCfg = await _usbService.readConfig();
-        break;
-      case ActiveInterface.tcp:
-        newCfg = await _tcpService.readConfig();
-        break;
-      case ActiveInterface.none:
-        break;
-    }
-
-    if (newCfg == null) {
-      throw StateError('No se pudo obtener la configuración del dispositivo');
-    }
-    _updateNodeNumFromService(interface);
-    return newCfg;
-  }
+  // ---------------- Helpers ----------------
 
   void _applyConfig(NodeConfig newCfg) {
     cfg
@@ -301,78 +218,6 @@ class ConfigProvider extends ChangeNotifier {
     _keyText = NodeConfig.keyToDisplay(cfg.key);
     _keyError = cfg.keyError;
   }
-
-  Future<void> _disconnectActive() {
-    return _disconnectInterface(_activeInterface);
-  }
-
-  Future<void> _disconnectInterface(ActiveInterface interface) async {
-    switch (interface) {
-      case ActiveInterface.bluetooth:
-        await _bluetoothService.disconnect();
-        break;
-      case ActiveInterface.usb:
-        await _usbService.disconnect();
-        break;
-      case ActiveInterface.tcp:
-        _tcpService.clearBaseUrl();
-        break;
-      case ActiveInterface.none:
-        return;
-    }
-    if (_activeInterface == interface) {
-      _activeInterface = ActiveInterface.none;
-    }
-  }
-
-  void _updateNodeNumFromService(ActiveInterface interface) {
-    final nodeNum = _nodeNumFor(interface);
-    if (nodeNum != null) {
-      _synchronizeNodeNum(nodeNum);
-    }
-  }
-
-  int? _nodeNumFor(ActiveInterface interface) {
-    switch (interface) {
-      case ActiveInterface.bluetooth:
-        return _bluetoothService.myNodeNum;
-      case ActiveInterface.usb:
-        return _usbService.myNodeNum;
-      case ActiveInterface.tcp:
-        return _tcpService.myNodeNum;
-      case ActiveInterface.none:
-        return _nodeNum;
-    }
-  }
-
-  void _synchronizeNodeNum(int nodeNum) {
-    _nodeNum = nodeNum;
-    _bluetoothService.myNodeNum = nodeNum;
-    _usbService.myNodeNum = nodeNum;
-    _tcpService.myNodeNum = nodeNum;
-  }
-
-  String _interfaceLabel(ActiveInterface interface) {
-    switch (interface) {
-      case ActiveInterface.bluetooth:
-        return 'Bluetooth';
-      case ActiveInterface.usb:
-        return 'USB';
-      case ActiveInterface.tcp:
-        return 'TCP/HTTP';
-      case ActiveInterface.none:
-        return 'Sin conexión';
-    }
-  }
-
-  String _errorDescription(Object error) {
-    if (error is TimeoutException) {
-      return 'Tiempo de espera agotado';
-    }
-    final message = error.toString();
-    return message
-        .replaceFirst(RegExp(r'^Exception: '), '')
-        .replaceFirst(RegExp(r'^StateError: '), '')
-        .trim();
-  }
 }
+
+

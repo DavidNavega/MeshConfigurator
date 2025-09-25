@@ -12,7 +12,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final _shortC = TextEditingController();
   final _longC = TextEditingController();
   final _keyC = TextEditingController();
-  final _tcpUrlC = TextEditingController(text: "http://192.168.1.4");
+  final _tcpUrlC = TextEditingController(text: "http://192.168.1.4:4403");
   ConfigProvider? _provider;
 
   void _syncControllers(ConfigProvider provider) {
@@ -23,16 +23,15 @@ class _HomeScreenState extends State<HomeScreen> {
         TextSelection.collapsed(offset: text.length);
 
     if (_shortC.text != cfg.shortName) {
-      _shortC.value = TextEditingValue(
-          text: cfg.shortName, selection: sel(cfg.shortName));
+      _shortC.value =
+          TextEditingValue(text: cfg.shortName, selection: sel(cfg.shortName));
     }
     if (_longC.text != cfg.longName) {
       _longC.value =
           TextEditingValue(text: cfg.longName, selection: sel(cfg.longName));
     }
     if (_keyC.text != keyText) {
-      _keyC.value =
-          TextEditingValue(text: keyText, selection: sel(keyText));
+      _keyC.value = TextEditingValue(text: keyText, selection: sel(keyText));
     }
   }
 
@@ -69,6 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final p = context.watch<ConfigProvider>();
+
     InputDecoration deco(String label,
         {String? errorText, String? helper}) =>
         InputDecoration(
@@ -80,21 +80,12 @@ class _HomeScreenState extends State<HomeScreen> {
         );
 
     const baudOptions = <String>[
-      '110',
-      '300',
-      '600',
-      '1200',
-      '2400',
       '4800',
       '9600',
       '19200',
       '38400',
       '57600',
       '115200',
-      '230400',
-      '460800',
-      '576000',
-      '921600',
     ];
     const dropdownTextStyle = TextStyle(color: Colors.red);
     final channelOptions = List<int>.generate(8, (i) => i + 1);
@@ -138,9 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         runSpacing: 8,
                         children: [
                           ElevatedButton.icon(
-                            onPressed: p.busy
-                                ? null
-                                : () async {
+                            onPressed: p.busy ? null : () async {
                               await p.connectBle();
                             },
                             icon: const Icon(Icons.bluetooth),
@@ -150,9 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 foregroundColor: Colors.white),
                           ),
                           ElevatedButton.icon(
-                            onPressed: p.busy
-                                ? null
-                                : () async {
+                            onPressed: p.busy ? null : () async {
                               await p.connectUsb();
                             },
                             icon: const Icon(Icons.usb),
@@ -161,28 +148,38 @@ class _HomeScreenState extends State<HomeScreen> {
                                 backgroundColor: Colors.red,
                                 foregroundColor: Colors.white),
                           ),
-                          SizedBox(
-                            width: 260,
-                            child: TextField(
-                              controller: _tcpUrlC,
-                              style: const TextStyle(color: Colors.white),
-                              decoration: deco(
-                                  'URL TCP/HTTP (p.ej. http://192.168.4.1)'),
+                          if (p.hasTcpFixed)
+                            ElevatedButton.icon(
+                              onPressed: p.busy ? null : () async {
+                                await p.connectTcp('http://192.168.1.4:4403');
+                              },
+                              icon: const Icon(Icons.wifi),
+                              label: const Text('TCP Fijo'),
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                  foregroundColor: Colors.white),
+                            )
+                          else ...[
+                            SizedBox(
+                              width: 260,
+                              child: TextField(
+                                controller: _tcpUrlC,
+                                style: const TextStyle(color: Colors.white),
+                                decoration: deco(
+                                    'URL TCP/HTTP (p.ej. http://192.168.4.1:4403)'),
+                              ),
                             ),
-                          ),
-                          ElevatedButton.icon(
-                            onPressed: p.busy
-                                ? null
-                                : () async {
-                              await p
-                                  .connectTcp(_tcpUrlC.text.trim());
-                            },
-                            icon: const Icon(Icons.wifi),
-                            label: const Text('TCP/HTTP'),
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red,
-                                foregroundColor: Colors.white),
-                          ),
+                            ElevatedButton.icon(
+                              onPressed: p.busy ? null : () async {
+                                await p.connectTcp(_tcpUrlC.text.trim());
+                              },
+                              icon: const Icon(Icons.wifi),
+                              label: const Text('TCP/HTTP'),
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                  foregroundColor: Colors.white),
+                            ),
+                          ],
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -247,26 +244,27 @@ class _HomeScreenState extends State<HomeScreen> {
                         controller: _shortC,
                         style: const TextStyle(color: Colors.red),
                         decoration: deco('Nombre Corto'),
-                        onChanged: (v) =>
-                            context.read<ConfigProvider>().setNames(v, p.cfg.longName),
+                        onChanged: (v) => context
+                            .read<ConfigProvider>()
+                            .setNames(v, p.cfg.longName),
                       ),
                       const SizedBox(height: 8),
                       TextField(
                         controller: _longC,
                         style: const TextStyle(color: Colors.red),
                         decoration: deco('Nombre Largo'),
-                        onChanged: (v) =>
-                            context.read<ConfigProvider>().setNames(p.cfg.shortName, v),
+                        onChanged: (v) => context
+                            .read<ConfigProvider>()
+                            .setNames(p.cfg.shortName, v),
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<int>(
-                        initialValue: p.cfg.channelIndex,
+                        value: p.cfg.channelIndex,
                         items: channelOptions
                             .map((i) => DropdownMenuItem(
-                                value: i,
-                                child: Text('Canal $i',
-                                    style: const TextStyle(
-                                        color: Colors.red))))
+                            value: i,
+                            child: Text('Canal $i',
+                                style: const TextStyle(color: Colors.red))))
                             .toList(),
                         onChanged: (v) => context
                             .read<ConfigProvider>()
@@ -281,78 +279,70 @@ class _HomeScreenState extends State<HomeScreen> {
                         decoration: deco(
                           'Llave (PSK)',
                           errorText: p.keyError,
-                          helper:
-                          'Vacío, 1, 16 o 32 bytes en hex o Base64.',
+                          helper: 'Vacío, 1, 16 o 32 bytes en hex o Base64.',
                         ),
                         onChanged: (v) =>
                             context.read<ConfigProvider>().setKeyText(v),
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        initialValue: p.serialModeDisplay,
+                        value: p.serialModeDisplay,
                         items: const [
                           DropdownMenuItem(
                               value: 'DEFAULT',
                               child: Text('DEFAULT',
-                                  style:
-                                      TextStyle(color: Colors.red))),
+                                  style: TextStyle(color: Colors.red))),
                           DropdownMenuItem(
                               value: 'PROTO',
                               child: Text('PROTO',
-                                  style:
-                                      TextStyle(color: Colors.red))),
+                                  style: TextStyle(color: Colors.red))),
                           DropdownMenuItem(
                               value: 'TLL',
                               child: Text('TLL',
-                                  style:
-                                      TextStyle(color: Colors.red))),
+                                  style: TextStyle(color: Colors.red))),
                           DropdownMenuItem(
                               value: 'WPL',
                               child: Text('WPL',
-                                  style:
-                                      TextStyle(color: Colors.red))),
+                                  style: TextStyle(color: Colors.red))),
                         ],
-                        onChanged: (v) =>
-                            context.read<ConfigProvider>().setSerialMode(v ?? 'DEFAULT'),
+                        onChanged: (v) => context
+                            .read<ConfigProvider>()
+                            .setSerialMode(v ?? 'DEFAULT'),
                         decoration: deco('Salida de datos serie'),
                         dropdownColor: Colors.white,
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        initialValue: p.baudDisplay,
+                        value: p.baudDisplay,
                         items: baudOptions
-                            .map(
-                              (value) => DropdownMenuItem(
-                            value: value,
-                            child: Text(value,
-                                style: dropdownTextStyle),
-                          ),
-                        )
+                            .map((value) => DropdownMenuItem(
+                          value: value,
+                          child: Text(value,
+                              style: dropdownTextStyle),
+                        ))
                             .toList(),
-                        onChanged: (v) =>
-                            context.read<ConfigProvider>().setBaud(v ?? '9600'),
+                        onChanged: (v) => context
+                            .read<ConfigProvider>()
+                            .setBaud(v ?? '9600'),
                         decoration: deco('Baudrate salida serie'),
                         dropdownColor: Colors.white,
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        initialValue: p.regionDisplay,
+                        value: p.regionDisplay,
                         items: const [
                           DropdownMenuItem(
                               value: '433',
                               child: Text('433 MHz',
-                                  style:
-                                  TextStyle(color: Colors.red))),
+                                  style: TextStyle(color: Colors.red))),
                           DropdownMenuItem(
                               value: '868',
                               child: Text('868 MHz',
-                                  style:
-                                  TextStyle(color: Colors.red))),
+                                  style: TextStyle(color: Colors.red))),
                           DropdownMenuItem(
                               value: '915',
                               child: Text('915 MHz',
-                                  style:
-                                  TextStyle(color: Colors.red))),
+                                  style: TextStyle(color: Colors.red))),
                         ],
                         onChanged: (v) => context
                             .read<ConfigProvider>()
@@ -377,3 +367,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
